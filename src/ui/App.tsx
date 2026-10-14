@@ -21,8 +21,11 @@ export function App() {
   const start = async (p: Platform, folder?: string | null) => {
     const f = folder ?? (await p.pickFolder());
     if (!f) return;
-    // check the folder before entering the app, so a typo stays on the welcome screen
-    await p.listSaves(f);
+    // check the folder before entering the app, so a typo or a folder that isn't a save folder
+    // (e.g. one of the game-art folders) stays on the welcome screen instead of opening empty
+    const saves = await p.listSaves(f);
+    if (p.id === 'tauri' && saves.length === 0)
+      throw new Error(`No .d2s or .d2i saves found in ${f}. Choose the folder that holds your characters (or the one with a subfolder per character).`);
     const s = new Store(p);
     setStore(s);
     await s.openFolder(f);

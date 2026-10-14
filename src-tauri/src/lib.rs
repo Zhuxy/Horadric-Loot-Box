@@ -64,8 +64,22 @@ fn children(dir: &Path) -> Vec<PathBuf> {
         .unwrap_or_default()
 }
 
+/// Save files directly in `dir`, plus one level of subfolders. The desktop game keeps \`.d2s\` / \`.d2i\`
+/// flat in the save folder, but D2R Mobile (iOS) gives each character and the shared stash its own
+/// subfolder (e.g. `David/David.d2s`, `ModernSharedStashSoftCoreV2/ModernSharedStashSoftCoreV2.d2i`),
+/// so a folder synced from the phone would otherwise look empty.
+fn save_files(dir: &Path) -> Vec<PathBuf> {
+    let mut out: Vec<PathBuf> = children(dir).into_iter().filter(|p| is_save(p)).collect();
+    for sub in children(dir) {
+        if sub.is_dir() {
+            out.extend(children(&sub).into_iter().filter(|p| is_save(p)));
+        }
+    }
+    out
+}
+
 fn contains_saves(dir: &Path) -> bool {
-    children(dir).iter().any(|p| is_save(p))
+    !save_files(dir).is_empty()
 }
 
 /// `drive_c` folders of every Proton (incl. extra Steam libraries), Wine, Lutris, Heroic and Bottles prefix.
@@ -175,9 +189,8 @@ fn list_saves(folder: String) -> Result<Vec<SaveFileEntry>, String> {
     if !dir.is_dir() {
         return Err(format!("{} is not a folder", dir.display()));
     }
-    let mut out: Vec<SaveFileEntry> = children(&dir)
+    let mut out: Vec<SaveFileEntry> = save_files(&dir)
         .iter()
-        .filter(|p| is_save(p))
         .filter_map(|p| entry_for(p))
         .collect();
     out.sort_by(|a, b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
@@ -580,6 +593,35 @@ pub fn run() {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn finds_saves_flat_or_in_subfolders() {
+        // Desktop layout: .d2s / .d2i directly in the folder.
+        let flat = temp_dir("flat-saves");
+        fs::write(flat.join("Hero.d2s"), "x").unwrap();
+        fs::write(flat.join("SharedStashSoftCoreV2.d2i"), "x").unwrap();
+        assert_eq!(save_files(&flat).len(), 2);
+
+        // D2R Mobile layout: a subfolder per character / stash, plus stray files to ignore.
+        let nested = temp_dir("nested-saves");
+        fs::create_dir_all(nested.join("David")).unwrap();
+        fs::create_dir_all(nested.join("ModernSharedStashSoftCoreV2")).unwrap();
+        fs::create_dir_all(nested.join("Settings")).unwrap();
+        fs::write(nested.join("David/David.d2s"), "x").unwrap();
+        fs::write(nested.join("David/David.ctl"), "x").unwrap();
+        fs::write(nested.join("David/David.d2s.meta"), "x").unwrap();
+        fs::write(nested.join("David/David.swpouch"), "x").unwrap();
+        fs::write(nested.join("ModernSharedStashSoftCoreV2/ModernSharedStashSoftCoreV2.d2i"), "x").unwrap();
+        fs::write(nested.join("Settings/Settings.json"), "x").unwrap();
+        let names: Vec<String> = save_files(&nested)
+            .iter()
+            .map(|p| p.file_name().unwrap().to_string_lossy().into_owned())
+            .collect();
+        assert_eq!(names.len(), 2, "{names:?}");
+        assert!(names.contains(&"David.d2s".to_string()), "{names:?}");
+        assert!(names.contains(&"ModernSharedStashSoftCoreV2.d2i".to_string()), "{names:?}");
+        assert!(contains_saves(&nested));
+    }
 
     fn temp_dir(name: &str) -> PathBuf {
         let d = std::env::temp_dir().join(format!("hlb-test-{}-{}", name, std::process::id()));
