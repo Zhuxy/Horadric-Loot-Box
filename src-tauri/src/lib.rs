@@ -107,6 +107,26 @@ fn drive_c_roots() -> Vec<PathBuf> {
     for prefix in wine_prefixes {
         out.push(prefix.join("drive_c"));
     }
+
+    // macOS: Diablo II: Resurrected has no native build, so it runs under a Wine wrapper
+    // (CrossOver, Whisky, Wineskin/Porting Kit, or plain Wine in ~/.wine above).
+    #[cfg(target_os = "macos")]
+    {
+        let bottle_roots = [
+            home.join("Library/Application Support/CrossOver/Bottles"),
+            home.join("Library/Containers/com.isaacmarovitz.Whisky/Bottles"),
+            home.join("Library/Application Support/com.isaacmarovitz.Whisky/Bottles"),
+        ];
+        for root in bottle_roots {
+            for bottle in children(&root) {
+                out.push(bottle.join("drive_c"));                       // CrossOver / Whisky
+                out.push(bottle.join("Contents/Resources/drive_c"));   // Wineskin-style bundle
+            }
+        }
+        for app in children(&home.join("Applications")) {
+            out.push(app.join("Contents/Resources/drive_c"));          // Wineskin / Porting Kit wrappers
+        }
+    }
     out.retain(|p| p.is_dir());
     out.dedup();
     out
@@ -378,7 +398,12 @@ fn is_game_running() -> bool {
     sys.refresh_processes(sysinfo::ProcessesToUpdate::All, true);
     sys.processes().values().any(|p| {
         let name = p.name().to_string_lossy().to_ascii_lowercase();
-        name == "d2r.exe" || name == "d2r"
+        // Windows runs it as D2R.exe. Under Wine/CrossOver on macOS the process can show up as
+        // the translated name, the full game name, or through the wrapper, so match loosely.
+        let stem = name.strip_suffix(".exe").unwrap_or(&name);
+        stem == "d2r"
+            || name.contains("diablo ii resurrected")
+            || (name.contains("diablo") && name.contains("resurrected"))
     })
 }
 

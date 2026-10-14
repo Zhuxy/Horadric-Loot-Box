@@ -11,6 +11,7 @@ RELEASING.md
 # local scratch and logs
 scratch/
 switch-art-out/
+.cargo/
 __pycache__/
 *.pyc
 *.log

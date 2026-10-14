@@ -31,7 +31,9 @@
       "nsis",
       "msi",
       "appimage",
-      "deb"
+      "deb",
+      "app",
+      "dmg"
     ],
     "category": "Utility",
     "shortDescription": "Diablo II: Resurrected muling tool",
@@ -42,7 +44,10 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "macOS": {
+      "minimumSystemVersion": "10.15"
+    }
   },
   "plugins": {
     "updater": {
