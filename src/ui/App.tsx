@@ -19,9 +19,11 @@ export function App() {
   const [lastError, setLastError] = useState<string | null>(null);
 
   const start = async (p: Platform, folder?: string | null) => {
-    const s = new Store(p);
     const f = folder ?? (await p.pickFolder());
     if (!f) return;
+    // check the folder before entering the app, so a typo stays on the welcome screen
+    await p.listSaves(f);
+    const s = new Store(p);
     setStore(s);
     await s.openFolder(f);
   };
@@ -69,6 +71,7 @@ function Logo() {
 function Welcome({ platforms, onStart, last, note }: { platforms: Platform[]; onStart: (p: Platform, folder?: string | null) => Promise<void>; last?: string; note?: string | null }) {
   const [detected, setDetected] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [manual, setManual] = useState('');
   const main = platforms[0];
   const demo = platforms.find((p) => p.id === 'demo');
   useEffect(() => {
@@ -98,6 +101,28 @@ function Welcome({ platforms, onStart, last, note }: { platforms: Platform[]; on
             <button onClick={() => go(main)} className="w-full rounded bg-gold-500 px-4 py-2.5 text-[14px] font-semibold text-ink-950 hover:bg-gold-400">
               Choose save folder…
             </button>
+          )}
+          {main.id !== 'demo' && (
+            <form
+              className="flex gap-1.5"
+              onSubmit={(e) => {
+                e.preventDefault();
+                const p = manual.trim().replace(/^"(.*)"$/, '$1');
+                if (p) go(main, p);
+              }}
+            >
+              <input
+                value={manual}
+                onChange={(e) => setManual(e.target.value)}
+                placeholder="…or type / paste a save folder path"
+                aria-label="Save folder path"
+                spellCheck={false}
+                className="min-w-0 flex-1 rounded border border-ink-600 bg-ink-950 px-2.5 py-2 font-mono text-[11.5px] text-ink-200 outline-none placeholder:text-ink-600 focus:border-gold-500"
+              />
+              <button type="submit" disabled={!manual.trim()} className="rounded border border-ink-600 px-3 py-2 text-[13px] text-ink-200 hover:bg-ink-800 disabled:opacity-40">
+                Open
+              </button>
+            </form>
           )}
           {demo && (
             <button onClick={() => go(demo, 'demo/')} className="w-full rounded border border-ink-600 px-4 py-2.5 text-[14px] text-ink-200 hover:bg-ink-800">
