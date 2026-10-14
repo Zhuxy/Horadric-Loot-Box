@@ -52,20 +52,17 @@ export function socketLayout(n: number, w: number, h: number): { x: number; y: n
   }
 }
 
-/** URLs that failed to load (unsupported sprite, missing file): those items fall back to the classic tile. */
-const failedArt = new Set<string>();
-
-function ArtImg({ src, className, style, onFail }: { src: string; className?: string; style?: React.CSSProperties; onFail?: () => void }) {
-  const [broken, setBroken] = useState(failedArt.has(src));
-  if (broken) return null;
+function ArtImg({ src, failed, className, style, onFail }: { src: string; failed: Set<string>; className?: string; style?: React.CSSProperties; onFail?: () => void }) {
+  const [, bump] = useState(0);
+  if (failed.has(src)) return null;
   return (
     <img
       src={src}
       alt=""
       draggable={false}
       onError={() => {
-        failedArt.add(src);
-        setBroken(true);
+        failed.add(src);
+        bump((n) => n + 1);
         onFail?.();
       }}
       className={`pointer-events-none select-none object-contain ${className ?? ''}`}
@@ -99,7 +96,7 @@ export function ItemFace({ item, width, height, cell, view, art, count, socketPx
   const d = desc(item);
   const [, bump] = useState(0);
   const wanted = view !== 'tiles' ? art?.srcFor(item) : undefined;
-  const src = wanted && !failedArt.has(wanted) ? wanted : undefined;
+  const src = wanted && !art?.failedImages.has(wanted) ? wanted : undefined;
   const w = item.def?.w ?? 1, h = item.def?.h ?? 1;
   const small = w * h === 1;
   // one size for empty and filled sockets alike
@@ -109,7 +106,7 @@ export function ItemFace({ item, width, height, cell, view, art, count, socketPx
   return (
     <>
       {src ? (
-        <ArtImg src={src} onFail={() => bump((n) => n + 1)} className={`absolute inset-[3%] h-[94%] w-[94%] ${view === 'artNames' ? 'opacity-45' : ''}`} />
+        <ArtImg src={src} failed={art!.failedImages} onFail={() => bump((n) => n + 1)} className={`absolute inset-[3%] h-[94%] w-[94%] ${view === 'artNames' ? 'opacity-45' : ''}`} />
       ) : (
         <div className="flex h-full w-full flex-col items-center justify-center">
           <GlyphIcon glyph={glyphFor(item)} className={`${QUALITY_TEXT[d.qualityClass]} ${small ? 'h-4 w-4' : 'h-6 w-6'} opacity-80`} />
@@ -142,7 +139,7 @@ export function ItemFace({ item, width, height, cell, view, art, count, socketPx
                   opacity: view === 'artNames' ? 0.5 : 1,
                 }}
               >
-                {childSrc && <ArtImg src={childSrc} className="h-full w-full drop-shadow-[0_1px_2px_rgba(0,0,0,.9)]" />}
+                {childSrc && <ArtImg src={childSrc} failed={art!.failedImages} className="h-full w-full drop-shadow-[0_1px_2px_rgba(0,0,0,.9)]" />}
                 {!childSrc && child && !src && <span className="text-[6px] font-bold text-ink-950">{desc(child).short.slice(0, 3)}</span>}
               </div>
             );

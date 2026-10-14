@@ -65,6 +65,8 @@ const CATEGORY = { weapon: 'weapon/', armor: 'armor/', misc: 'misc/' } as const;
 
 export class ArtIndex {
   readonly sprites: Set<string>;
+  /** Failed image URLs belong to this source only; reopening artwork allows retries. */
+  readonly failedImages = new Set<string>();
   readonly byBase = new Map<string, string[]>();
   readonly items: Map<string, string>;
   readonly uniques = new Map<string, string>();

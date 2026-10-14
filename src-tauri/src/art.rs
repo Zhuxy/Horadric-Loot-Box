@@ -492,7 +492,8 @@ pub fn protocol_response(state: &ArtState, uri_path: &str) -> tauri::http::Respo
         Some(png) => tauri::http::Response::builder()
             .status(200)
             .header("Content-Type", "image/png")
-            .header("Cache-Control", "max-age=31536000, immutable")
+            // The same key may refer to different artwork after changing sources.
+            .header("Cache-Control", "no-store")
             .header("Access-Control-Allow-Origin", "*")
             .body(png.as_ref().clone())
             .unwrap(),

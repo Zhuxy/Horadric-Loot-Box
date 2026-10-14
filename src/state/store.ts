@@ -378,7 +378,11 @@ export class Store {
       const idx = new ArtIndex(info, backend.url);
       if (!idx.listed) await this.probeArt(idx);
       this.art = idx;
-      if (path) this.setSettings({ artPath: path });
+      // Choosing artwork explicitly should show it immediately. Startup reloads preserve the user's view.
+      if (path) this.setSettings({
+        artPath: path,
+        itemView: this.settings.itemView === 'tiles' ? 'art' : this.settings.itemView,
+      });
       const n = idx.listed ? `${idx.sprites.size} item images` : 'item images';
       this.artStatus = { state: 'ready', message: `Loaded ${n} from ${info.path}` };
     } catch (e) {
