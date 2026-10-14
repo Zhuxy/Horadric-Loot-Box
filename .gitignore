@@ -10,6 +10,9 @@ RELEASING.md
 
 # local scratch and logs
 scratch/
+switch-art-out/
+__pycache__/
+*.pyc
 *.log
 npm-debug.log*
 
