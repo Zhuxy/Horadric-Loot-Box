@@ -185,9 +185,16 @@ function Shell({ onSwitch }: { onSwitch: () => void }) {
     <div className="flex h-screen flex-col">
       <header className="flex items-center gap-3 border-b border-ink-800 bg-ink-900 px-4 py-2">
         <Logo />
-        <span className="ml-2 min-w-0 truncate rounded bg-ink-850 px-2 py-0.5 font-mono text-[11px] text-ink-400" title={store.folder}>
-          {store.platform.id === 'demo' ? 'Demo sandbox — changes stay in memory' : store.folder}
-        </span>
+        <button
+          onClick={() => setSettings(true)}
+          className="ml-2 flex min-w-0 items-center gap-1.5 rounded bg-ink-850 px-2 py-0.5 font-mono text-[11px] text-ink-400 hover:bg-ink-800 hover:text-ink-300"
+          title={store.platform.id === 'demo' ? 'Demo sandbox' : `Save folder: ${store.folder}\nClick to change or forget it`}
+        >
+          <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth={2}>
+            <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" />
+          </svg>
+          <span className="min-w-0 truncate">{store.platform.id === 'demo' ? 'Demo sandbox — changes stay in memory' : store.folder}</span>
+        </button>
         {store.settings.readOnly && (
           <button onClick={() => setSettings(true)} className="rounded border border-sky-700/60 bg-sky-900/30 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-sky-200" title="Moving and saving are off. Change this in Settings.">
             Read-only
@@ -337,16 +344,29 @@ function SettingsModal({ onClose, onSwitch }: { onClose: () => void; onSwitch: (
           <ArtSettings />
           <TradeSettings />
           {store.platform.updates && <UpdateSettings />}
+          {store.platform.id === 'tauri' && store.folder && (
+            <Section title="Save folder">
+              <p className="font-mono text-[11.5px] text-ink-300 [overflow-wrap:anywhere]">{store.folder}</p>
+              <Hint>
+                Characters and shared stashes are read from here, and vaults are kept in its <span className="font-mono">HoradricLootBox-Vaults</span> subfolder. The app
+                reopens this folder at launch.
+              </Hint>
+              <div className="mt-2 flex flex-wrap gap-2">
+                <button className="rounded border border-ink-600 px-2.5 py-1 text-[12.5px] text-ink-200 hover:bg-ink-800" onClick={onSwitch}>
+                  Choose a different folder…
+                </button>
+                <button className="rounded border border-ink-600 px-2.5 py-1 text-[12.5px] text-ink-200 hover:bg-ink-800" onClick={() => store.forgetFolder()}>
+                  Forget saved folder
+                </button>
+              </div>
+              <Hint>“Forget saved folder” makes the welcome screen ask again at the next launch.</Hint>
+            </Section>
+          )}
           <Section title="About">
             <p className="text-[13px] text-ink-200">
               <span className="text-gold-300">Horadric Loot Box</span> {__APP_VERSION__} · created by <span className="font-semibold">PyroSplat</span>
             </p>
             <Hint>Game data from {GD.meta.source.replace(/ \(.*\)$/, '')}. Not affiliated with Blizzard.</Hint>
-            {store.platform.id === 'tauri' && store.folder && (
-              <Hint>
-                Vaults are saved in <span className="font-mono text-ink-400 [overflow-wrap:anywhere]">{store.folder.replace(/[\\/]+$/, '')}{store.folder.includes('\\') ? '\\' : '/'}HoradricLootBox-Vaults</span>, next to your characters.
-              </Hint>
-            )}
             <Hint>
               Items only move between saves of the same edition, and hardcore never mixes with softcore. {store.lastBackup ? `Last backup: ${store.lastBackup}.` : 'Each file is backed up the first time you save it.'}
             </Hint>

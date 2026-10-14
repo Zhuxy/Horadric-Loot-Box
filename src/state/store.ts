@@ -336,6 +336,21 @@ export class Store {
     this.emit();
   }
 
+  /** Forget the remembered save folder, so the welcome screen asks again at the next launch. */
+  forgetFolder() {
+    if (this.settings.lastFolder !== undefined) {
+      const { lastFolder: _dropped, ...rest } = this.settings;
+      this.settings = rest as Settings;
+      try {
+        localStorage.setItem('hlb-settings', JSON.stringify(this.settings));
+      } catch {
+        /* ignore */
+      }
+    }
+    this.toast('info', 'Saved folder forgotten — you will be asked to choose one next launch.');
+    this.emit();
+  }
+
   // ------------------------------------------------------------------ artwork
 
   /** True when items should be drawn with game art right now. */
