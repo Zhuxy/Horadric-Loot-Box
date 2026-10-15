@@ -3,6 +3,7 @@ import { searchMatcher, type D2Item } from '../core';
 import { TRADE_ID, desc, docLabel } from '../state/store';
 import { CharacterView } from './CharacterView';
 import { useStore, docDrag } from './context';
+import { ImportDialog } from './ImportDialog';
 import { StashView } from './StashView';
 import { VaultView } from './VaultView';
 
@@ -14,6 +15,7 @@ export function Pane({ pane }: { pane: 0 | 1 }) {
   const state = store.panes[pane];
   const entry = state.docId ? store.docs.get(state.docId) : undefined;
   const [query, setQuery] = useState('');
+  const [showImport, setShowImport] = useState(false);
   const test = searchMatcher(query);
   const matches = test ? (i: D2Item) => test(desc(i).search) : undefined;
   const docs = [...store.docs.values()].filter((d) => d.doc);
@@ -92,6 +94,15 @@ export function Pane({ pane }: { pane: 0 | 1 }) {
           )}
         </div>
         <button
+          className="rounded border border-ink-600 bg-ink-900 px-2 py-1 text-[12px] text-ink-300 hover:bg-ink-700 hover:text-ink-100 disabled:opacity-40"
+          onClick={() => setShowImport(true)}
+          disabled={!entry?.doc}
+          title="Import a .d2i item file into this panel"
+          aria-label="Import item"
+        >
+          ⤵ Import
+        </button>
+        <button
           className="d2-close"
           onClick={() => store.closePane(pane)}
           aria-label={`Close the ${pane === 0 ? 'left' : 'right'} side`}
@@ -123,6 +134,7 @@ export function Pane({ pane }: { pane: 0 | 1 }) {
           <VaultView docId={entry.id} vault={entry.doc!} pane={pane} query={query} />
         )}
       </div>
+      {showImport && entry?.doc && <ImportDialog pane={pane} onClose={() => setShowImport(false)} />}
     </div>
   );
 }

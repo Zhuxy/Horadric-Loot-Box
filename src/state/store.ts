@@ -53,6 +53,9 @@ import {
   serializeVault,
   serializeVerified,
   tabIsEditable,
+  planImport,
+  ItemMode,
+  StorePage,
   type D2Character,
   type D2Item,
   type D2SharedStash,
@@ -1688,6 +1691,65 @@ export class Store {
   }
 
   // ------------------------------------------------------------------ queries
+
+  /**
+   * Imports items from a .d2i file into a document.
+   * For vault targets, appends entries (unlimited). For grid targets
+   * (character inventory/stash/cube, shared stash tab), uses planImport
+   * (First-Fit-Decreasing) and discards what doesn't fit.
+   * Returns { imported, discarded }.
+   */
+  importItems(
+    docId: string,
+    item: D2Item,
+    quantity: number,
+    target: { area: 'vault' } | { area: GridKind; tab?: number },
+  ): { imported: number; discarded: number } {
+    const entry = this.entryOf(docId);
+    if (!entry?.doc) {
+      this.toast('error', 'No document selected');
+      return { imported: 0, discarded: 0 };
+    }
+    const doc = entry.doc;
+    this.snapshot(`import ${quantity}x ${item.code}`, [docId]);
+    let imported = 0;
+    let discarded = 0;
+    try {
+      if (target.area === 'vault') {
+        const v = doc as Vault;
+        for (let i = 0; i < quantity; i++) {
+          v.entries.push({
+            uid: newUid(),
+            item: withPlacement(item, { mode: ItemMode.Stored, page: StorePage.None, x: 0, y: 0 }),
+            addedAt: new Date().toISOString(),
+            source: 'imported .d2i',
+          });
+          imported++;
+        }
+      } else {
+        const grid = target.area;
+        const tab = target.tab ?? 0;
+        const occ = occupancy(doc as D2Character | D2SharedStash, grid, tab);
+        const plan = planImport([{ item, quantity }], occ);
+        const page = grid === 'inventory' ? StorePage.Inventory : grid === 'stash' ? StorePage.Stash : grid === 'cube' ? StorePage.Cube : StorePage.Stash;
+        for (const p of plan.placed) {
+          const placed = withPlacement(p.item, { mode: ItemMode.Stored, page, x: p.x, y: p.y });
+          placeItem(doc as D2Character | D2SharedStash, grid, tab, placed, p.x, p.y);
+          imported++;
+        }
+        discarded = plan.discarded.reduce((n, d) => n + d.quantity, 0);
+      }
+    } catch (e) {
+      this.undoQuiet();
+      this.toast('error', (e as Error).message);
+      return { imported: 0, discarded: 0 };
+    }
+    entry.dirty = true;
+    this.emit();
+    if (discarded > 0) this.toast('info', `Imported ${imported}, ${discarded} discarded (no space)`);
+    else this.toast('success', `Imported ${imported}`);
+    return { imported, discarded };
+  }
 
   allItems(): { docId: string; item: D2Item; where: string }[] {
     const out: { docId: string; item: D2Item; where: string }[] = [];

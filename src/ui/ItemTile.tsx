@@ -1,8 +1,12 @@
 import type { D2Item } from '../core';
+import { itemBytes, itemName } from '../core';
 import { desc } from '../state/store';
+import { download } from '../platform/dropped';
 import { endDrag, startDrag, useStore } from './context';
+import { ContextMenu } from './ContextMenu';
 import { ItemFace, QUALITY_BORDER } from './ItemArt';
 import { useTooltip } from './Tooltip';
+import { useState } from 'react';
 
 const QUALITY_BG: Record<string, string> = {
   unique: 'bg-[#2b2415] border-[#6b5a2e]',
@@ -44,6 +48,7 @@ export function ItemTile({ item, docId, cell, draggable, onDoubleClick, onContex
   const store = useStore();
   const d = desc(item);
   const tip = useTooltip();
+  const [menu, setMenu] = useState<{ x: number; y: number } | null>(null);
   const w = item.def?.w ?? 1, h = item.def?.h ?? 1;
   const width = box ? box.w : w * cell - 2;
   const height = box ? box.h : h * cell - 2;
@@ -79,7 +84,7 @@ export function ItemTile({ item, docId, cell, draggable, onDoubleClick, onContex
         ((e) => {
           e.preventDefault();
           tip.hide();
-          store.requestDelete(docId, store.groupFor(item, docId));
+          setMenu({ x: e.clientX, y: e.clientY });
         })
       }
       className={`group absolute select-none overflow-hidden text-center transition
@@ -90,6 +95,27 @@ export function ItemTile({ item, docId, cell, draggable, onDoubleClick, onContex
       style={{ width, height, ...(artBox ? { borderColor: QUALITY_BORDER[d.qualityClass] } : {}), ...style }}
     >
       <ItemFace item={item} width={width} height={height} cell={cell} view={view} art={store.art} count={stack} />
+      {menu && (
+        <ContextMenu
+          x={menu.x}
+          y={menu.y}
+          onClose={() => setMenu(null)}
+          items={[
+            {
+              label: '⤴ Export as .d2i',
+              onClick: () => {
+                const safe = itemName(item).replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '_') || item.code;
+                download(`${item.code}_${safe}.d2i`, itemBytes(item));
+              },
+            },
+            {
+              label: 'Delete',
+              danger: true,
+              onClick: () => store.requestDelete(docId, store.groupFor(item, docId)),
+            },
+          ]}
+        />
+      )}
     </div>
   );
 }
