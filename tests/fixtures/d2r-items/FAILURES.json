@@ -1,0 +1,477 @@
+[
+ {
+  "source": "SharedStashSoftCoreV2.d2i#tab0",
+  "index": 15,
+  "error": "Failed to parse item 'jew' at byte 217: Unknown stat id 509"
+ },
+ {
+  "source": "SharedStashSoftCoreV2.d2i#tab1",
+  "index": 2,
+  "error": "Failed to parse item 'cm2' at byte 1051: Unknown stat id 419"
+ },
+ {
+  "source": "SharedStashSoftCoreV2.d2i#tab2",
+  "index": 1,
+  "error": "Failed to parse item 'amu' at byte 1890: Stat 30 (nextexp) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Aldursset.d2s",
+  "error": "char parse: Failed to parse item 'utb' at byte 910: Unknown stat id 386"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Angelicset.d2s",
+  "error": "char parse: Failed to parse item 'ung' at byte 1032: Unknown stat id 510"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Arcannasset.d2s",
+  "error": "char parse: Failed to parse item 'amu' at byte 892: Stat 255 (item_find_item) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/berserkersset.d2s",
+  "error": "char parse: Failed to parse item 'ulm' at byte 929: Stat 255 (item_find_item) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/BowneSpear.d2s",
+  "error": "char parse: Failed to parse item 'cm2' at byte 881: Unknown stat id 419"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Bulwark.d2s",
+  "error": "skip v96 (classic)"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/BunnyFuFu.d2s",
+  "error": "char parse: Failed to parse item 'cm2' at byte 852: Unknown stat id 419"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Cathanstraps.d2s",
+  "error": "char parse: Failed to parse item 'usk' at byte 964: Stat 255 (item_find_item) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Civerbsset.d2s",
+  "error": "char parse: Failed to parse item 'amu' at byte 952: Stat 64 (stamdrainmindam) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/cleglawsset.d2s",
+  "error": "char parse: Failed to parse item 'sml' at byte 1158: Unknown stat id 416"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Cody.d2s",
+  "error": "skip v96 (classic)"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Cowkingsset.d2s",
+  "error": "char parse: Failed to parse item 'utu' at byte 941: Unknown stat id 497"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Cure.d2s",
+  "error": "skip v96 (classic)"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Cursed.d2s",
+  "error": "char parse: Failed to parse item 'utp' at byte 1035: Stat 168 (skill_chillingarmor) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/DayoftheBarb.d2s",
+  "error": "char parse: Failed to parse item 'cm1' at byte 852: Stat 255 (item_find_item) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/discipleset.d2s",
+  "error": "char parse: Failed to parse item 'uui' at byte 1001: Stat 70 (quantity) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/dora.d2s",
+  "error": "skip v96 (classic)"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/dream.d2s",
+  "error": "char parse: Failed to parse item 'utp' at byte 907: Stat 168 (skill_chillingarmor) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/FartySparty.d2s",
+  "error": "skip v96 (classic)"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/FlickeringFlame.d2s",
+  "error": "char parse: Failed to parse item 'uea' at byte 902: Stat 64 (stamdrainmindam) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/gems.d2s",
+  "error": "char parse: Failed to parse item 'rng' at byte 1507: Stat 15 (goldbank) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/GGM_Badgerine.d2s",
+  "error": "char parse: Failed to parse item 'cm1' at byte 932: Stat 163 (skill_passive_staminapercent) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/GGM_Cactus.d2s",
+  "error": "char parse: Failed to parse item 'cm1' at byte 857: Stat 163 (skill_passive_staminapercent) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/GGM_MagmaFlow.d2s",
+  "error": "char parse: Failed to parse item 'cm1' at byte 967: Stat 163 (skill_passive_staminapercent) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/GGM_Sherman.d2s",
+  "error": "char parse: Failed to parse item 'cm1' at byte 852: Stat 163 (skill_passive_staminapercent) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/griswoldsset.d2s",
+  "error": "char parse: Failed to parse item 'urn' at byte 934: Unknown stat id 386"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Ground.d2s",
+  "error": "skip v96 (classic)"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Hearth.d2s",
+  "error": "skip v96 (classic)"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/heavensset.d2s",
+  "error": "char parse: Failed to parse item 'uts' at byte 1121: Stat 63 (manadrainmaxdam) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Hollow.d2s",
+  "error": "char parse: Failed to parse item 'vbt' at byte 1115: Stat 178 (unit_dooverlay) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/HolyMoly.d2s",
+  "error": "char parse: Failed to parse item 'paf' at byte 1061: Unknown stat id 410"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Hsarusset.d2s",
+  "error": "char parse: Failed to parse item 'umb' at byte 929: Stat 4 (statpts) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Hustle.d2s",
+  "error": "skip v96 (classic)"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/hwaninsset.d2s",
+  "error": "char parse: Failed to parse item 'ucl' at byte 929: Unknown stat id 510"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/immortalkingset.d2s",
+  "error": "char parse: Failed to parse item 'uap' at byte 1044: Unknown stat id 510"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Infernalset.d2s",
+  "error": "char parse: Failed to parse item 'uap' at byte 887: Unknown stat id 468"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Irathasset.d2s",
+  "error": "char parse: Failed to parse item 'amu' at byte 870: Stat 311 (item_tohit_vs_monster) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Iron_Master.d2s",
+  "error": "char parse: Failed to parse item 'xmg' at byte 915: Stat 4 (statpts) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Isenhartsset.d2s",
+  "error": "char parse: Failed to parse item 'uhl' at byte 899: Unknown stat id 396"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/ManaBurn.d2s",
+  "error": "char parse: Failed to parse item 'amu' at byte 907: Unknown stat id 424"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/mavinasset.d2s",
+  "error": "char parse: Failed to parse item 'ci3' at byte 897: Unknown stat id 421"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Metamorphisis.d2s",
+  "error": "skip v96 (classic)"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Milabregasset.d2s",
+  "error": "char parse: Failed to parse item 'urn' at byte 949: Unknown stat id 510"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Mist.d2s",
+  "error": "char parse: Failed to parse item 'cm1' at byte 897: Stat 203 (passive_mastery_item_req_percent) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Mortuary.d2s",
+  "error": "char parse: Failed to parse item 'cm1' at byte 862: Stat 256 (item_slash_damage) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/MuelyMuloExtrem.d2s",
+  "error": "char parse: Failed to parse item 'lst' at byte 897: Unknown stat id 497"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Najsset.d2s",
+  "error": "char parse: Failed to parse item 'ult' at byte 887: Unknown stat id 421"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Natalyasset.d2s",
+  "error": "char parse: Failed to parse item 'cm1' at byte 852: Stat 163 (skill_passive_staminapercent) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/newrunes.d2s",
+  "error": "char parse: Failed to parse item 'wsp' at byte 966: Unknown stat id 391"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Obsession.d2s",
+  "error": "char parse: Failed to parse item 'cm2' at byte 852: Unknown stat id 419"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/OrbyBorby.d2s",
+  "error": "char parse: Failed to parse item 'vbt' at byte 933: Unknown stat id 382"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/orphanscallset.d2s",
+  "error": "char parse: Failed to parse item 'uvg' at byte 914: Stat 352 (last_sent_hp_pct) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Pattern.d2s",
+  "error": "char parse: Failed to parse item 'btl' at byte 897: Unknown stat id 455"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Plauge.d2s",
+  "error": "char parse: Failed to parse item 'xmg' at byte 895: Stat 4 (statpts) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/PoisonBomb.d2s",
+  "error": "char parse: Failed to parse item 'cm1' at byte 1342: Stat 178 (unit_dooverlay) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Polearms.d2s",
+  "error": "char parse: Failed to parse item 'scy' at byte 947: Stat 316 (burningmin) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Procazon.d2s",
+  "error": "char parse: Failed to parse item 'cm1' at byte 852: Stat 163 (skill_passive_staminapercent) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/RabidWolfPack.d2s",
+  "error": "char parse: Failed to parse item 'cm1' at byte 852: Unknown stat id 507"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Resistances.d2s",
+  "error": "skip v96 (classic)"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Runemaster.d2s",
+  "error": "char parse: Failed to parse item 'jew' at byte 1354: Unknown stat id 419"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Runewordslow.d2s",
+  "error": "skip v96 (classic)"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Runewordstest.d2s",
+  "error": "char parse: Failed to parse item '6lw' at byte 882: Unknown stat id 416"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/SanicDaHoogeHag.d2s",
+  "error": "char parse: Failed to parse item 'cm1' at byte 854: Stat 163 (skill_passive_staminapercent) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Sigonsset.d2s",
+  "error": "char parse: Failed to parse item 'uhc' at byte 893: Stat 255 (item_find_item) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/SpreadingPlauge.d2s",
+  "error": "char parse: Failed to parse item 'cm1' at byte 852: Unknown stat id 406"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/talrashasset.d2s",
+  "error": "char parse: Failed to parse item '6ss' at byte 1244: Stat 6 (hitpoints) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/tancredsset.d2s",
+  "error": "char parse: Failed to parse item 'uh9' at byte 972: Unknown stat id 396"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Tankazon.d2s",
+  "error": "char parse: Failed to parse item 'cm2' at byte 1196: Stat 255 (item_find_item) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Temper.d2s",
+  "error": "skip v96 (classic)"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/TestAmazon.d2s",
+  "error": "char parse: Failed to parse item 'umc' at byte 1094: Stat 63 (manadrainmaxdam) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/TestBarb.d2s",
+  "error": "char parse: Failed to parse item 'ulg' at byte 1073: Stat 8 (mana) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/TestDruid.d2s",
+  "error": "char parse: Failed to parse item 'cm2' at byte 974: Unknown stat id 419"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/testerrunewords.d2s",
+  "error": "char parse: Failed to parse item '7pa' at byte 1053: Unknown stat id 424"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/TestNecro.d2s",
+  "error": "char parse: Failed to parse item 'nef' at byte 1088: Unknown stat id 429"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/TestPaladin.d2s",
+  "error": "char parse: Failed to parse item 'hlm' at byte 932: Stat 312 (item_tohit_percent_vs_monster) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/TestpallyBrave.d2s",
+  "error": "char parse: Failed to parse item 'cm1' at byte 854: Stat 131 (thorns_percent) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/testrunes.d2s",
+  "error": "char parse: Failed to parse item 'utp' at byte 1153: Stat 168 (skill_chillingarmor) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/TestSorc.d2s",
+  "error": "char parse: Failed to parse item 'scl' at byte 1080: Unknown stat id 422"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Tossme.d2s",
+  "error": "skip v96 (classic)"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/trangoulsset.d2s",
+  "error": "char parse: Failed to parse item 'nee' at byte 1018: Unknown stat id 424"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/TRAPPYTRAPMCTRP.d2s",
+  "error": "char parse: Failed to parse item 'cm1' at byte 868: Stat 255 (item_find_item) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/TriWizardcup.d2s",
+  "error": "char parse: Failed to parse item 'cm1' at byte 878: Stat 163 (skill_passive_staminapercent) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/UnbendingWill.d2s",
+  "error": "char parse: Failed to parse item 'cm2' at byte 854: Unknown stat id 419"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Uniquearmors.d2s",
+  "error": "char parse: Failed to parse item 'uld' at byte 984: Stat 64 (stamdrainmindam) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Uniquearmorsone.d2s",
+  "error": "skip v96 (classic)"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Uniquearmorstwo.d2s",
+  "error": "skip v96 (classic)"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/UniqueAxes.d2s",
+  "error": "char parse: Failed to parse item 'wax' at byte 1001: Stat 256 (item_slash_damage) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Uniqueaxestwo.d2s",
+  "error": "skip v96 (classic)"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/UniqueBarbhelms.d2s",
+  "error": "skip v96 (classic)"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Uniquebelts.d2s",
+  "error": "char parse: Failed to parse item 'vbl' at byte 884: Unknown stat id 442"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/UniqueBoots.d2s",
+  "error": "char parse: Failed to parse item 'lbt' at byte 884: Stat 259 (item_crush_damage_percent) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/UniqueBows.d2s",
+  "error": "char parse: Failed to parse item 'cbw' at byte 954: Stat 326 (poison_count) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/UniqueCrossbows.d2s",
+  "error": "skip v96 (classic)"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/UniqueDaggers.d2s",
+  "error": "char parse: Failed to parse item 'dir' at byte 897: Stat 320 (progressive_other) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/UniqueGloves.d2s",
+  "error": "char parse: Failed to parse item 'xlg' at byte 1011: Unknown stat id 481"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/UniqueHelmets.d2s",
+  "error": "char parse: Failed to parse item 'msk' at byte 884: Stat 319 (progressive_steal) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/UniqueMaces.d2s",
+  "error": "char parse: Failed to parse item 'clb' at byte 888: Stat 4 (statpts) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/UniqueMacestwo.d2s",
+  "error": "char parse: Failed to parse item '7sp' at byte 888: Unknown stat id 374"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Uniqueonehanded.d2s",
+  "error": "char parse: Failed to parse item 'bsw' at byte 888: Unknown stat id 384"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/UniquePelts.d2s",
+  "error": "skip v96 (classic)"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Uniquerings.d2s",
+  "error": "skip v96 (classic)"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/UniqueShields.d2s",
+  "error": "skip v96 (classic)"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/UniqueShieldsII.d2s",
+  "error": "char parse: Failed to parse item 'uts' at byte 941: Stat 166 (skill_pierce) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/UniqueSpears.d2s",
+  "error": "skip v96 (classic)"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/UniqueStaffs.d2s",
+  "error": "skip v96 (classic)"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Uniquetwohanded.d2s",
+  "error": "char parse: Failed to parse item '9gs' at byte 935: Stat 100 (monster_playercount) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/UniquetwohN.d2s",
+  "error": "skip v96 (classic)"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/UniqueWands.d2s",
+  "error": "char parse: Failed to parse item 'nef' at byte 1021: Unknown stat id 429"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/vidalasset.d2s",
+  "error": "char parse: Failed to parse item 'amu' at byte 869: Stat 255 (item_find_item) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Videoitems.d2s",
+  "error": "char parse: Failed to parse item '7sp' at byte 1051: Unknown stat id 374"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/VideoItemsfour.d2s",
+  "error": "char parse: Failed to parse item 'amu' at byte 987: Stat 165 (skill_enchant) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/videoitemstwo.d2s",
+  "error": "char parse: Failed to parse item 'uvc' at byte 1337: Unknown stat id 370"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/Wisdom.d2s",
+  "error": "char parse: Failed to parse item 'cm1' at byte 884: Stat 163 (skill_passive_staminapercent) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/ydoc.d2s",
+  "error": "char parse: Failed to parse item 'hbt' at byte 949: Stat 260 (item_thrust_damage) has no save bits"
+ },
+ {
+  "source": "D2R Char Files/GGM's Offline Characters D2R/ZonAZon.d2s",
+  "error": "char parse: Failed to parse item 'cm2' at byte 871: Stat 255 (item_find_item) has no save bits"
+ }
+]
