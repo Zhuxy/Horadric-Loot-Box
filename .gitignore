@@ -44,6 +44,7 @@ desktop.ini
 *.hvault.json
 !tests/fixtures/*.d2s
 !tests/fixtures/*.d2i
+!tests/fixtures/**/*.d2i
 !public/demo/*.d2s
 !public/demo/*.d2i
 public/ocr/
