@@ -12,17 +12,32 @@ import { Occupancy } from './layout';
  * bytes round-trip exactly. The .d2i format is raw itemBytes() output
  * (D2R item bitstream, no JM header, no version header).
  *
+ * The source version is auto-detected: v97–v105 are tried in order and the
+ * first version that parses AND round-trips byte-for-byte wins. This is
+ * necessary because the item bitstream is NOT fully compatible across
+ * versions (e.g. v105 added a quantity-present bool that v98 lacks; parsing
+ * v98 bytes as v105 misaligns the stream).
+ *
  * @param bytes The .d2i file contents.
- * @param version Save version to parse with (D1: the target container's version).
+ * @param hintVersion Version to try first (e.g. the target container's).
  */
-export function parseImportFile(bytes: Uint8Array, version: number): D2Item {
-  const item = parseItemBytes(bytes, version);
-  // Round-trip validation: re-serializing must produce identical bytes.
-  const rt = itemBytes(item);
-  if (rt.length !== bytes.length || !rt.every((b, i) => b === bytes[i])) {
-    throw new Error('Item failed round-trip validation');
+export function parseImportFile(bytes: Uint8Array, hintVersion = 105): D2Item {
+  // Try hint first, then newest-to-oldest (recent exports are most common).
+  const versions = [hintVersion, ...[105, 104, 103, 102, 101, 100, 99, 98, 97].filter((v) => v !== hintVersion)];
+  let lastError: Error | undefined;
+  for (const v of versions) {
+    try {
+      const item = parseItemBytes(bytes, v);
+      // Round-trip validation: re-serializing must produce identical bytes.
+      const rt = itemBytes(item);
+      if (rt.length === bytes.length && rt.every((b, i) => b === bytes[i])) {
+        return item;
+      }
+    } catch (e) {
+      lastError = e as Error;
+    }
   }
-  return item;
+  throw lastError ?? new Error('Could not parse item with any D2R version (v97–v105)');
 }
 
 export interface ImportRequest {
