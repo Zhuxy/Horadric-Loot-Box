@@ -72,6 +72,22 @@ npm run desktop:dev    # desktop app (Tauri)
 npm run desktop:build  # installers
 ```
 
+### Makefile shortcuts
+
+On macOS a `Makefile` wraps the common steps:
+
+```bash
+make            # build the .app and install it into /Applications
+make install    # same as above
+make dmg        # also build the .dmg installer
+make run        # install, then launch
+make test       # run the test suite
+make clean      # remove build output
+make distclean  # also wipe the Rust cache (after moving the repo)
+```
+
+Install somewhere else with `make install INSTALL_DIR=~/Applications`.
+
 ## Credits
 
 - [CascLib](https://github.com/ladislav-zezula/CascLib) (MIT).
