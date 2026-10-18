@@ -2,8 +2,10 @@
 #
 #   make            build the app bundle and install it into /Applications
 #   make install    same as above
+#   make desktop    explicit alias: compile and install the desktop app
 #   make dmg        build the .dmg installer too
 #   make run        install, then launch the app
+#   make ios        build, sign and install the iOS app (scaffold, see target)
 #   make clean      remove build output
 #   make help       list every target
 #
@@ -28,13 +30,15 @@ OPEN            ?= open
 
 .DEFAULT_GOAL   := install
 
-.PHONY: help all install app build dmg run dev test typecheck check-tauri deps clean distclean uninstall
+.PHONY: help all desktop install app build dmg run ios dev test typecheck check-tauri deps clean distclean uninstall
 
 help: ## Show this help
 	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
 		| awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-11s\033[0m %s\n", $$1, $$2}'
 
 all: install ## Alias for install
+
+desktop: install ## Compile and install the desktop app
 
 # Reinstall JS dependencies only when the lockfile is newer than the current install.
 node_modules/.package-lock.json: package-lock.json
@@ -69,6 +73,26 @@ dmg: build ## Build every bundle, then report the .dmg path
 run: install ## Install, then launch the app
 	$(OPEN) "$(INSTALLED_APP)"
 
+# iOS: scaffold for the mobile entry. Runs every stage that is ready and stops
+# at the first missing piece with instructions. Remaining before this goes
+# green on your Mac: `npx tauri ios init` (once), Rust iOS stubs
+# (is_game_running / reveal_backups / art_detect_installs), the build.rs
+# TARGET_OS_MAC widen for iOS, platform/ios.ts, and the mobile UI itself.
+ios: node_modules/.package-lock.json ## Build, sign and install the iOS app (scaffold)
+	$(NPM) run build:mobile
+	@if [ "$$(uname)" != "Darwin" ]; then \
+		echo "==> iOS packaging needs macOS + Xcode (this machine is $$(uname -s))"; exit 1; fi
+	@command -v xcodebuild >/dev/null 2>&1 || \
+		{ echo "==> Xcode command-line tools not found"; exit 1; }
+	@if [ ! -d "src-tauri/gen/apple" ]; then \
+		echo "==> iOS project not initialized yet."; \
+		echo "    On your Mac, run once: npx tauri ios init"; exit 1; fi
+	@echo "==> Building iOS bundle (dist-mobile frontend + Rust backend)"
+	$(NPM) run tauri -- ios build --config src-tauri/tauri.ios.conf.json
+	@echo "==> TODO: sign with your Apple ID (open src-tauri/gen/apple in Xcode once,"
+	@echo "    pick your Team for automatic signing; a free Apple ID works with 7-day certs),"
+	@echo "    then install to the device from Xcode or: xcrun devicectl device install app --device <id> <file>.ipa"
+
 dev: node_modules/.package-lock.json ## Run the desktop app in development mode
 	$(NPM) run desktop:dev
 
@@ -87,7 +111,7 @@ uninstall: ## Quit and remove the installed .app from $(INSTALL_DIR)
 	@echo "==> Removed $(INSTALLED_APP)"
 
 clean: ## Remove frontend and bundled output
-	rm -rf dist dist-web
+	rm -rf dist dist-web dist-mobile
 	rm -rf src-tauri/target/release/bundle
 	rm -f src-tauri/target/release/$(BIN_NAME)
 	@echo "==> Cleaned build output"
