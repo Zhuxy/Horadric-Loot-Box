@@ -9,6 +9,8 @@
     "preview": "vite preview",
     "dev:web": "node scripts/copy-ocr.mjs && vite --mode web",
     "build:web": "node scripts/build-gamedata.mjs && node scripts/copy-ocr.mjs && tsc -p . && vite build --mode web",
+    "dev:mobile": "vite --mode mobile",
+    "build:mobile": "tsc -p . && vite build --mode mobile",
     "test": "vitest run",
     "typecheck": "tsc -p .",
     "check:tauri": "node scripts/check-tauri-versions.mjs",
