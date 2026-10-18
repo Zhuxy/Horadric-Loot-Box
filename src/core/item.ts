@@ -115,6 +115,10 @@ export interface D2Item {
   advBit?: number;
   /** Bit offset (inside `raw`) of the 32-bit item id, for non-compact items. */
   idBit?: number;
+  /** Bit offset (inside `raw`) where a personalized/ear name starts (7- or 8-bit characters). */
+  nameBit?: number;
+  /** Bit offset (inside `raw`) where the quantity field starts (also when the version has no such field). */
+  quantityBit?: number;
   chronicle?: { id: number; timestamp?: number; recipients: number };
   /** Number of socketed children declared in the item header. */
   filledSockets: number;
@@ -217,7 +221,10 @@ export function readItem(r: BitReader, saveVersion: number): D2Item {
     if (item.compact) {
       if (flags & ItemFlag.IsEar) {
         item.code = 'ear';
-        item.ear = { cls: r.readBits(3), level: r.readBits(7), name: r.readString(charBits) };
+        const cls = r.readBits(3);
+        const level = r.readBits(7);
+        item.nameBit = r.bitPos - start * 8;
+        item.ear = { cls, level, name: r.readString(charBits) };
       } else {
         item.code = decodeItemCode(r).trim();
         item.def = itemDef(item.code);
@@ -259,11 +266,11 @@ function readRealm(r: BitReader) {
 }
 
 function readAdvancedStack(r: BitReader, item: D2Item, v: number, start: number) {
+  item.advBit = r.bitPos - start * 8;
   if (v <= 99) return;
   if (v <= 101) {
     if (!V100_STACKABLE.has(item.code)) return;
   } else {
-    item.advBit = r.bitPos - start * 8;
     if (!r.readBool()) return;
   }
   item.advancedStackSize = r.readBits(8);
@@ -322,8 +329,12 @@ function readComplete(r: BitReader, item: D2Item, v: number, charBits: 7 | 8, st
 
   if (item.runeword) item.runewordId = r.readBits(16);
   if (item.flags & ItemFlag.IsEar) {
-    item.ear = { cls: r.readBits(3), level: r.readBits(7), name: r.readString(charBits) };
+    const cls = r.readBits(3);
+    const level = r.readBits(7);
+    item.nameBit = r.bitPos - start * 8;
+    item.ear = { cls, level, name: r.readString(charBits) };
   } else if (item.flags & ItemFlag.Personalized) {
+    item.nameBit = r.bitPos - start * 8;
     item.personalizedName = r.readString(charBits);
   }
   readRealm(r);
@@ -342,6 +353,7 @@ function readComplete(r: BitReader, item: D2Item, v: number, charBits: 7 | 8, st
     r.readBool();
   }
 
+  item.quantityBit = r.bitPos - start * 8;
   if (v > 104) {
     if (r.readBool()) item.quantity = r.readBits(9);
   } else if (def.stackable) {
@@ -456,6 +468,164 @@ export function withNewId(item: D2Item): D2Item {
   writeBitsAt(raw, item.idBit + 16, 16, id >>> 16);
   const out = parseItemBytes(concatBytes([raw, ...item.sockets.map(itemBytes)]), item.saveVersion);
   if (out.id !== id) throw new Error('Item id change did not verify');
+  return out;
+}
+
+// ---------------------------------------------------------------------------
+// Version conversion.
+//
+// A .d2i file is a bare item bitstream with no version header, and the stream
+// is not fully compatible across v97-v105. To place an imported item in a file
+// we rewrite only the fields that differ between versions and copy every other
+// bit (position, sockets, affixes, unknown fields) verbatim.
+//
+// The version-dependent fields, in the order they are written:
+//   - a personalized/ear name is 7-bit per character at v97 and 8-bit at v98+
+//   - the quantity field is 9 bits for stackables at v104 and below, and a
+//     presence bool + 9 bits at v105
+//   - the advanced-stash stack field is absent up to v99, is an 8-bit size for
+//     a known set of codes at v100-101, and a presence bool + 8-bit size at v102+
+
+function bitsOf(bytes: Uint8Array): number[] {
+  const out = new Array<number>(bytes.length * 8);
+  for (let i = 0; i < bytes.length; i++) for (let b = 0; b < 8; b++) out[i * 8 + b] = (bytes[i] >>> b) & 1;
+  return out;
+}
+
+function bytesOf(bits: number[]): Uint8Array {
+  const out = new Uint8Array(Math.ceil(bits.length / 8));
+  for (let i = 0; i < bits.length; i++) if (bits[i]) out[i >> 3] |= 1 << (i & 7);
+  return out;
+}
+
+function readBitValue(bits: number[], at: number, count: number): number {
+  let v = 0;
+  for (let i = 0; i < count; i++) v += bits[at + i] * 2 ** i;
+  return v;
+}
+
+function intBits(value: number, count: number): number[] {
+  const out = new Array<number>(count);
+  for (let i = 0; i < count; i++) out[i] = Math.floor(value / 2 ** i) & 1;
+  return out;
+}
+
+/** Width of the advanced-stash field as stored at the item's own version. */
+function advancedStackSourceBits(item: D2Item): number {
+  if (item.advBit === undefined) return 0;
+  if (item.saveVersion <= 99) return 0;
+  if (item.saveVersion <= 101) return V100_STACKABLE.has(item.code) ? 8 : 0;
+  return item.advancedStackSize !== undefined ? 9 : 1;
+}
+
+/** The advanced-stash field as it should be stored at `target`. */
+function advancedStackTargetBits(item: D2Item, target: number): number[] {
+  if (item.advBit === undefined || target <= 99) return [];
+  if (target <= 101) return V100_STACKABLE.has(item.code) ? intBits(item.advancedStackSize ?? 1, 8) : [];
+  return item.advancedStackSize !== undefined ? [1, ...intBits(item.advancedStackSize, 8)] : [0];
+}
+
+/** Width of the quantity field as stored at the item's own version. */
+function quantitySourceBits(item: D2Item): number {
+  if (item.quantityBit === undefined) return 0;
+  if (item.saveVersion >= 105) return item.quantity !== undefined ? 10 : 1;
+  return item.def?.stackable ? 9 : 0;
+}
+
+/** The quantity field as it should be stored at `target`. */
+function quantityTargetBits(item: D2Item, target: number): number[] {
+  if (item.quantityBit === undefined) return [];
+  if (target >= 105) return item.quantity !== undefined ? [1, ...intBits(item.quantity, 9)] : [0];
+  if (item.def?.stackable) return intBits(item.quantity ?? 1, 9);
+  return [];
+}
+
+interface BitEdit {
+  at: number;
+  remove: number;
+  insert: number[];
+}
+
+/** Rewrites one item's own bytes (not its socketed children) for `target`. */
+function convertItemBytes(item: D2Item, target: number): Uint8Array {
+  const edits: BitEdit[] = [];
+  if (item.advBit !== undefined)
+    edits.push({ at: item.advBit, remove: advancedStackSourceBits(item), insert: advancedStackTargetBits(item, target) });
+  if (item.quantityBit !== undefined)
+    edits.push({ at: item.quantityBit, remove: quantitySourceBits(item), insert: quantityTargetBits(item, target) });
+
+  // A name string changes width when crossing the v97 <-> v98 boundary.
+  if (item.nameBit !== undefined) {
+    const srcChars = item.saveVersion > 97 ? 8 : 7;
+    const dstChars = target > 97 ? 8 : 7;
+    if (srcChars !== dstChars) {
+      const bits = bitsOf(item.raw);
+      const units: number[] = [];
+      let p = item.nameBit;
+      for (let i = 0; i < 64; i++) {
+        const u = readBitValue(bits, p, srcChars);
+        p += srcChars;
+        units.push(u);
+        if (u === 0) break;
+      }
+      const insert: number[] = [];
+      for (const u of units) insert.push(...intBits(u, dstChars));
+      edits.push({ at: item.nameBit, remove: units.length * srcChars, insert });
+    }
+  }
+
+  // Apply from the end so earlier offsets stay valid as the stream shifts.
+  edits.sort((a, b) => b.at - a.at);
+  let bits = bitsOf(item.raw);
+  // Drop the source version's byte-alignment padding; the parser's content ends at the last real field.
+  if (item.advBit !== undefined) bits = bits.slice(0, item.advBit + advancedStackSourceBits(item));
+  for (const e of edits) bits = [...bits.slice(0, e.at), ...e.insert, ...bits.slice(e.at + e.remove)];
+  return bytesOf(bits);
+}
+
+/** Structural fields that must survive a version conversion unchanged. */
+function shapeOf(item: D2Item): string {
+  return JSON.stringify({
+    code: item.code,
+    compact: item.compact,
+    mode: item.mode,
+    quality: item.quality,
+    itemLevel: item.itemLevel,
+    id: item.id,
+    uniqueId: item.uniqueId,
+    setId: item.setId,
+    runewordId: item.runewordId,
+    prefixes: item.prefixes,
+    suffixes: item.suffixes,
+    defense: item.defense,
+    maxDurability: item.maxDurability,
+    durability: item.durability,
+    quantity: item.quantity,
+    advancedStackSize: item.advancedStackSize,
+    socketCount: item.socketCount,
+    setMask: item.setMask,
+    stats: item.stats,
+    setBonusStats: item.setBonusStats,
+    runewordStats: item.runewordStats,
+    personalizedName: item.personalizedName,
+    ear: item.ear,
+    gold: item.gold,
+    filledSockets: item.filledSockets,
+    sockets: item.sockets.map(shapeOf),
+  });
+}
+
+/**
+ * Re-encodes an imported item (and its socketed children) for another save version, so it can be placed in a
+ * file of that version. Only the fields that differ between versions are rewritten; everything else is copied
+ * bit for bit. The result is parsed back and compared, so a failed conversion is refused instead of written.
+ */
+export function transcodeItem(item: D2Item, targetVersion: number): D2Item {
+  if (item.saveVersion === targetVersion) return item;
+  const bytes = concatBytes([convertItemBytes(item, targetVersion), ...item.sockets.map((s) => convertItemBytes(s, targetVersion))]);
+  const out = parseItemBytes(bytes, targetVersion);
+  if (shapeOf(out) !== shapeOf(item))
+    throw new Error(`Could not convert this item from v${item.saveVersion} to v${targetVersion} without changing it`);
   return out;
 }
 

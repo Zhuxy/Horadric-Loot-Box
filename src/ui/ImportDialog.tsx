@@ -33,12 +33,13 @@ export function ImportDialog({ pane, onClose }: { pane: 0 | 1; onClose: () => vo
   const [quantity, setQuantity] = useState(1);
   const [charGrid, setCharGrid] = useState<GridKind>('inventory');
 
-  // D1: parse with the target container's version.
+  // Convert the item to the target container's version so it can be placed.
+  // A vault has no single version, so it keeps the item's own.
   const targetVersion = useMemo(() => {
-    if (!doc) return 105;
+    if (!doc) return undefined;
     if (doc.kind === 'character') return doc.version;
-    if (doc.kind === 'stash') return doc.tabs[paneState.tab ?? 0]?.version ?? 105;
-    return 105; // vault: no single version; latest parses the v97–v105 family
+    if (doc.kind === 'stash') return doc.tabs[paneState.tab ?? 0]?.version;
+    return undefined;
   }, [doc, paneState.tab]);
 
   const targetLabel = useMemo(() => {

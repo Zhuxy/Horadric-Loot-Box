@@ -3,6 +3,7 @@ import {
   itemBytes,
   itemSize,
   parseItemBytes,
+  transcodeItem,
   type D2Item,
 } from './item';
 import { Occupancy } from './layout';
@@ -12,18 +13,24 @@ import { Occupancy } from './layout';
  * bytes round-trip exactly. The .d2i format is raw itemBytes() output
  * (D2R item bitstream, no JM header, no version header).
  *
- * The source version is auto-detected: v97–v105 are tried in order and the
- * first version that parses AND round-trips byte-for-byte wins. This is
- * necessary because the item bitstream is NOT fully compatible across
- * versions (e.g. v105 added a quantity-present bool that v98 lacks; parsing
- * v98 bytes as v105 misaligns the stream).
+ * The source version is auto-detected: v97–v105 are tried and the first
+ * version that parses AND round-trips byte-for-byte wins. This is necessary
+ * because the item bitstream is NOT fully compatible across versions (e.g.
+ * v105 added a quantity-present bool that v98 lacks; parsing v98 bytes as
+ * v105 misaligns the stream).
+ *
+ * When `targetVersion` is given (the file the item is being imported into),
+ * the item is converted to that version afterwards, so it can actually be
+ * placed: the .d2i carries no version, and a file only accepts items encoded
+ * with its own version.
  *
  * @param bytes The .d2i file contents.
- * @param hintVersion Version to try first (e.g. the target container's).
+ * @param targetVersion Save version to convert the item to (e.g. the target file's).
  */
-export function parseImportFile(bytes: Uint8Array, hintVersion = 105): D2Item {
-  // Try hint first, then newest-to-oldest (recent exports are most common).
-  const versions = [hintVersion, ...[105, 104, 103, 102, 101, 100, 99, 98, 97].filter((v) => v !== hintVersion)];
+export function parseImportFile(bytes: Uint8Array, targetVersion?: number): D2Item {
+  // Try the target first, then newest-to-oldest (recent exports are most common).
+  const all = [105, 104, 103, 102, 101, 100, 99, 98, 97];
+  const versions = targetVersion === undefined ? all : [targetVersion, ...all.filter((v) => v !== targetVersion)];
   let lastError: Error | undefined;
   for (const v of versions) {
     try {
@@ -31,7 +38,7 @@ export function parseImportFile(bytes: Uint8Array, hintVersion = 105): D2Item {
       // Round-trip validation: re-serializing must produce identical bytes.
       const rt = itemBytes(item);
       if (rt.length === bytes.length && rt.every((b, i) => b === bytes[i])) {
-        return item;
+        return targetVersion !== undefined && targetVersion !== v ? transcodeItem(item, targetVersion) : item;
       }
     } catch (e) {
       lastError = e as Error;
