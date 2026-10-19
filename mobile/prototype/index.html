@@ -389,8 +389,8 @@ html,body{margin:0; padding:0; background:#060505; color:var(--ink-200);
     <div class="sheet" id="esheet">
       <div class="grab"></div>
       <h3>导出</h3><div class="sub" id="ex-name">—</div>
-      <div class="stats">iOS 上导出会打开<b>系统分享</b>，由你亲手选择保存位置（比如 D2R Mobile 的文件夹）。App 不会背地里写别处——这就是之前说的 security-scoped 授权。</div>
-      <button class="abtn primary" onclick="toast('已导出 .d2i');closeSheet()">选择保存位置…</button>
+      <div class="stats">v1 导出到 App 自己的 <b>Documents/exports/</b>（沙盒内，无需额外授权），你在文件 App 里把它挪到 D2R Mobile 的文件夹即可——跟存档"考出"是同一个动作。</div>
+      <button class="abtn primary" onclick="toast('已导出 .d2i');closeSheet()">导出到 exports/</button>
     </div>
 
     <input type="file" id="filepick" accept=".d2i,.D2I" style="display:none" onchange="importPicked(this)">

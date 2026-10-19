@@ -74,9 +74,9 @@
 - 解析用 `core.parseImportFile`（round-trip 校验 + `planImport`），原型中预览为 mock，真实实现 UI 不变。
 
 ### 6.2 导出（物品 Sheet → 导出为 .d2i）
-1. **导出 Sheet**：说明"iOS 上导出会打开系统分享，由你亲手选择保存位置（如 D2R Mobile 文件夹），App 不会背地里写别处"。
-2. "选择保存位置…" → 系统分享 → 完成 Toast。
-- 导出字节流走现有 `export .d2i` 逻辑。
+- v1 机制：Rust `export_item` 命令把 `.d2i` 写进 App 自己的 `Documents/exports/`（沙盒内，无需 security-scoped 授权），Toast 提示位置，用户在文件 App 里把它挪到 D2R Mobile 文件夹——跟存档"考出"是同一个动作。
+- v1.1 可选升级：系统分享直达目标位置（需 security-scoped 封装 + 真机测试）。
+- 导出字节流走现有 `itemBytes` 逻辑。
 
 ## 7. 数据模型要点（UI 必须尊重）
 
@@ -96,7 +96,7 @@
 1. 装备页"纵向列表 vs 纸娃娃"信息是否足够（等用户上手反馈）。
 2. 背包格子触控尺寸实测（iPhone 15 Pro）。
 3. 真实 `.d2i` 解析接入（`core.parseImportFile`）与 fit 实时计算。
-4. iOS bring-up：`tauri ios init` → Rust stub（must-fix 3）→ `build.rs` 的 `TARGET_OS_MAC` 门限放宽到 Apple 全平台（must-fix 2）→ `make ios`（must-fix 1：Documents 工作区 + `detect_save_folders` 扫沙盒）。
+4. iOS bring-up（Rust 三处 must-fix 已写，未在真机编译验证）：`tauri ios init`（他 M2 上一次）→ Xcode 选 Team（免费 Apple ID，7 天 cert）→ 插手机信任电脑 → `make ios` 一键打包安装。`make ios` 已实现 devicectl 自动找设备安装（`DEVICE=<uuid>` 可覆盖）。
 5. 桌面端 `make desktop` 打包在 M2 上验证（与本 SPEC 无关，另行）。
 
 ## 10. 原型

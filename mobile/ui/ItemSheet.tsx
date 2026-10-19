@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { save } from '@tauri-apps/plugin-dialog';
+import { invoke } from '@tauri-apps/api/core';
 import { StashTabType, itemBytes, itemName, type D2Item } from '../../src/core';
 import { desc, docLabel } from '../../src/state/store';
 import { useStore } from '../../src/ui/context';
+import { isTauri } from '../../src/platform/tauri';
 import { download } from '../../src/platform/dropped';
 import { Sheet, Tile, QName, typeSub } from './parts';
 
@@ -51,16 +52,15 @@ export function ItemSheet({ ref, onClose }: { ref: ItemRef | null; onClose: () =
       const safe = itemName(item).replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '_') || item.code;
       const name = `${item.code}_${safe}.d2i`;
       const bytes = itemBytes(item);
-      // iOS: system share picker (SPEC §6.2) — the user picks the destination,
-      // which grants the one-time security-scoped write. Plain browser: download.
-      try {
-        const p = await save({ defaultPath: name, filters: [{ name: 'D2R item', extensions: ['d2i'] }] });
-        if (p) await store.platform.writeFileAtomic(p, bytes);
-        else return; // user cancelled
-      } catch {
+      if (isTauri()) {
+        // iOS app: export_item writes into Documents/exports/ (app-owned, no
+        // security-scoped URL needed); the user moves it in the Files app ("考出").
+        await invoke<string>('export_item', { name, data: Array.from(bytes) });
+        store.toast('success', '已导出到文件 App → Horadric Loot Box → exports');
+      } else {
         download(name, bytes);
+        store.toast('success', `Exported ${name}`);
       }
-      store.toast('success', `Exported ${name}`);
     } catch (e) {
       store.toast('error', `Export failed: ${(e as Error).message}`);
     } finally {

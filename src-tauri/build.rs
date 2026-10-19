@@ -48,8 +48,10 @@ fn build_casclib() {
     let windows = std::env::var("CARGO_CFG_TARGET_OS")
         .map(|o| o == "windows")
         .unwrap_or(false);
-    let macos = std::env::var("CARGO_CFG_TARGET_OS")
-        .map(|o| o == "macos")
+    // iOS clang also predefines TARGET_OS_MAC=1, so the vendored-zlib workaround
+    // below must apply to every Apple target, not just macOS.
+    let apple = std::env::var("CARGO_CFG_TARGET_OS")
+        .map(|o| o == "macos" || o == "ios")
         .unwrap_or(false);
 
     let mut b = cc::Build::new();
@@ -76,11 +78,12 @@ fn build_casclib() {
     if windows {
         z.define("UNICODE", None).define("_UNICODE", None);
     }
-    if macos {
+    if apple {
         // The vendored (old) zlib does `#if defined(MACOS) || defined(TARGET_OS_MAC)` and then
-        // `#define fdopen(fd,mode) NULL`; clang defines TARGET_OS_MAC as a builtin on macOS, so
-        // <stdio.h> ends up with a broken fdopen declaration. CascLib only uses inflate*, never
-        // gz*, so undefining it for the zlib sources is safe and lets the build go through.
+        // `#define fdopen(fd,mode) NULL`; clang defines TARGET_OS_MAC as a builtin on Apple
+        // targets, so <stdio.h> ends up with a broken fdopen declaration. CascLib only uses
+        // inflate*, never gz*, so undefining it for the zlib sources is safe and lets the build
+        // go through.
         z.flag("-UTARGET_OS_MAC");
     }
     for f in c {

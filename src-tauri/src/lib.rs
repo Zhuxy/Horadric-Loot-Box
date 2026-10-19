@@ -147,8 +147,23 @@ fn drive_c_roots() -> Vec<PathBuf> {
 }
 
 /// Candidate save folders: Windows "Saved Games", plus Proton / Wine / Lutris / Heroic prefixes on Linux and macOS.
+/// On iOS the app's own Documents folder is the workspace (exposed to the Files app via
+/// UIFileSharingEnabled + LSSupportsOpeningDocumentsInPlace); saves are copied in/out there.
 #[tauri::command]
-fn detect_save_folders() -> Vec<String> {
+fn detect_save_folders(app: AppHandle) -> Vec<String> {
+    #[cfg(target_os = "ios")]
+    {
+        return app
+            .path()
+            .document_dir()
+            .map(|d| vec![d.to_string_lossy().into_owned()])
+            .unwrap_or_default();
+    }
+    detect_save_folders_inner()
+}
+
+/// Desktop candidate folders (AppHandle-free, so tests can call it).
+fn detect_save_folders_inner() -> Vec<String> {
     let mut found: Vec<PathBuf> = Vec::new();
     let home = dirs::home_dir().unwrap_or_default();
 
@@ -236,6 +251,38 @@ fn write_file_atomic(path: String, data: Vec<u8>) -> Result<(), String> {
         ));
     }
     atomic_write(&p, &data)
+}
+
+/// iOS: writes an exported .d2i into <Documents>/exports/ and returns the path.
+/// Documents is app-owned, so no security-scoped URL dance is needed; the user
+/// moves the file via the Files app ("考出"). The desktop app exports through
+/// browser downloads instead, so this command is iOS-only.
+#[tauri::command]
+fn export_item(app: AppHandle, name: String, data: Vec<u8>) -> Result<String, String> {
+    #[cfg(not(target_os = "ios"))]
+    {
+        let _ = (app, name, data);
+        return Err("export_item is iOS-only".into());
+    }
+    #[cfg(target_os = "ios")]
+    {
+        let safe: String = name
+            .chars()
+            .filter(|c| c.is_alphanumeric() || *c == '.' || *c == '_' || *c == '-')
+            .collect();
+        let safe = if safe.is_empty() {
+            "item.d2i".to_string()
+        } else {
+            safe
+        };
+        let dir = app.path().document_dir().map_err(err)?.join("exports");
+        fs::create_dir_all(&dir).map_err(err)?;
+        let path = dir.join(safe);
+        let tmp = dir.join(".tmp-export.d2i");
+        fs::write(&tmp, &data).map_err(err)?;
+        fs::rename(&tmp, &path).map_err(err)?;
+        Ok(path.to_string_lossy().into_owned())
+    }
 }
 
 fn data_dir(app: &AppHandle, sub: &str) -> Result<PathBuf, String> {
@@ -407,6 +454,9 @@ fn write_vault(
 
 #[tauri::command]
 fn is_game_running() -> bool {
+    // iOS sandbox: sysinfo can't see other processes, and the game can't run alongside anyway.
+    #[cfg(target_os = "ios")]
+    return false;
     let mut sys = sysinfo::System::new();
     sys.refresh_processes(sysinfo::ProcessesToUpdate::All, true);
     sys.processes().values().any(|p| {
@@ -422,6 +472,9 @@ fn is_game_running() -> bool {
 
 #[tauri::command]
 fn reveal_backups(app: AppHandle) -> Result<(), String> {
+    // iOS: spawning `open`/`xdg-open` is banned in the sandbox.
+    #[cfg(target_os = "ios")]
+    return Err("Not supported on iOS: open the Files app to see the backups folder.".into());
     let dir = data_dir(&app, "backups")?;
     #[cfg(target_os = "windows")]
     let cmd = "explorer";
@@ -517,6 +570,10 @@ fn delete_vault(app: AppHandle, path: String) -> Result<String, String> {
 
 #[tauri::command]
 fn art_detect_installs() -> Vec<String> {
+    // iOS: there is no drive_c to scan. Artwork comes from a resource pack the
+    // user copies into Documents (SPEC §8).
+    #[cfg(target_os = "ios")]
+    return Vec::new();
     art::detect_installs(&drive_c_roots())
 }
 
@@ -579,6 +636,7 @@ pub fn run() {
             write_vault,
             is_game_running,
             reveal_backups,
+            export_item,
             art_detect_installs,
             delete_character,
             delete_vault,
@@ -750,7 +808,7 @@ mod tests {
         fs::create_dir_all(&saves).unwrap();
         fs::write(saves.join("Warlock.d2s"), b"x").unwrap();
         std::env::set_var("HOME", &home);
-        let found = detect_save_folders();
+        let found = detect_save_folders_inner();
         assert!(
             found
                 .iter()

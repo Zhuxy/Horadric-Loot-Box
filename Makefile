@@ -5,7 +5,7 @@
 #   make desktop    explicit alias: compile and install the desktop app
 #   make dmg        build the .dmg installer too
 #   make run        install, then launch the app
-#   make ios        build, sign and install the iOS app (scaffold, see target)
+#   make ios        build the iOS app and install it on the plugged-in iPhone
 #   make clean      remove build output
 #   make help       list every target
 #
@@ -73,12 +73,14 @@ dmg: build ## Build every bundle, then report the .dmg path
 run: install ## Install, then launch the app
 	$(OPEN) "$(INSTALLED_APP)"
 
-# iOS: scaffold for the mobile entry. Runs every stage that is ready and stops
-# at the first missing piece with instructions. Remaining before this goes
-# green on your Mac: `npx tauri ios init` (once), Rust iOS stubs
-# (is_game_running / reveal_backups / art_detect_installs), the build.rs
-# TARGET_OS_MAC widen for iOS, platform/ios.ts, and the mobile UI itself.
-ios: node_modules/.package-lock.json ## Build, sign and install the iOS app (scaffold)
+# iOS: one-click build + install to the plugged-in iPhone.
+# One-time setup on the Mac (not done by this target):
+#   1. npx tauri ios init          # generates src-tauri/gen/apple
+#   2. open src-tauri/gen/apple in Xcode, pick your Team for automatic signing
+#      (a free Apple ID works; certs last 7 days, then re-run this target)
+#   3. plug in the iPhone and trust the computer
+# Afterwards: make ios   (override device with DEVICE=<uuid>, see devicectl list devices)
+ios: node_modules/.package-lock.json ## Build the iOS app and install it on the plugged-in iPhone
 	$(NPM) run build:mobile
 	@if [ "$$(uname)" != "Darwin" ]; then \
 		echo "==> iOS packaging needs macOS + Xcode (this machine is $$(uname -s))"; exit 1; fi
@@ -87,11 +89,18 @@ ios: node_modules/.package-lock.json ## Build, sign and install the iOS app (sca
 	@if [ ! -d "src-tauri/gen/apple" ]; then \
 		echo "==> iOS project not initialized yet."; \
 		echo "    On your Mac, run once: npx tauri ios init"; exit 1; fi
-	@echo "==> Building iOS bundle (dist-mobile frontend + Rust backend)"
+	@echo "==> Building iOS app (dist-mobile frontend + Rust backend)"
 	$(NPM) run tauri -- ios build --config src-tauri/tauri.ios.conf.json
-	@echo "==> TODO: sign with your Apple ID (open src-tauri/gen/apple in Xcode once,"
-	@echo "    pick your Team for automatic signing; a free Apple ID works with 7-day certs),"
-	@echo "    then install to the device from Xcode or: xcrun devicectl device install app --device <id> <file>.ipa"
+	@echo "==> Installing to iPhone"
+	@IPA=$$(ls -t src-tauri/gen/apple/build/arm64/*.ipa 2>/dev/null | head -1); \
+	if [ -z "$$IPA" ]; then echo "==> No .ipa found under src-tauri/gen/apple/build/arm64/"; exit 1; fi; \
+	DEVICE="$${DEVICE:-$$(xcrun devicectl list devices 2>/dev/null | grep -oE '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}' | head -1)}"; \
+	if [ -z "$$DEVICE" ]; then \
+		echo "==> No iPhone found. Plug it in, tap Trust, then re-run."; \
+		echo "    (or pass DEVICE=<uuid> explicitly; see: xcrun devicectl list devices)"; exit 1; fi; \
+	echo "    $$IPA -> $$DEVICE"; \
+	xcrun devicectl device install app --device "$$DEVICE" "$$IPA" && \
+	echo "==> Done. On the iPhone: Settings > General > VPN & Device Management > trust your Apple ID, then open the app."
 
 dev: node_modules/.package-lock.json ## Run the desktop app in development mode
 	$(NPM) run desktop:dev
