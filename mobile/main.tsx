@@ -1,44 +1,76 @@
-// Mobile entry (npm run dev:mobile / build:mobile): a second Vite root sharing
-// src/core and src/state with the desktop app. The mobile UI itself is designed
-// later; this shell only proves the entry, the build pipeline and core sharing.
+// Mobile entry (npm run dev:mobile / build:mobile): the real mobile UI (SPEC v1.0),
+// sharing src/core and src/state with the desktop app.
 //
 // File flow (decided 2026-10-18): the app's own Documents folder is the
 // workspace, exposed to the Files app (UIFileSharingEnabled +
-// LSSupportsOpeningDocumentsInPlace); saves are copied in/out there. The
-// platform/ios.ts implementation and the export button come with that design.
-import React from 'react';
+// LSSupportsOpeningDocumentsInPlace); saves are copied in/out there.
+// On iOS the Rust side returns Documents from detect_save_folders.
+import { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom/client';
-import * as Core from '../src/core';
+import '@fontsource/cinzel/600.css';
+import '@fontsource/cinzel/700.css';
+import '@fontsource/inter/400.css';
+import '@fontsource/inter/500.css';
+import '@fontsource/inter/600.css';
 import '../src/index.css';
+import './styles.css';
+import { Store } from '../src/state/store';
+import { StoreContext } from '../src/ui/context';
+import { createDemoPlatform } from '../src/platform/demo';
+import { iosPlatform } from './platform/ios';
+import { MobileApp } from './ui/App';
 
-declare const __APP_VERSION__: string;
+function Boot() {
+  const [store, setStore] = useState<Store | null>(null);
+  const [folder, setFolder] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
-const coreSymbols = Object.keys(Core).length;
+  useEffect(() => {
+    (async () => {
+      // Real app (Tauri iOS webview): open the Documents workspace.
+      try {
+        const folders = await iosPlatform.detectSaveFolders();
+        const f = folders[0];
+        if (!f) throw new Error('empty');
+        const s = new Store(iosPlatform);
+        await s.openFolder(f);
+        setFolder(f);
+        setStore(s);
+        return;
+      } catch {
+        // Not under Tauri (desktop browser preview): fall back to demo data.
+      }
+      try {
+        const demo = createDemoPlatform();
+        const s = new Store(demo);
+        await s.openFolder('demo');
+        setFolder('demo (preview)');
+        setStore(s);
+      } catch (e) {
+        setError(`Couldn't load saves: ${(e as Error).message}`);
+      }
+    })();
+  }, []);
 
-function Shell() {
+  if (error) {
+    return (
+      <div className="m-app">
+        <div className="m-body"><div className="m-empty">{error}</div></div>
+      </div>
+    );
+  }
+  if (!store) {
+    return (
+      <div className="m-app">
+        <div className="m-body"><div className="m-empty">载入存档中…</div></div>
+      </div>
+    );
+  }
   return (
-    <main
-      className="min-h-dvh flex flex-col items-center justify-center gap-3 p-6 text-center"
-      style={{
-        paddingTop: 'max(1.5rem, env(safe-area-inset-top))',
-        paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))',
-      }}
-    >
-      <h1 className="font-display text-2xl text-ink-100">Horadric Loot Box</h1>
-      <p className="text-sm text-ink-400">mobile entry · v{__APP_VERSION__}</p>
-      <p className="text-sm text-ink-300">
-        Entry OK — sharing <span className="text-ink-100">{coreSymbols}</span> core symbols
-        with the desktop app.
-      </p>
-      <p className="text-xs text-ink-500 max-w-xs">
-        Mobile UI is designed next. Nothing here yet except the wiring.
-      </p>
-    </main>
+    <StoreContext.Provider value={store}>
+      <MobileApp folder={folder} />
+    </StoreContext.Provider>
   );
 }
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <Shell />
-  </React.StrictMode>,
-);
+ReactDOM.createRoot(document.getElementById('root')!).render(<Boot />);

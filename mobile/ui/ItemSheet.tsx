@@ -1,0 +1,170 @@
+import { useState } from 'react';
+import { save } from '@tauri-apps/plugin-dialog';
+import { StashTabType, itemBytes, itemName, type D2Item } from '../../src/core';
+import { desc, docLabel } from '../../src/state/store';
+import { useStore } from '../../src/ui/context';
+import { download } from '../../src/platform/dropped';
+import { Sheet, Tile, QName, typeSub } from './parts';
+
+export interface ItemRef {
+  item: D2Item;
+  docId: string;
+}
+
+/** Bottom action sheet for one item (SPEC §5.2): 放入宝库 / 移动到… / 导出为 .d2i / 删除. */
+export function ItemSheet({ ref, onClose }: { ref: ItemRef | null; onClose: () => void }) {
+  const store = useStore();
+  const [moving, setMoving] = useState(false);
+  const [confirmDel, setConfirmDel] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  const close = () => {
+    setMoving(false);
+    setConfirmDel(false);
+    onClose();
+  };
+
+  if (!ref) return <Sheet open={false} onClose={close}>{null}</Sheet>;
+  const { item, docId } = ref;
+  const d = desc(item);
+
+  const vaults = [...store.docs.entries()].filter(([, e]) => e.doc?.kind === 'vault');
+
+  const toVault = async () => {
+    const v = vaults[0];
+    if (!v) {
+      store.toast('error', 'No vault yet — create one from the Characters tab');
+      return;
+    }
+    setBusy(true);
+    try {
+      if (store.move(item, docId, { docId: v[0], area: 'vault' })) await store.saveAll();
+    } finally {
+      setBusy(false);
+      close();
+    }
+  };
+
+  const doExport = async () => {
+    setBusy(true);
+    try {
+      const safe = itemName(item).replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '_') || item.code;
+      const name = `${item.code}_${safe}.d2i`;
+      const bytes = itemBytes(item);
+      // iOS: system share picker (SPEC §6.2) — the user picks the destination,
+      // which grants the one-time security-scoped write. Plain browser: download.
+      try {
+        const p = await save({ defaultPath: name, filters: [{ name: 'D2R item', extensions: ['d2i'] }] });
+        if (p) await store.platform.writeFileAtomic(p, bytes);
+        else return; // user cancelled
+      } catch {
+        download(name, bytes);
+      }
+      store.toast('success', `Exported ${name}`);
+    } catch (e) {
+      store.toast('error', `Export failed: ${(e as Error).message}`);
+    } finally {
+      setBusy(false);
+      close();
+    }
+  };
+
+  const doDelete = async () => {
+    setBusy(true);
+    try {
+      store.deleteItems(docId, [item]);
+      await store.saveAll();
+    } finally {
+      setBusy(false);
+      close();
+    }
+  };
+
+  return (
+    <Sheet open onClose={close}>
+      <h3 className="font-display">物品</h3>
+      <div className="sub">{d.baseName}</div>
+      <div className="m-vitem" style={{ cursor: 'default' }}>
+        <Tile item={item} />
+        <span>
+          <QName item={item} />
+          <br />
+          <span className="m-ity">{typeSub(item)}</span>
+        </span>
+      </div>
+      {moving ? (
+        <MoveTargets item={item} docId={docId} onDone={close} />
+      ) : (
+        <>
+          <button className="m-abtn primary" disabled={busy} onClick={toVault}>放入宝库</button>
+          <button className="m-abtn" disabled={busy} onClick={() => setMoving(true)}>移动到…</button>
+          <button className="m-abtn" disabled={busy} onClick={doExport}>导出为 .d2i</button>
+          {confirmDel ? (
+            <button className="m-abtn danger" disabled={busy} onClick={doDelete}>确认删除？（备份保留）</button>
+          ) : (
+            <button className="m-abtn danger" disabled={busy} onClick={() => setConfirmDel(true)}>删除</button>
+          )}
+        </>
+      )}
+    </Sheet>
+  );
+}
+
+function MoveTargets({ item, docId, onDone }: { item: D2Item; docId: string; onDone: () => void }) {
+  const store = useStore();
+  const [busy, setBusy] = useState(false);
+
+  const targets: { label: string; sub: string; go: () => boolean }[] = [];
+  for (const [id, e] of store.docs) {
+    if (id === docId || !e.doc) continue;
+    const doc = e.doc;
+    if (doc.kind === 'vault') {
+      targets.push({ label: docLabel(doc, 'Vault'), sub: `${doc.entries.length} items · unlimited`, go: () => store.move(item, docId, { docId: id, area: 'vault' }) });
+    } else if (doc.kind === 'character') {
+      targets.push({
+        label: `${doc.name} · 背包`, sub: `Lv ${doc.level} ${doc.className}`,
+        go: () => {
+          const c = store.check(item, docId, { docId: id, area: 'inventory' });
+          return c.ok ? store.move(item, docId, { docId: id, area: 'inventory', x: c.x, y: c.y }) : (store.toast('error', c.reason ?? 'No space'), false);
+        },
+      });
+    } else if (doc.kind === 'stash') {
+      doc.tabs.forEach((t, i) => {
+        if (t.type !== StashTabType.Normal) return;
+        targets.push({
+          label: `${docLabel(doc, 'Stash')} · Tab ${i + 1}`, sub: `${t.items.length} items`,
+          go: () => {
+            const c = store.check(item, docId, { docId: id, area: 'shared', tab: i });
+            return c.ok ? store.move(item, docId, { docId: id, area: 'shared', tab: i, x: c.x, y: c.y }) : (store.toast('error', c.reason ?? 'No space'), false);
+          },
+        });
+      });
+    }
+  }
+
+  const go = async (t: (typeof targets)[number]) => {
+    setBusy(true);
+    try {
+      if (t.go()) await store.saveAll();
+    } finally {
+      setBusy(false);
+      onDone();
+    }
+  };
+
+  return (
+    <>
+      <div className="sub">选择目标位置（放不下会提示）</div>
+      {targets.length === 0 && <div className="m-empty">没有其他可移动的位置</div>}
+      {targets.map((t) => (
+        <button key={t.label} className="m-vitem" disabled={busy} onClick={() => go(t)}>
+          <span>
+            <span className="m-inm">{t.label}</span>
+            <br />
+            <span className="m-ity">{t.sub}</span>
+          </span>
+        </button>
+      ))}
+    </>
+  );
+}
