@@ -1,1 +1,1 @@
-{"$schema":"https://schema.tauri.app/config/2","_comment":"Merged on top of tauri.conf.json for iOS builds: `tauri ios build --config src-tauri/tauri.ios.conf.json`. Points the iOS app at the mobile frontend entry (mobile/, built by `npm run build:mobile` into dist-mobile). Desktop builds are unaffected.","build":{"frontendDist":"../dist-mobile"}}
+{"$schema":"https://schema.tauri.app/config/2","build":{"frontendDist":"../dist-mobile"}}
