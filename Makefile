@@ -76,24 +76,71 @@ run: install ## Install, then launch the app
 # iOS: one-click build + install to the plugged-in iPhone.
 # One-time setup on the Mac (not done by this target):
 #   1. npx tauri ios init          # generates src-tauri/gen/apple
-#   2. open src-tauri/gen/apple in Xcode, pick your Team for automatic signing
-#      (a free Apple ID works; certs last 7 days, then re-run this target)
+#   2. sign into Xcode (Settings > Accounts) with your Apple ID; the Team ID
+#      lives in src-tauri/tauri.ios.conf.json (bundle.iOS.developmentTeam)
 #   3. plug in the iPhone and trust the computer
 # Afterwards: make ios   (override device with DEVICE=<uuid>, see devicectl list devices)
+#
+# This target deliberately does NOT use `tauri ios build`: the CLI hard-requires
+# an installed iOS *simulator runtime* (ensure_ios_runtime_installed in tauri-cli's
+# src/mobile/ios/mod.rs runs `xcrun simctl list runtimes` and bails when no runtime
+# name starts with "iOS") even for device-only builds. Instead it reproduces the
+# CLI's steps minus that check: build the frontend, cargo-build libapp.a with the
+# iOS config merged via TAURI_CONFIG, strip the project's Rust script phase (it
+# calls back into the CLI and panics without the CLI's options server), then
+# xcodebuild archive/export and devicectl install.
+TEAM_ID := $(shell python3 -c "import json; print(json.load(open('src-tauri/tauri.ios.conf.json'))['bundle']['iOS']['developmentTeam'])" 2>/dev/null)
 ios: node_modules/.package-lock.json ## Build the iOS app and install it on the plugged-in iPhone
 	$(NPM) run build:mobile
 	@if [ "$$(uname)" != "Darwin" ]; then \
 		echo "==> iOS packaging needs macOS + Xcode (this machine is $$(uname -s))"; exit 1; fi
 	@command -v xcodebuild >/dev/null 2>&1 || \
 		{ echo "==> Xcode command-line tools not found"; exit 1; }
+	@command -v xcodegen >/dev/null 2>&1 || \
+		{ echo "==> xcodegen not found (brew install xcodegen)"; exit 1; }
 	@if [ ! -d "src-tauri/gen/apple" ]; then \
 		echo "==> iOS project not initialized yet."; \
 		echo "    On your Mac, run once: npx tauri ios init"; exit 1; fi
-	@echo "==> Building iOS app (dist-mobile frontend + Rust backend, device target only)"
-	$(NPM) run tauri -- ios build --target aarch64 --config src-tauri/tauri.ios.conf.json
+	@if [ -z "$(TEAM_ID)" ]; then \
+		echo "==> No bundle.iOS.developmentTeam in src-tauri/tauri.ios.conf.json"; exit 1; fi
+	@echo "==> Building Rust library (aarch64-apple-ios, config merged via TAURI_CONFIG)"
+	@rustup target list --installed 2>/dev/null | grep -q '^aarch64-apple-ios$$' || rustup target add aarch64-apple-ios
+	cd src-tauri && TAURI_CONFIG="$$(cat tauri.ios.conf.json)" cargo build --release --target aarch64-apple-ios --lib
+	@mkdir -p src-tauri/gen/apple/Externals/arm64/release
+	cp src-tauri/target/aarch64-apple-ios/release/libhoradric_loot_box_lib.a src-tauri/gen/apple/Externals/arm64/release/libapp.a
+	@if grep -q "xcode-script" src-tauri/gen/apple/project.yml; then \
+		echo "==> Removing the Build Rust Code script phase (libapp.a is pre-built)"; \
+		python3 scripts/ios/strip_rust_script_phase.py src-tauri/gen/apple/project.yml && \
+		cd src-tauri/gen/apple && xcodegen generate; fi
+	@echo "==> Archiving (device only, automatic signing, team $(TEAM_ID))"
+	xcodebuild archive \
+		-project src-tauri/gen/apple/horadric-loot-box.xcodeproj \
+		-scheme horadric-loot-box_iOS \
+		-configuration release \
+		-destination 'generic/platform=iOS' \
+		-archivePath src-tauri/gen/apple/build/hlb.xcarchive \
+		-allowProvisioningUpdates \
+		DEVELOPMENT_TEAM=$(TEAM_ID) CODE_SIGN_STYLE=Automatic
+	@mkdir -p src-tauri/gen/apple/build
+	@printf '%s\n' '<?xml version="1.0" encoding="UTF-8"?>' \
+		'<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">' \
+		'<plist version="1.0">' '<dict>' \
+		'<key>method</key>' '<string>development</string>' \
+		'<key>teamID</key>' '<string>$(TEAM_ID)</string>' \
+		'<key>signingStyle</key>' '<string>automatic</string>' \
+		'<key>stripSwiftSymbols</key>' '<true/>' \
+		'<key>provisioningProfiles</key>' '<dict/>' \
+		'<key>manageAppVersionAndBuildNumber</key>' '<false/>' \
+		'</dict>' '</plist>' > src-tauri/gen/apple/build/ExportOptions.plist
+	@echo "==> Exporting .ipa"
+	xcodebuild -exportArchive \
+		-archivePath src-tauri/gen/apple/build/hlb.xcarchive \
+		-exportPath src-tauri/gen/apple/build/export \
+		-exportOptionsPlist src-tauri/gen/apple/build/ExportOptions.plist \
+		-allowProvisioningUpdates
 	@echo "==> Installing to iPhone"
-	@IPA=$$(ls -t src-tauri/gen/apple/build/arm64/*.ipa 2>/dev/null | head -1); \
-	if [ -z "$$IPA" ]; then echo "==> No .ipa found under src-tauri/gen/apple/build/arm64/"; exit 1; fi; \
+	@IPA=$$(ls -t src-tauri/gen/apple/build/export/*.ipa 2>/dev/null | head -1); \
+	if [ -z "$$IPA" ]; then echo "==> No .ipa found under src-tauri/gen/apple/build/export/"; exit 1; fi; \
 	DEVICE="$${DEVICE:-$$(xcrun devicectl list devices 2>/dev/null | grep -oE '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}' | head -1)}"; \
 	if [ -z "$$DEVICE" ]; then \
 		echo "==> No iPhone found. Plug it in, tap Trust, then re-run."; \
