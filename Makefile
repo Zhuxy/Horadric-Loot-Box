@@ -89,8 +89,8 @@ ios: node_modules/.package-lock.json ## Build the iOS app and install it on the 
 	@if [ ! -d "src-tauri/gen/apple" ]; then \
 		echo "==> iOS project not initialized yet."; \
 		echo "    On your Mac, run once: npx tauri ios init"; exit 1; fi
-	@echo "==> Building iOS app (dist-mobile frontend + Rust backend)"
-	$(NPM) run tauri -- ios build --config src-tauri/tauri.ios.conf.json
+	@echo "==> Building iOS app (dist-mobile frontend + Rust backend, device target only)"
+	$(NPM) run tauri -- ios build --target aarch64-apple-ios --config src-tauri/tauri.ios.conf.json
 	@echo "==> Installing to iPhone"
 	@IPA=$$(ls -t src-tauri/gen/apple/build/arm64/*.ipa 2>/dev/null | head -1); \
 	if [ -z "$$IPA" ]; then echo "==> No .ipa found under src-tauri/gen/apple/build/arm64/"; exit 1; fi; \
