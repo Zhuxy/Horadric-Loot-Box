@@ -730,14 +730,12 @@ function buildVault(scr){
 function buildSettings(scr){
   S.activeGrid = null;
   scr.innerHTML = '<div style="padding-top:6px">' +
-    [['💾','实时保存','每次操作后自动写盘 · 写前自动备份 · 顶栏显示保存时间','已启用','live'],
-     ['📥','存档同步（考进考出）','从文件 App 选择 D2R Mobile 存档夹考入 / 考出回游戏','预留',''],
+    [['📥','存档同步（考进考出）','从文件 App 选择 D2R Mobile 存档夹考入 / 考出回游戏','预留',''],
      ['🎨','美术资源包','从自己购买的 D2R 提取物品图标后导入，替换占位字形','未导入',''],
      ['🗂️','备份管理','查看 / 恢复自动备份（每次写盘保留最近若干份）','预留',''],
-     ['🧺','装备托盘','托盘内容实时落盘于 app 私有存储，退出不丢失','已启用','live'],
      ['ℹ️','关于','Horadric Loot Box 移动版 · 原型 v2','v2',''],
     ].map(r=>'<div class="setrow"><span style="font-size:19px">'+r[0]+'</span><div><div class="st">'+r[1]+'</div><div class="sd">'+r[2]+'</div></div><span class="tag '+r[4]+'">'+r[3]+'</span></div>').join('') +
-    '<div class="hintline" style="margin-top:16px">设置页本次只预留结构，功能随后版本补齐</div></div>';
+    '<div class="hintline" style="margin-top:16px">设置页本次只预留结构，功能随后版本补齐<br>实时保存与装备托盘为常开基础行为（关掉功能就不完整），不设开关</div></div>';
 }
 /* ================= tray ================= */
 function packTray(){
