@@ -150,16 +150,152 @@ fn drive_c_roots() -> Vec<PathBuf> {
 /// On iOS the app's own Documents folder is the workspace (exposed to the Files app via
 /// UIFileSharingEnabled + LSSupportsOpeningDocumentsInPlace); saves are copied in/out there.
 #[tauri::command]
-fn detect_save_folders(app: AppHandle) -> Vec<String> {
+fn detect_save_folders(app: AppHandle) -> Result<Vec<String>, String> {
     #[cfg(target_os = "ios")]
     {
-        return app
-            .path()
-            .document_dir()
-            .map(|d| vec![d.to_string_lossy().into_owned()])
-            .unwrap_or_default();
+        return Ok(vec![ios_workspace(&app)?.to_string_lossy().into_owned()]);
     }
-    detect_save_folders_inner()
+    Ok(detect_save_folders_inner())
+}
+
+#[cfg(target_os = "ios")]
+fn ios_workspace(app: &AppHandle) -> Result<PathBuf, String> {
+    let documents = app.path().document_dir().map_err(err)?;
+    let workspace = documents.join("save");
+    if workspace.is_dir() {
+        return Ok(workspace);
+    }
+    fs::create_dir_all(&documents).map_err(err)?;
+    // Older builds opened Documents itself. Copy any saves and companions into
+    // the new visible `save` folder, leaving the originals untouched.
+    let legacy_saves: Vec<PathBuf> = children(&documents)
+        .into_iter()
+        .filter(|p| is_save(p))
+        .collect();
+    let folders: Vec<PathBuf> = children(&documents)
+        .into_iter()
+        .filter(|p| {
+            p.is_dir()
+                && p.file_name().and_then(|n| n.to_str()) != Some("exports")
+                && contains_saves(p)
+        })
+        .collect();
+    if legacy_saves.is_empty() && folders.is_empty() {
+        fs::create_dir_all(&workspace).map_err(err)?;
+        return Ok(workspace);
+    }
+    let staged = documents.join(".save-migration");
+    fs::create_dir_all(&staged).map_err(err)?;
+    let copied = (|| -> Result<(), String> {
+        for src in children(&documents).into_iter().filter(|p| p.is_file()) {
+            let stem = src.file_stem();
+            if is_save(&src) || legacy_saves.iter().any(|s| s.file_stem() == stem) {
+                fs::copy(&src, staged.join(src.file_name().ok_or("bad file name")?)).map_err(err)?;
+            }
+        }
+        for folder in folders {
+            let destination = staged.join(folder.file_name().ok_or("bad folder name")?);
+            fs::create_dir_all(&destination).map_err(err)?;
+            for src in children(&folder).into_iter().filter(|p| p.is_file()) {
+                fs::copy(&src, destination.join(src.file_name().ok_or("bad file name")?))
+                    .map_err(err)?;
+            }
+        }
+        fs::rename(&staged, &workspace).map_err(err)?;
+        Ok(())
+    })();
+    if copied.is_err() {
+        let _ = fs::remove_dir_all(&staged);
+    }
+    copied.map(|()| workspace)
+}
+
+#[cfg(target_os = "ios")]
+extern "C" {
+    fn hlb_sync_save_folder(
+        mode: i32,
+        workspace: *const std::ffi::c_char,
+        callback: extern "C" fn(*mut std::ffi::c_void, *const std::ffi::c_char),
+        context: *mut std::ffi::c_void,
+    );
+}
+
+#[cfg(target_os = "ios")]
+extern "C" fn ios_sync_callback(context: *mut std::ffi::c_void, result: *const std::ffi::c_char) {
+    let sender = unsafe { Box::from_raw(context as *mut std::sync::mpsc::Sender<String>) };
+    let value = if result.is_null() {
+        "error:文件选择器没有返回结果".to_string()
+    } else {
+        unsafe { std::ffi::CStr::from_ptr(result) }
+            .to_string_lossy()
+            .into_owned()
+    };
+    let _ = sender.send(value);
+}
+
+#[cfg(target_os = "ios")]
+async fn ios_sync(app: AppHandle, mode: i32) -> Result<Option<String>, String> {
+    let workspace = if mode == 2 {
+        ios_art_path(&app)?
+    } else {
+        ios_workspace(&app)?
+    };
+    let path = std::ffi::CString::new(workspace.to_string_lossy().as_bytes()).map_err(err)?;
+    tauri::async_runtime::spawn_blocking(move || {
+        let (sender, receiver) = std::sync::mpsc::channel();
+        let context = Box::into_raw(Box::new(sender)) as *mut std::ffi::c_void;
+        unsafe { hlb_sync_save_folder(mode, path.as_ptr(), ios_sync_callback, context) };
+        let value: String = receiver.recv().map_err(err)?;
+        if value == "cancel" {
+            Ok(None)
+        } else if let Some(result) = value.strip_prefix("ok:") {
+            Ok(Some(result.to_string()))
+        } else {
+            Err(value.strip_prefix("error:").unwrap_or(&value).to_string())
+        }
+    })
+    .await
+    .map_err(err)?
+}
+
+#[tauri::command]
+async fn ios_import_saves(app: AppHandle) -> Result<Option<String>, String> {
+    #[cfg(target_os = "ios")]
+    { return ios_sync(app, 0).await; }
+    #[cfg(not(target_os = "ios"))]
+    { let _ = app; Err("iOS only".into()) }
+}
+
+#[tauri::command]
+async fn ios_export_saves(app: AppHandle) -> Result<Option<String>, String> {
+    #[cfg(target_os = "ios")]
+    { return ios_sync(app, 1).await; }
+    #[cfg(not(target_os = "ios"))]
+    { let _ = app; Err("iOS only".into()) }
+}
+
+#[cfg(target_os = "ios")]
+fn ios_art_path(app: &AppHandle) -> Result<PathBuf, String> {
+    Ok(app.path().document_dir().map_err(err)?.join("resources"))
+}
+
+#[tauri::command]
+fn ios_art_folder(app: AppHandle) -> Result<Option<String>, String> {
+    #[cfg(target_os = "ios")]
+    {
+        let path = ios_art_path(&app)?;
+        return Ok(path.is_dir().then(|| path.to_string_lossy().into_owned()));
+    }
+    #[cfg(not(target_os = "ios"))]
+    { let _ = app; Ok(None) }
+}
+
+#[tauri::command]
+async fn ios_import_art(app: AppHandle) -> Result<Option<String>, String> {
+    #[cfg(target_os = "ios")]
+    { return ios_sync(app, 2).await; }
+    #[cfg(not(target_os = "ios"))]
+    { let _ = app; Err("iOS only".into()) }
 }
 
 /// Desktop candidate folders (AppHandle-free, so tests can call it).
@@ -637,6 +773,10 @@ pub fn run() {
             is_game_running,
             reveal_backups,
             export_item,
+            ios_import_saves,
+            ios_export_saves,
+            ios_art_folder,
+            ios_import_art,
             art_detect_installs,
             delete_character,
             delete_vault,

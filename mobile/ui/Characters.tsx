@@ -95,7 +95,7 @@ export function Characters({ onOpen }: { onOpen: (docId: string) => void }) {
       ) : (
         <button className="m-btn m-btn-ghost" onClick={() => setNaming(true)}>＋ 新建宝库</button>
       )}
-      {docs.length === 0 && <div className="m-empty">没有读到存档。<br />把 .d2s 存档拷进文件 App 的 Horadric Loot Box 文件夹，然后点「同步」页重新载入。</div>}
+      {docs.length === 0 && <div className="m-empty">没有读到存档。<br />请在「同步」页点击「从 D2R Mobile 导入 save」，选择游戏的 save 文件夹。</div>}
     </>
   );
 }

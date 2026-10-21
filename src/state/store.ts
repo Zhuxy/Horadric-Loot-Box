@@ -447,7 +447,7 @@ export class Store {
       this.arrangePanes();
       this.restorePanes();
       this.gameRunning = await this.platform.isGameRunning().catch(() => false);
-      if (this.files.length === 0) this.toast('info', this.emptyFolderMessage);
+      if (this.files.length === 0 && this.emptyFolderMessage) this.toast('info', this.emptyFolderMessage);
       if (!this.art) void this.loadArt();
       else if (!this.art.listed) void this.probeArt(this.art).then(() => this.emit());
     } catch (e) {

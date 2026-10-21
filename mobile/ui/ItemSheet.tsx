@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
-import { StashTabType, itemBytes, itemName, type D2Item } from '../../src/core';
+import { StashTabType, itemBytes, itemName, type D2Item, type ItemDescription } from '../../src/core';
 import { desc, docLabel } from '../../src/state/store';
 import { useStore } from '../../src/ui/context';
 import { isTauri } from '../../src/platform/tauri';
 import { download } from '../../src/platform/dropped';
-import { Sheet, Tile, QName, typeSub } from './parts';
+import { Sheet, Tile, QName, qText, typeSub } from './parts';
 
 export interface ItemRef {
   item: D2Item;
@@ -13,7 +13,7 @@ export interface ItemRef {
 }
 
 /** Bottom action sheet for one item (SPEC §5.2): 放入宝库 / 移动到… / 导出为 .d2i / 删除. */
-export function ItemSheet({ ref, onClose }: { ref: ItemRef | null; onClose: () => void }) {
+export function ItemSheet({ selected, onClose }: { selected: ItemRef | null; onClose: () => void }) {
   const store = useStore();
   const [moving, setMoving] = useState(false);
   const [confirmDel, setConfirmDel] = useState(false);
@@ -25,8 +25,8 @@ export function ItemSheet({ ref, onClose }: { ref: ItemRef | null; onClose: () =
     onClose();
   };
 
-  if (!ref) return <Sheet open={false} onClose={close}>{null}</Sheet>;
-  const { item, docId } = ref;
+  if (!selected) return <Sheet open={false} onClose={close}>{null}</Sheet>;
+  const { item, docId } = selected;
   const d = desc(item);
 
   const vaults = [...store.docs.entries()].filter(([, e]) => e.doc?.kind === 'vault');
@@ -82,8 +82,10 @@ export function ItemSheet({ ref, onClose }: { ref: ItemRef | null; onClose: () =
 
   return (
     <Sheet open onClose={close}>
-      <h3 className="font-display">物品</h3>
-      <div className="sub">{d.baseName}</div>
+      <div className="m-sheet-title">
+        <h3 className="font-display">装备属性</h3>
+        <button type="button" className="m-sheet-close" aria-label="关闭装备属性" onClick={close}>×</button>
+      </div>
       <div className="m-vitem" style={{ cursor: 'default' }}>
         <Tile item={item} />
         <span>
@@ -92,6 +94,7 @@ export function ItemSheet({ ref, onClose }: { ref: ItemRef | null; onClose: () =
           <span className="m-ity">{typeSub(item)}</span>
         </span>
       </div>
+      <ItemProperties description={d} />
       {moving ? (
         <MoveTargets item={item} docId={docId} onDone={close} />
       ) : (
@@ -107,6 +110,27 @@ export function ItemSheet({ ref, onClose }: { ref: ItemRef | null; onClose: () =
         </>
       )}
     </Sheet>
+  );
+}
+
+function ItemProperties({ description: d }: { description: ItemDescription }) {
+  return (
+    <div className="m-item-props">
+      {d.lines.map((line, i) => {
+        if (line.heading) return <div key={i} className="m-item-prop-heading">{line.text}</div>;
+        const previous = d.lines[i - 1];
+        const bonusStart = line.bonus && (!previous?.bonus || previous.bonus.scope !== line.bonus.scope || previous.bonus.when !== line.bonus.when);
+        return (
+          <div key={i}>
+            {bonusStart && <div className="m-item-bonus-label">{line.bonus!.scope === 'item' ? `This item · ${line.bonus!.when}` : line.bonus!.when}</div>}
+            <div className={`m-item-prop m-item-prop-${line.kind}`} style={line.kind === 'base' && i === 0 && d.baseName === line.text ? { color: qText[d.qualityClass] } : undefined}>
+              {line.text}
+              {line.range && <span className={`m-item-range${line.perfect ? ' perfect' : ''}`} title={line.perfect ? 'Perfect roll' : `Possible roll: ${line.range}`}> [{line.range}]{line.perfect ? ' ★' : ''}</span>}
+            </div>
+          </div>
+        );
+      })}
+    </div>
   );
 }
 

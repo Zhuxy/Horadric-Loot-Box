@@ -9,6 +9,9 @@ license = "MIT"
 name = "horadric_loot_box_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
+[features]
+custom-protocol = ["tauri/custom-protocol"]
+
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
 cc = "1"
@@ -25,6 +28,10 @@ chrono = { version = "0.4", default-features = false, features = ["clock"] }
 sysinfo = { version = "0.33", default-features = false, features = ["system"] }
 dirs = "6"
 png = "0.17"
+
+[patch.crates-io]
+# tao 0.35.3 needs the iOS scene delegate ownership fix when built with Xcode 27.
+tao = { path = "vendor/tao" }
 
 [profile.release]
 lto = true

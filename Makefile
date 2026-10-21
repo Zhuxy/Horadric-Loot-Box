@@ -90,6 +90,7 @@ run: install ## Install, then launch the app
 # calls back into the CLI and panics without the CLI's options server), then
 # xcodebuild archive/export and devicectl install.
 TEAM_ID := $(shell python3 -c "import json; print(json.load(open('src-tauri/tauri.ios.conf.json'))['bundle']['iOS']['developmentTeam'])" 2>/dev/null)
+IOS_DEPLOYMENT_TARGET ?= 15.0
 ios: node_modules/.package-lock.json ## Build the iOS app and install it on the plugged-in iPhone
 	$(NPM) run build:mobile
 	@if [ "$$(uname)" != "Darwin" ]; then \
@@ -105,13 +106,14 @@ ios: node_modules/.package-lock.json ## Build the iOS app and install it on the 
 		echo "==> No bundle.iOS.developmentTeam in src-tauri/tauri.ios.conf.json"; exit 1; fi
 	@echo "==> Building Rust library (aarch64-apple-ios, config merged via TAURI_CONFIG)"
 	@rustup target list --installed 2>/dev/null | grep -q '^aarch64-apple-ios$$' || rustup target add aarch64-apple-ios
-	cd src-tauri && TAURI_CONFIG="$$(cat tauri.ios.conf.json)" cargo build --release --target aarch64-apple-ios --lib
+	cd src-tauri && IPHONEOS_DEPLOYMENT_TARGET=$(IOS_DEPLOYMENT_TARGET) TAURI_CONFIG="$$(cat tauri.ios.conf.json)" GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=http.version GIT_CONFIG_VALUE_0=HTTP/1.1 cargo build --release --target aarch64-apple-ios --lib --features custom-protocol
 	@mkdir -p src-tauri/gen/apple/Externals/arm64/release
 	cp src-tauri/target/aarch64-apple-ios/release/libhoradric_loot_box_lib.a src-tauri/gen/apple/Externals/arm64/release/libapp.a
 	@if grep -q "xcode-script" src-tauri/gen/apple/project.yml; then \
 		echo "==> Removing the Build Rust Code script phase (libapp.a is pre-built)"; \
 		python3 scripts/ios/strip_rust_script_phase.py src-tauri/gen/apple/project.yml && \
 		cd src-tauri/gen/apple && xcodegen generate; fi
+	python3 scripts/ios/ensure_scene_manifest.py src-tauri/gen/apple/horadric-loot-box_iOS/Info.plist
 	@echo "==> Archiving (device only, automatic signing, team $(TEAM_ID))"
 	xcodebuild archive \
 		-project src-tauri/gen/apple/horadric-loot-box.xcodeproj \
@@ -120,7 +122,8 @@ ios: node_modules/.package-lock.json ## Build the iOS app and install it on the 
 		-destination 'generic/platform=iOS' \
 		-archivePath src-tauri/gen/apple/build/hlb.xcarchive \
 		-allowProvisioningUpdates \
-		DEVELOPMENT_TEAM=$(TEAM_ID) CODE_SIGN_STYLE=Automatic
+		DEVELOPMENT_TEAM=$(TEAM_ID) CODE_SIGN_STYLE=Automatic \
+		IPHONEOS_DEPLOYMENT_TARGET=$(IOS_DEPLOYMENT_TARGET)
 	@mkdir -p src-tauri/gen/apple/build
 	@printf '%s\n' '<?xml version="1.0" encoding="UTF-8"?>' \
 		'<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">' \
@@ -141,7 +144,7 @@ ios: node_modules/.package-lock.json ## Build the iOS app and install it on the 
 	@echo "==> Installing to iPhone"
 	@IPA=$$(ls -t src-tauri/gen/apple/build/export/*.ipa 2>/dev/null | head -1); \
 	if [ -z "$$IPA" ]; then echo "==> No .ipa found under src-tauri/gen/apple/build/export/"; exit 1; fi; \
-	DEVICE="$${DEVICE:-$$(xcrun devicectl list devices 2>/dev/null | grep -oE '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}' | head -1)}"; \
+	DEVICE="$${DEVICE:-$$(xcrun devicectl list devices 2>/dev/null | grep 'available (paired)' | grep -oE '[0-9A-Fa-f]{8}-([0-9A-Fa-f]{16}|[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12})' | head -1)}"; \
 	if [ -z "$$DEVICE" ]; then \
 		echo "==> No iPhone found. Plug it in, tap Trust, then re-run."; \
 		echo "    (or pass DEVICE=<uuid> explicitly; see: xcrun devicectl list devices)"; exit 1; fi; \

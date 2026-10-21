@@ -101,5 +101,13 @@ fn build_casclib() {
 
 fn main() {
     build_casclib();
+    if std::env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("ios") {
+        cc::Build::new()
+            .file("../scripts/ios/SaveFolderPicker.mm")
+            .flag("-fobjc-arc")
+            .compile("hlb_save_picker");
+        println!("cargo:rustc-link-lib=framework=UniformTypeIdentifiers");
+        println!("cargo:rerun-if-changed=../scripts/ios/SaveFolderPicker.mm");
+    }
     tauri_build::build()
 }

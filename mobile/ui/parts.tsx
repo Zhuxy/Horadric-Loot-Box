@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import type { D2Item, QualityClass } from '../../src/core';
 import { desc } from '../../src/state/store';
 import { useStore } from '../../src/ui/context';
@@ -34,19 +34,13 @@ export function Sheet({ open, onClose, children }: { open: boolean; onClose: () 
 /** Renders store toasts (import results, save confirmations, errors). */
 export function Toasts() {
   const store = useStore();
-  const [last, setLast] = useState<{ id: number; kind: string; text: string } | null>(null);
-  const cur = store.toasts[store.toasts.length - 1];
-  useEffect(() => {
-    if (!cur || cur.id === last?.id) return;
-    setLast(cur);
-    const t = setTimeout(() => setLast((l) => (l?.id === cur.id ? null : l)), 2600);
-    return () => clearTimeout(t);
-  }, [cur, last?.id]);
-  return <div className={`m-toast${last ? ' show' : ''}${last?.kind === 'error' ? ' err' : ''}`}>{last?.text}</div>;
+  const current = store.toasts[store.toasts.length - 1];
+  return <div className={`m-toast${current ? ' show' : ''}${current?.kind === 'error' ? ' err' : ''}`}>{current?.text}</div>;
 }
 
 /** Small item tile: game art when available, glyph fallback otherwise (SPEC §8). */
 export function Tile({ item, size = 46, empty }: { item?: D2Item; size?: number; empty?: boolean }) {
+  const store = useStore();
   if (empty || !item) return <span className="m-tile empty" style={{ width: size, height: size }}>·</span>;
   const d = desc(item);
   return (
@@ -56,7 +50,7 @@ export function Tile({ item, size = 46, empty }: { item?: D2Item; size?: number;
       title={d.name}
     >
       <span style={{ position: 'relative', width: '88%', height: '88%', display: 'block' }}>
-        <ItemFace item={item} width={size} height={size} cell={size / 2} view="art" art={undefined} />
+        <ItemFace item={item} width={size} height={size} cell={size / 2} view="art" art={store.art} />
       </span>
     </span>
   );

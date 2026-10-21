@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { StorePage } from '../../src/core';
+import { ItemMode, StorePage } from '../../src/core';
 import type { D2Character, D2Item } from '../../src/core';
 import { useStore } from '../../src/ui/context';
 import { EquipList, ItemGrid } from './grids';
@@ -17,6 +17,8 @@ const SLOTS = [
   { loc: 6, label: '戒指' },
   { loc: 7, label: '戒指' },
   { loc: 9, label: '靴子' },
+  { loc: 11, label: '切换武器' },
+  { loc: 12, label: '切换副手' },
 ];
 
 const MERC_SLOT_LABEL: Record<number, string> = { 1: '头盔', 3: '护甲', 4: '武器', 5: '副手' };
@@ -29,8 +31,8 @@ export function CharacterDetail({ docId, onTap }: { docId: string; onTap: (r: It
   const ch = entry?.doc as D2Character | undefined;
   if (!ch || ch.kind !== 'character') return <div className="m-empty">角色读取失败</div>;
 
-  const equipped = ch.items.filter((i) => i.page === StorePage.Equip);
-  const inventory = ch.items.filter((i) => i.page === StorePage.Inventory);
+  const equipped = ch.items.filter((i) => i.mode === ItemMode.Equipped);
+  const inventory = ch.items.filter((i) => i.mode === ItemMode.Stored && i.page === StorePage.Inventory);
   const hasMerc = ch.hasMerc || ch.mercItems.length > 0;
   const gold = ch.stats?.gold ?? 0;
 

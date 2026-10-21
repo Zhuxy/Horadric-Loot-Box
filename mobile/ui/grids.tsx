@@ -17,6 +17,7 @@ export function ItemGrid({
   docId: string;
   onTap: (r: ItemRef) => void;
 }) {
+  const store = useStore();
   let rows = 4;
   for (const it of items) rows = Math.max(rows, (it.y ?? 0) + (it.def?.h ?? 1));
   return (
@@ -44,7 +45,7 @@ export function ItemGrid({
             onClick={() => onTap({ item: it, docId })}
           >
             <span style={{ position: 'relative', width: '100%', height: '100%', display: 'block', pointerEvents: 'none' }}>
-              <ItemFace item={it} width={64} height={64} cell={32} view="art" art={undefined} />
+              <ItemFace item={it} width={64} height={64} cell={32} view="art" art={store.art} />
             </span>
             {stack != null && stack > 1 && <span className="m-qty">{stack}</span>}
           </button>

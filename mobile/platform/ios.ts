@@ -9,11 +9,11 @@ import type { Platform } from '../../src/platform/types';
  *   can't run alongside anyway -> always false, no invoke needed.
  * - revealBackups: spawns `open`, banned on iOS -> omitted.
  * - updates: tauri-plugin-updater is desktop-only -> omitted.
- * - art: art_detect_installs scans drive_c -> omitted. Artwork comes from a
- *   resource pack the user copies into Documents (SPEC §8), wired later.
+ * - art: the player imports extracted sprites into Documents/resources; the
+ *   existing Rust art backend decodes them for the webview.
  *
- * The Rust side (detect_save_folders -> app Documents, security-scoped writes)
- * is iOS bring-up work; the frontend just calls the same commands.
+ * The Rust side opens Documents/save. The Sync tab invokes native folder
+ * import/export commands, which handle security-scoped access on iOS.
  */
 export const iosPlatform: Platform = {
   ...tauriPlatform,
@@ -22,5 +22,9 @@ export const iosPlatform: Platform = {
   isGameRunning: async () => false,
   revealBackups: undefined,
   updates: undefined,
-  art: undefined,
+  art: {
+    ...tauriPlatform.art!,
+    detectInstalls: async () => [],
+    pickFolder: async () => null,
+  },
 };

@@ -1,10 +1,8 @@
 // Mobile entry (npm run dev:mobile / build:mobile): the real mobile UI (SPEC v1.0),
 // sharing src/core and src/state with the desktop app.
 //
-// File flow (decided 2026-10-18): the app's own Documents folder is the
-// workspace, exposed to the Files app (UIFileSharingEnabled +
-// LSSupportsOpeningDocumentsInPlace); saves are copied in/out there.
-// On iOS the Rust side returns Documents from detect_save_folders.
+// The iOS workspace is Documents/save. It is exposed in Files and the Sync tab
+// imports/exports complete save folders through the native document picker.
 import { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import '@fontsource/cinzel/600.css';
@@ -18,33 +16,39 @@ import { Store } from '../src/state/store';
 import { StoreContext } from '../src/ui/context';
 import { createDemoPlatform } from '../src/platform/demo';
 import { iosPlatform } from './platform/ios';
+import { isTauri } from '../src/platform/tauri';
+import { invoke } from '@tauri-apps/api/core';
 import { MobileApp } from './ui/App';
+import type { Platform } from '../src/platform/types';
 
 function Boot() {
   const [store, setStore] = useState<Store | null>(null);
-  const [folder, setFolder] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
-      // Real app (Tauri iOS webview): open the Documents workspace.
+      // Real app (Tauri iOS webview): open Documents/save.
       try {
         const folders = await iosPlatform.detectSaveFolders();
         const f = folders[0];
         if (!f) throw new Error('empty');
-        const s = new Store(iosPlatform);
+        const s = new MobileStore(iosPlatform);
         await s.openFolder(f);
-        setFolder(f);
+        const artFolder = await invoke<string | null>('ios_art_folder');
+        if (artFolder) await s.loadArt(artFolder);
         setStore(s);
         return;
-      } catch {
-        // Not under Tauri (desktop browser preview): fall back to demo data.
+      } catch (e) {
+        if (isTauri()) {
+          setError(`无法打开存档目录：${String(e)}`);
+          return;
+        }
+        // Desktop browser preview: fall back to demo data.
       }
       try {
         const demo = createDemoPlatform();
         const s = new Store(demo);
         await s.openFolder('demo');
-        setFolder('demo (preview)');
         setStore(s);
       } catch (e) {
         setError(`Couldn't load saves: ${(e as Error).message}`);
@@ -68,9 +72,19 @@ function Boot() {
   }
   return (
     <StoreContext.Provider value={store}>
-      <MobileApp folder={folder} />
+      <MobileApp />
     </StoreContext.Provider>
   );
+}
+
+class MobileStore extends Store {
+  constructor(platform: Platform) {
+    super(platform);
+    // The copied resource directory is resolved afresh on every launch.
+    // Avoid racing Store.openFolder's background load of a stale saved path.
+    this.settings.artPath = undefined;
+  }
+  protected emptyFolderMessage = '';
 }
 
 ReactDOM.createRoot(document.getElementById('root')!).render(<Boot />);
