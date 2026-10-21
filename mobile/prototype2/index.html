@@ -13,7 +13,7 @@
     --q-normal:#c8c8c8; --q-magic:#6969ff; --q-rare:#ffff64; --q-set:#1fdc1f;
     --q-unique:#c7b377; --q-rune:#ffa033; --q-crafted:#ff8c1a; --q-gem:#b48ce8;
     --ok:#3fae5a; --bad:#d84545;
-    --c:36px; /* grid cell */
+    --c:30px; /* grid cell */
   }
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{height:100%}
@@ -34,17 +34,17 @@
   /* ---------- top bar ---------- */
   header{
     flex:0 0 auto;display:flex;align-items:center;gap:8px;
-    padding:calc(env(safe-area-inset-top,0px) + 8px) 14px 8px;
+    padding:calc(env(safe-area-inset-top,0px) + 6px) 12px 6px;
     border-bottom:1px solid var(--panel-edge);
     background:linear-gradient(180deg,rgba(40,34,24,.55),rgba(20,17,12,.2));
   }
-  header .ttl{font-family:Georgia,"Times New Roman",serif;letter-spacing:.14em;font-size:15px;color:var(--gold);text-transform:uppercase}
-  header .ttl b{color:var(--ink);font-weight:600;letter-spacing:.02em;text-transform:none;font-family:-apple-system,"PingFang SC",sans-serif;font-size:14px}
+  header .ttl{font-family:Georgia,"Times New Roman",serif;letter-spacing:.14em;font-size:15px;color:var(--gold);text-transform:uppercase;white-space:nowrap;overflow:hidden;flex:0 1 auto}
+  header .ttl b{color:var(--ink);font-weight:600;letter-spacing:.02em;text-transform:none;font-family:-apple-system,"PingFang SC",sans-serif;font-size:14px;display:inline-block;max-width:36vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:bottom}
   header .save{margin-left:auto;font-size:11px;color:var(--ink-faint);display:flex;align-items:center;gap:5px;white-space:nowrap}
   header .save .dot{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 6px var(--ok)}
   header .save.flash .dot{animation:blink .5s}
   @keyframes blink{0%{transform:scale(1.7)}100%{transform:scale(1)}}
-  .backbtn{font-size:13px;color:var(--gold);border:1px solid var(--gold-faint);border-radius:4px;padding:4px 9px;background:rgba(0,0,0,.3);cursor:pointer}
+  .backbtn{font-size:13px;color:var(--gold);border:1px solid var(--gold-faint);border-radius:4px;padding:4px 9px;background:rgba(0,0,0,.3);cursor:pointer;white-space:nowrap;flex:0 0 auto}
   /* ---------- screens ---------- */
   main{flex:1 1 auto;position:relative;overflow:hidden}
   .screen{position:absolute;inset:0;display:none;flex-direction:column}
@@ -57,14 +57,14 @@
     padding-bottom:env(safe-area-inset-bottom,0px);
   }
   nav.tabs button{
-    flex:1;background:none;border:none;color:var(--ink-dim);padding:9px 0 7px;cursor:pointer;
+    flex:1;background:none;border:none;color:var(--ink-dim);padding:7px 0 6px;cursor:pointer;
     font-size:11px;display:flex;flex-direction:column;align-items:center;gap:2px;
   }
   nav.tabs button .ic{font-size:19px;line-height:1;filter:grayscale(.4) opacity(.75)}
   nav.tabs button.on{color:var(--gold)}
   nav.tabs button.on .ic{filter:none}
   /* ---------- sub tabs / segmented ---------- */
-  .subtabs{display:flex;gap:6px;padding:9px 12px 7px;flex:0 0 auto}
+  .subtabs{display:flex;gap:6px;padding:7px 12px 5px;flex:0 0 auto}
   .subtabs button,.seg button{
     flex:1;background:rgba(0,0,0,.35);border:1px solid var(--panel-edge);color:var(--ink-dim);
     border-radius:4px;padding:7px 0;font-size:13px;cursor:pointer;letter-spacing:.06em;
@@ -135,15 +135,15 @@
   .slot.filled{background:rgba(10,10,10,.35)}
   .slot.drop-ok{border-color:var(--ok);box-shadow:0 0 0 1px var(--ok),inset 0 0 10px rgba(63,174,90,.35)}
   .slot.drop-bad{border-color:var(--bad);box-shadow:0 0 0 1px var(--bad)}
-  .swapctl{display:flex;align-items:center;gap:6px;justify-content:center;margin-top:6px}
+  .swapctl{display:flex;align-items:center;gap:6px;justify-content:center;margin-top:2px}
   .swapctl span{font-size:11px;color:var(--ink-faint);letter-spacing:.1em}
   .swapctl button{background:rgba(0,0,0,.4);border:1px solid var(--panel-edge);color:var(--ink-dim);border-radius:4px;padding:3px 12px;font-size:12px;cursor:pointer}
   .swapctl button.on{color:var(--gold);border-color:var(--gold-faint)}
   /* ---------- belt strip ---------- */
-  .beltrow{display:flex;align-items:center;gap:8px;justify-content:center;padding:7px 12px 0}
+  .beltrow{display:flex;align-items:center;gap:8px;justify-content:center;padding:5px 12px 0}
   .beltrow .cap{font-size:11px;color:var(--ink-faint)}
   .beltcells{position:relative}
-  .beltcells .item{--c:34px}
+  .beltcells .item{--c:30px}
   .beltpanel{
     position:absolute;left:12px;right:12px;z-index:30;margin-top:4px;
     border:1px solid var(--gold-faint);border-radius:6px;padding:8px 10px;
@@ -153,10 +153,10 @@
   .screen .padwrap{position:relative;flex:1;display:flex;flex-direction:column}
   #trayhandle.droptarget{outline:2px solid var(--ok);outline-offset:-2px;background:linear-gradient(180deg,#5d4d1c,#3a2d10)}
   .beltpanel.on{display:block}
-  .beltpanel .gridwrap{--c:34px}
+  .beltpanel .gridwrap{--c:30px}
   /* ---------- gold ---------- */
   .goldrow{
-    display:flex;align-items:center;gap:8px;margin:8px 12px 0;padding:8px 12px;cursor:pointer;
+    display:flex;align-items:center;gap:8px;margin:6px 12px 0;padding:7px 12px;cursor:pointer;
     border:1px solid var(--panel-edge);border-radius:6px;
     background:linear-gradient(180deg,rgba(46,38,18,.6),rgba(22,18,10,.6));
     font-size:13px;
@@ -335,7 +335,7 @@
 <script>
 'use strict';
 /* ================= data ================= */
-const CELL = 34, TRAYCELL = 40;
+const CELL = 30, TRAYCELL = 40;
 const QNAME = {normal:'普通',magic:'魔法',rare:'稀有',set:'套装',unique:'独特',rune:'符文之语',crafted:'手工',gem:'宝石'};
 let _uid = 1;
 function it(name,o){ return Object.assign({id:_uid++, name, q:'normal', g:'◆', w:1, h:1, x:0, y:0, cat:'其他', type:'misc', lvl:1, props:[], fit:null, qty:0}, o||{}); }
@@ -471,7 +471,7 @@ const cur = ()=> S.chars[S.cur];
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
 function fmt(n){ return n.toLocaleString('en-US'); }
 function toast(msg, ms){ const t=$('#toast'); t.innerHTML=msg; t.classList.add('on'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('on'), ms||2100); }
-function flashSave(){ const b=$('#savebox'); $('#savetxt').textContent='已保存 '+new Date().toTimeString().slice(0,8)+' · 实时保存'; b.classList.remove('flash'); void b.offsetWidth; b.classList.add('flash'); }
+function flashSave(){ const b=$('#savebox'); $('#savetxt').textContent='已保存 '+new Date().toTimeString().slice(0,5); b.classList.remove('flash'); void b.offsetWidth; b.classList.add('flash'); }
 function rectFree(items, x, y, w, h, ignoreId){
   return !items.some(o=> o.id!==ignoreId && x < o.x+o.w && o.x < x+w && y < o.y+o.h && o.y < y+h);
 }
@@ -591,7 +591,7 @@ function buildEquip(body){
       '<button class="backbtn" id="belttoggle">'+(S.beltOpen?'收起':'展开 '+rows+' 排')+'</button></div>' +
     '<div class="beltpanel'+(S.beltOpen?' on':'')+'" id="beltpanel"></div>' +
     goldrowHTML('携带金币', c.goldInv, 'inv') +
-    '<div style="display:flex;align-items:center;gap:6px;padding:9px 12px 5px"><span style="font-size:12px;color:var(--ink-dim)">'+(S.gridView==='inv'?'背包':'赫拉迪克方块')+'</span>'+
+    '<div style="display:flex;align-items:center;gap:6px;padding:6px 12px 4px"><span style="font-size:12px;color:var(--ink-dim)">'+(S.gridView==='inv'?'背包':'赫拉迪克方块')+'</span>'+
       '<span style="margin-left:auto"></span>'+
       '<button class="backbtn" data-gv="inv" style="'+(S.gridView==='inv'?'border-color:var(--gold);color:var(--gold)':'')+'">背包</button>'+
       '<button class="backbtn" data-gv="cube" style="'+(S.gridView==='cube'?'border-color:var(--gold);color:var(--gold)':'')+'">方块</button></div>' +
