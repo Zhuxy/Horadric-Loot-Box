@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>HLB 移动版原型 v2 · 纸娃娃</title>
+<style>
+  :root{
+    --gold:#d4b66a; --gold-dim:#9c7a34; --gold-faint:#6e5a2e;
+    --ink:#e8e0cc; --ink-dim:#a99f83; --ink-faint:#6f6752;
+    --cell:#17123f; --cell-edge:#3a2f6b; --cell-edge-dim:#241d4d;
+    --panel:#141210; --panel-edge:#3d3428; --bg:#0a0908;
+    --q-normal:#c8c8c8; --q-magic:#6969ff; --q-rare:#ffff64; --q-set:#1fdc1f;
+    --q-unique:#c7b377; --q-rune:#ffa033; --q-crafted:#ff8c1a; --q-gem:#b48ce8;
+    --ok:#3fae5a; --bad:#d84545;
+    --c:36px; /* grid cell */
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    background:#000;color:var(--ink);
+    font-family:-apple-system,"PingFang SC","Helvetica Neue",sans-serif;
+    overflow:hidden;
+  }
+  /* stone-noise backdrop, same recipe as desktop */
+  #app{
+    height:100dvh;max-width:430px;margin:0 auto;display:flex;flex-direction:column;position:relative;
+    background:
+      radial-gradient(120% 60% at 50% -10%,rgba(96,80,50,.28),transparent 60%),
+      radial-gradient(100% 50% at 50% 115%,rgba(60,50,34,.22),transparent 60%),
+      repeating-conic-gradient(rgba(255,255,255,.014) 0 .6deg,transparent .6deg 1.7deg),
+      linear-gradient(168deg,#1b1815 0%,#12100e 45%,#0b0a09 100%);
+  }
+  /* ---------- top bar ---------- */
+  header{
+    flex:0 0 auto;display:flex;align-items:center;gap:8px;
+    padding:calc(env(safe-area-inset-top,0px) + 8px) 14px 8px;
+    border-bottom:1px solid var(--panel-edge);
+    background:linear-gradient(180deg,rgba(40,34,24,.55),rgba(20,17,12,.2));
+  }
+  header .ttl{font-family:Georgia,"Times New Roman",serif;letter-spacing:.14em;font-size:15px;color:var(--gold);text-transform:uppercase}
+  header .ttl b{color:var(--ink);font-weight:600;letter-spacing:.02em;text-transform:none;font-family:-apple-system,"PingFang SC",sans-serif;font-size:14px}
+  header .save{margin-left:auto;font-size:11px;color:var(--ink-faint);display:flex;align-items:center;gap:5px;white-space:nowrap}
+  header .save .dot{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 6px var(--ok)}
+  header .save.flash .dot{animation:blink .5s}
+  @keyframes blink{0%{transform:scale(1.7)}100%{transform:scale(1)}}
+  .backbtn{font-size:13px;color:var(--gold);border:1px solid var(--gold-faint);border-radius:4px;padding:4px 9px;background:rgba(0,0,0,.3);cursor:pointer}
+  /* ---------- screens ---------- */
+  main{flex:1 1 auto;position:relative;overflow:hidden}
+  .screen{position:absolute;inset:0;display:none;flex-direction:column}
+  .screen.on{display:flex}
+  .scrollable{overflow-y:auto;-webkit-overflow-scrolling:touch}
+  /* ---------- bottom tabs ---------- */
+  nav.tabs{
+    flex:0 0 auto;display:flex;border-top:1px solid var(--panel-edge);
+    background:linear-gradient(0deg,rgba(30,26,18,.9),rgba(16,14,10,.85));
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  nav.tabs button{
+    flex:1;background:none;border:none;color:var(--ink-dim);padding:9px 0 7px;cursor:pointer;
+    font-size:11px;display:flex;flex-direction:column;align-items:center;gap:2px;
+  }
+  nav.tabs button .ic{font-size:19px;line-height:1;filter:grayscale(.4) opacity(.75)}
+  nav.tabs button.on{color:var(--gold)}
+  nav.tabs button.on .ic{filter:none}
+  /* ---------- sub tabs / segmented ---------- */
+  .subtabs{display:flex;gap:6px;padding:9px 12px 7px;flex:0 0 auto}
+  .subtabs button,.seg button{
+    flex:1;background:rgba(0,0,0,.35);border:1px solid var(--panel-edge);color:var(--ink-dim);
+    border-radius:4px;padding:7px 0;font-size:13px;cursor:pointer;letter-spacing:.06em;
+  }
+  .subtabs button.on,.seg button.on{color:#0d0b06;background:linear-gradient(180deg,var(--gold),var(--gold-dim));border-color:var(--gold);font-weight:700}
+  .seg{display:flex;gap:6px;padding:9px 12px 7px}
+  /* ---------- generic panel ---------- */
+  .panel{
+    margin:8px 12px;border:1px solid var(--panel-edge);border-radius:6px;
+    background:linear-gradient(180deg,rgba(30,26,20,.66),rgba(14,12,9,.66));
+    box-shadow:inset 0 0 0 1px rgba(0,0,0,.65),inset 0 1px 0 rgba(212,182,106,.09),0 2px 10px rgba(0,0,0,.45);
+    padding:10px;
+  }
+  .panel h3{
+    font-family:Georgia,serif;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);
+    text-align:center;margin-bottom:8px;font-weight:600;
+  }
+  .hintline{font-size:11px;color:var(--ink-faint);text-align:center;padding:2px 16px 6px}
+  /* ---------- grids & items ---------- */
+  .gridwrap{position:relative;margin:0 auto}
+  .gridbg{position:absolute;inset:0;border-radius:3px;
+    background:
+      repeating-linear-gradient(0deg,transparent 0 calc(var(--c) - 1px),rgba(0,0,0,.55) calc(var(--c) - 1px) var(--c)),
+      repeating-linear-gradient(90deg,transparent 0 calc(var(--c) - 1px),rgba(0,0,0,.55) calc(var(--c) - 1px) var(--c)),
+      var(--cell);
+    border:1px solid var(--cell-edge-dim);
+    box-shadow:inset 0 0 18px rgba(0,0,0,.6);
+  }
+  .item{
+    position:absolute;border-radius:2px;border:1px solid var(--cell-edge);
+    background:radial-gradient(120% 120% at 30% 20%,#241d5e,var(--cell) 70%);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;
+    color:var(--ink);cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:none;
+    box-shadow:inset 0 0 0 1px rgba(0,0,0,.5);
+    z-index:2;
+  }
+  .item .g{font-size:calc(var(--c)*.52);line-height:1.05;pointer-events:none}
+  .item .n{font-size:8.5px;line-height:1.1;color:var(--ink-dim);text-align:center;padding:0 1px;pointer-events:none;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .item.q-magic{border-color:#3d3da8}.item.q-rare{border-color:#8a8a2e}
+  .item.q-set{border-color:#177a17}.item.q-unique{border-color:#8a744a;background:radial-gradient(120% 120% at 30% 20%,#3a2c12,#241b08 70%)}
+  .item.q-rune{border-color:#8a5a1e}.item.q-crafted{border-color:#8a5416}
+  .item.q-gem{border-color:#5e4488}
+  .item .qty{position:absolute;right:2px;bottom:1px;font-size:9px;color:#fff;text-shadow:0 1px 2px #000;pointer-events:none}
+  .item.drag-src{opacity:.3}
+  .drop-hl{position:absolute;border:2px solid var(--ok);border-radius:3px;background:rgba(63,174,90,.22);z-index:3;pointer-events:none;display:none}
+  .drop-hl.bad{border-color:var(--bad);background:rgba(216,69,69,.22)}
+  #ghost{
+    position:fixed;z-index:99;pointer-events:none;border-radius:2px;border:2px solid var(--gold);
+    background:radial-gradient(120% 120% at 30% 20%,#2c2470,#17123f 70%);
+    display:none;align-items:center;justify-content:center;font-size:22px;color:var(--ink);
+    box-shadow:0 10px 28px rgba(0,0,0,.65);
+  }
+  #ghost.bad{border-color:var(--bad)}
+  /* ---------- paper doll ---------- */
+  .dollwrap{position:relative;margin:2px auto 0}
+  .dollwrap svg.figure{position:absolute;left:50%;top:0;transform:translateX(-50%);opacity:.9;pointer-events:none}
+  .slot{
+    position:absolute;border-radius:3px;border:1px solid #2e2e2e;z-index:2;
+    background:linear-gradient(135deg,rgba(26,26,26,.88),rgba(14,14,14,.88));
+    box-shadow:inset 0 0 10px rgba(0,0,0,.75);
+  }
+  .slot .lab{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;
+    font-size:9.5px;color:#555048;letter-spacing:.08em;pointer-events:none;padding:2px;
+  }
+  .slot .item{position:absolute;inset:0;border-radius:3px}
+  .slot.filled{background:rgba(10,10,10,.35)}
+  .slot.drop-ok{border-color:var(--ok);box-shadow:0 0 0 1px var(--ok),inset 0 0 10px rgba(63,174,90,.35)}
+  .slot.drop-bad{border-color:var(--bad);box-shadow:0 0 0 1px var(--bad)}
+  .swapctl{display:flex;align-items:center;gap:6px;justify-content:center;margin-top:6px}
+  .swapctl span{font-size:11px;color:var(--ink-faint);letter-spacing:.1em}
+  .swapctl button{background:rgba(0,0,0,.4);border:1px solid var(--panel-edge);color:var(--ink-dim);border-radius:4px;padding:3px 12px;font-size:12px;cursor:pointer}
+  .swapctl button.on{color:var(--gold);border-color:var(--gold-faint)}
+  /* ---------- belt strip ---------- */
+  .beltrow{display:flex;align-items:center;gap:8px;justify-content:center;padding:7px 12px 0}
+  .beltrow .cap{font-size:11px;color:var(--ink-faint)}
+  .beltcells{position:relative}
+  .beltcells .item{--c:34px}
+  .beltpanel{
+    position:absolute;left:12px;right:12px;z-index:30;margin-top:4px;
+    border:1px solid var(--gold-faint);border-radius:6px;padding:8px 10px;
+    background:linear-gradient(180deg,rgba(34,29,20,.97),rgba(18,15,10,.97));display:none;
+    box-shadow:0 14px 30px rgba(0,0,0,.6);
+  }
+  .screen .padwrap{position:relative;flex:1;display:flex;flex-direction:column}
+  #trayhandle.droptarget{outline:2px solid var(--ok);outline-offset:-2px;background:linear-gradient(180deg,#5d4d1c,#3a2d10)}
+  .beltpanel.on{display:block}
+  .beltpanel .gridwrap{--c:34px}
+  /* ---------- gold ---------- */
+  .goldrow{
+    display:flex;align-items:center;gap:8px;margin:8px 12px 0;padding:8px 12px;cursor:pointer;
+    border:1px solid var(--panel-edge);border-radius:6px;
+    background:linear-gradient(180deg,rgba(46,38,18,.6),rgba(22,18,10,.6));
+    font-size:13px;
+  }
+  .goldrow .amt{color:var(--gold);font-weight:700;font-variant-numeric:tabular-nums}
+  .goldrow .act{margin-left:auto;font-size:11.5px;color:var(--gold);border:1px solid var(--gold-faint);padding:3px 9px;border-radius:4px}
+  .goldrow .cap2{font-size:10.5px;color:var(--ink-faint)}
+  /* ---------- char list ---------- */
+  .charcard{
+    margin:10px 12px 0;padding:13px 14px;border:1px solid var(--panel-edge);border-radius:6px;cursor:pointer;
+    background:linear-gradient(180deg,rgba(34,29,21,.75),rgba(16,14,10,.75));display:flex;gap:12px;align-items:center;
+  }
+  .charcard .ava{width:46px;height:46px;border-radius:4px;border:1px solid var(--gold-faint);display:flex;align-items:center;justify-content:center;font-size:24px;background:radial-gradient(circle at 35% 30%,#3a2f16,#171204)}
+  .charcard .nm{font-size:16px;color:var(--ink);font-weight:600}
+  .charcard .meta{font-size:12px;color:var(--ink-dim);margin-top:2px}
+  .charcard .go{margin-left:auto;color:var(--gold);font-size:18px}
+  /* ---------- attributes ---------- */
+  .statgrid{display:grid;grid-template-columns:1fr 1fr;gap:5px 14px;font-size:13px}
+  .statgrid .k{color:var(--ink-dim)} .statgrid .v{text-align:right;font-variant-numeric:tabular-nums}
+  .statgrid .v b{color:var(--gold);font-weight:600}
+  .vitals{display:flex;gap:8px}
+  .vital{flex:1;text-align:center;border:1px solid var(--panel-edge);border-radius:5px;padding:6px 2px;background:rgba(0,0,0,.3)}
+  .vital .t{font-size:10px;color:var(--ink-faint);letter-spacing:.12em}
+  .vital .n{font-size:15px;font-weight:700;margin-top:1px}
+  .orb-hp{color:#ff7a6b}.orb-mp{color:#7aa2ff}.orb-st{color:#ffe28a}
+  .skilltree{margin-bottom:9px}
+  .skilltree h4{font-size:12px;color:var(--gold);letter-spacing:.08em;margin-bottom:4px;font-weight:600}
+  .skillrow{display:flex;justify-content:space-between;font-size:12.5px;padding:2.5px 0;border-bottom:1px dashed rgba(255,255,255,.05)}
+  .skillrow .pts{font-variant-numeric:tabular-nums;color:var(--ink-dim)}
+  .skillrow .pts b{color:var(--ink)} .skillrow .pts .plus{color:var(--q-magic)}
+  .bonusline{display:flex;justify-content:space-between;font-size:12.5px;padding:2.5px 0;border-bottom:1px dashed rgba(255,255,255,.05)}
+  .bonusline .bv{color:var(--gold);font-variant-numeric:tabular-nums}
+  /* ---------- merc ---------- */
+  .mercinfo{text-align:center;font-size:12.5px;line-height:1.55;color:var(--ink-dim)}
+  .mercinfo .mn{color:var(--gold);font-size:14px}
+  .emptybox{margin:26px 20px;text-align:center;color:var(--ink-faint);font-size:13px;line-height:1.9;
+    border:1px dashed var(--panel-edge);border-radius:8px;padding:26px 14px}
+  /* ---------- stash ---------- */
+  .charchips{display:flex;gap:6px;padding:10px 12px 0;overflow-x:auto;flex:0 0 auto}
+  .charchips button{flex:0 0 auto;background:rgba(0,0,0,.35);border:1px solid var(--panel-edge);color:var(--ink-dim);border-radius:20px;padding:5px 13px;font-size:12.5px;cursor:pointer}
+  .charchips button.on{color:var(--gold);border-color:var(--gold-faint)}
+  .tabchips{display:flex;gap:5px;padding:8px 12px 0;overflow-x:auto;flex:0 0 auto}
+  .tabchips button{flex:1;background:rgba(0,0,0,.3);border:1px solid var(--panel-edge);color:var(--ink-dim);border-radius:4px;padding:5px 0;font-size:11.5px;cursor:pointer;white-space:nowrap}
+  .tabchips button.on{color:var(--gold);border-color:var(--gold-faint);background:rgba(60,48,20,.35)}
+  .stash-scroll{flex:1;overflow-y:auto;padding-bottom:14px}
+  /* ---------- vault ---------- */
+  .vsearch{display:flex;gap:7px;padding:10px 12px 0}
+  .vsearch input{
+    flex:1;background:rgba(0,0,0,.45);border:1px solid var(--panel-edge);border-radius:5px;color:var(--ink);
+    padding:9px 11px;font-size:14px;outline:none;
+  }
+  .vsearch input:focus{border-color:var(--gold-faint)}
+  .vsearch .fbtn{background:rgba(0,0,0,.35);border:1px solid var(--panel-edge);color:var(--gold);border-radius:5px;padding:0 13px;font-size:13px;cursor:pointer}
+  .fchips{display:flex;gap:5px;padding:8px 12px 0;overflow-x:auto}
+  .fchips button{flex:0 0 auto;background:rgba(0,0,0,.3);border:1px solid var(--panel-edge);color:var(--ink-dim);border-radius:16px;padding:4px 11px;font-size:12px;cursor:pointer}
+  .fchips button.on{color:var(--gold);border-color:var(--gold-faint)}
+  .vrow{
+    display:flex;gap:10px;align-items:center;margin:7px 12px 0;padding:8px 10px;cursor:pointer;
+    border:1px solid var(--panel-edge);border-radius:6px;background:linear-gradient(180deg,rgba(28,24,17,.6),rgba(14,12,9,.6));
+  }
+  .vrow .vic{width:40px;height:40px;flex:0 0 auto;border-radius:3px;border:1px solid var(--cell-edge);background:radial-gradient(120% 120% at 30% 20%,#241d5e,var(--cell) 70%);display:flex;align-items:center;justify-content:center;font-size:19px}
+  .vrow .vn{font-size:13.5px;font-weight:600}
+  .vrow .vm{font-size:11px;color:var(--ink-dim);margin-top:1px}
+  .vrow .vl{margin-left:auto;text-align:right;font-size:11px;color:var(--ink-faint);white-space:nowrap}
+  /* ---------- settings ---------- */
+  .setrow{display:flex;align-items:center;gap:10px;margin:9px 12px 0;padding:12px;border:1px solid var(--panel-edge);border-radius:6px;background:rgba(0,0,0,.28)}
+  .setrow .st{font-size:14px}.setrow .sd{font-size:11.5px;color:var(--ink-dim);margin-top:1px}
+  .setrow .tag{margin-left:auto;font-size:10.5px;color:var(--ink-faint);border:1px solid var(--panel-edge);border-radius:10px;padding:2px 8px;white-space:nowrap}
+  .setrow .tag.live{color:var(--ok);border-color:rgba(63,174,90,.5)}
+  /* ---------- tray ---------- */
+  #trayhandle{
+    position:absolute;right:0;top:44%;z-index:40;cursor:pointer;
+    background:linear-gradient(180deg,#4a3a14,#2c2210);border:1px solid var(--gold-faint);border-right:none;
+    border-radius:8px 0 0 8px;color:var(--gold);padding:13px 5px 13px 7px;
+    writing-mode:vertical-rl;font-size:12px;letter-spacing:.3em;
+    box-shadow:-3px 4px 14px rgba(0,0,0,.5);
+  }
+  #trayhandle .cnt{
+    writing-mode:horizontal-tb;background:var(--gold);color:#191204;border-radius:9px;
+    font-size:10.5px;font-weight:800;padding:1px 5px;margin-top:6px;display:inline-block;letter-spacing:0;
+  }
+  #trayhandle.bump{animation:bump .35s}
+  @keyframes bump{40%{transform:translateX(-7px)}}
+  #scrim{position:absolute;inset:0;background:rgba(0,0,0,.55);z-index:49;display:none}
+  #scrim.on{display:block}
+  #tray{
+    position:absolute;top:0;right:0;bottom:0;width:78%;max-width:330px;z-index:50;
+    background:linear-gradient(270deg,#1d1913,#12100c);border-left:1px solid var(--gold-faint);
+    transform:translateX(102%);transition:transform .28s ease;display:flex;flex-direction:column;
+    box-shadow:-14px 0 34px rgba(0,0,0,.6);
+  }
+  #tray.on{transform:none}
+  #tray .th{padding:calc(env(safe-area-inset-top,0px) + 14px) 14px 8px;display:flex;align-items:baseline;gap:8px}
+  #tray .th .tt{font-family:Georgia,serif;letter-spacing:.2em;color:var(--gold);font-size:14px}
+  #tray .th .tx{margin-left:auto;color:var(--ink-dim);font-size:20px;background:none;border:none;cursor:pointer;padding:2px 6px}
+  #tray .tsub{font-size:11.5px;color:var(--ink-faint);padding:0 14px 8px;line-height:1.6}
+  #traybody{flex:1;overflow-y:auto;padding:4px 12px 16px}
+  #trayfoot{padding:9px 14px calc(env(safe-area-inset-bottom,0px) + 10px);border-top:1px solid var(--panel-edge);font-size:11px;color:var(--ink-faint);line-height:1.6}
+  /* ---------- sheets ---------- */
+  .sheetwrap{position:absolute;inset:0;z-index:60;display:none}
+  .sheetwrap.on{display:block}
+  .sheetwrap .bg{position:absolute;inset:0;background:rgba(0,0,0,.6)}
+  .sheet{
+    position:absolute;left:0;right:0;bottom:0;max-height:82%;overflow-y:auto;
+    background:linear-gradient(180deg,#221d14,#14110b);border-top:1px solid var(--gold-faint);
+    border-radius:14px 14px 0 0;padding:14px 16px calc(env(safe-area-inset-bottom,0px) + 16px);
+    animation:up .22s ease;
+  }
+  @keyframes up{from{transform:translateY(26px);opacity:.4}}
+  .sheet .grab{width:38px;height:4px;border-radius:2px;background:#4d4433;margin:0 auto 12px}
+  .sheet h3{font-size:16.5px;line-height:1.35}
+  .sheet .base{font-size:12px;color:var(--ink-dim);margin-top:1px}
+  .sheet .props{margin:10px 0 4px;border-top:1px solid rgba(255,255,255,.07);padding-top:9px}
+  .sheet .props div{font-size:13px;color:#9db4ff;line-height:1.65}
+  .sheet .props div.gd{color:var(--gold)} .sheet .props div.req{color:#ff8f83}
+  .sheet .sock{font-size:12px;color:var(--ink-dim);margin-top:5px;line-height:1.6}
+  .sheet .btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+  .sheet .btns button{
+    padding:11px 0;border-radius:6px;border:1px solid var(--panel-edge);background:rgba(0,0,0,.35);
+    color:var(--ink);font-size:13.5px;cursor:pointer;
+  }
+  .sheet .btns button.primary{border-color:var(--gold-faint);color:var(--gold);font-weight:700}
+  .sheet .btns button.danger{color:#ff9a8f;border-color:rgba(216,69,69,.4)}
+  .sheet .btns button.wide{grid-column:1/-1}
+  /* gold sheet */
+  .gamount{display:flex;gap:8px;margin:13px 0 4px}
+  .gamount input{
+    flex:1;background:rgba(0,0,0,.5);border:1px solid var(--panel-edge);border-radius:6px;color:var(--gold);
+    font-size:19px;font-weight:700;padding:10px 12px;outline:none;font-variant-numeric:tabular-nums;min-width:0;
+  }
+  .gamount button{background:rgba(0,0,0,.35);border:1px solid var(--gold-faint);color:var(--gold);border-radius:6px;padding:0 15px;font-size:13px;cursor:pointer}
+  .destchips{display:flex;flex-wrap:wrap;gap:6px;margin:9px 0 3px}
+  .destchips button{background:rgba(0,0,0,.3);border:1px solid var(--panel-edge);color:var(--ink-dim);border-radius:16px;padding:6px 12px;font-size:12.5px;cursor:pointer}
+  .destchips button.on{color:var(--gold);border-color:var(--gold-faint)}
+  .gbal{font-size:12px;color:var(--ink-dim);line-height:1.7}
+  .gbal b{color:var(--ink);font-variant-numeric:tabular-nums}
+  /* filter sheet */
+  .frow{margin-top:13px}
+  .frow .fl{font-size:12px;color:var(--ink-dim);letter-spacing:.08em;margin-bottom:6px}
+  .togrow{display:flex;gap:14px;font-size:13px}
+  .togrow label{display:flex;gap:6px;align-items:center;cursor:pointer}
+  .rng{display:flex;gap:8px;align-items:center}
+  .rng input{width:76px;background:rgba(0,0,0,.5);border:1px solid var(--panel-edge);border-radius:5px;color:var(--ink);padding:7px 9px;font-size:13px;outline:none}
+  /* toast */
+  #toast{
+    position:absolute;left:50%;bottom:96px;transform:translate(-50%,16px);z-index:80;opacity:0;pointer-events:none;
+    background:rgba(12,10,6,.94);border:1px solid var(--gold-faint);color:var(--ink);
+    font-size:13px;padding:9px 15px;border-radius:8px;transition:.25s;max-width:86%;text-align:center;line-height:1.5;
+    box-shadow:0 8px 24px rgba(0,0,0,.55);
+  }
+  #toast.on{opacity:1;transform:translate(-50%,0)}
+  .q-unique-t{color:var(--q-unique)} .q-set-t{color:var(--q-set)} .q-rare-t{color:var(--q-rare)}
+  .q-magic-t{color:var(--q-magic)} .q-rune-t{color:var(--q-rune)} .q-normal-t{color:var(--q-normal)} .q-crafted-t{color:var(--q-crafted)}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <button class="backbtn" id="backbtn" style="display:none">‹ 角色</button>
+    <div class="ttl">Horadric <b id="crumb">· 角色</b></div>
+    <div class="save" id="savebox"><span class="dot"></span><span id="savetxt">已保存 · 实时保存</span></div>
+  </header>
+  <main id="main"></main>
+  <div id="trayhandle">托盘<span class="cnt" id="traycnt">0</span></div>
+  <div id="scrim"></div>
+  <aside id="tray">
+    <div class="th"><span class="tt">装备托盘</span><button class="tx" id="trayclose">✕</button></div>
+    <div class="tsub">临时中转区 · <b style="color:var(--gold)">实时落盘</b>，放进来就可以直接退应用。<br>双击托盘物品 → 放回当前屏幕的网格区（背包 / 仓库 / 方块）。</div>
+    <div id="traybody"></div>
+    <div id="trayfoot">托盘里的物品不属于任何角色，游戏里读不到；要用之前先放回背包或仓库。</div>
+  </aside>
+  <div id="toast"></div>
+  <div id="ghost"></div>
+  <nav class="tabs" id="tabbar"></nav>
+</div>
+<script>
+'use strict';
+/* ================= data ================= */
+const CELL = 34, TRAYCELL = 40;
+const QNAME = {normal:'普通',magic:'魔法',rare:'稀有',set:'套装',unique:'独特',rune:'符文之语',crafted:'手工',gem:'宝石'};
+let _uid = 1;
+function it(name,o){ return Object.assign({id:_uid++, name, q:'normal', g:'◆', w:1, h:1, x:0, y:0, cat:'其他', type:'misc', lvl:1, props:[], fit:null, qty:0}, o||{}); }
+function potion(name,qty){ return it(name,{g:'药',q:'normal',type:'potion',qty:qty||0,props:['右键使用 · 立即恢复']}); }
+
+function sorChar(){ _uid = 100;
+  const doll = {
+    head: it('谐角之冠',{q:'unique',g:'帽',fit:['head'],lvl:50,cat:'防具',type:'helm',props:['+2 所有技能','+2 角色等级基于生命','伤害减少 10%','50% 更佳机会取得魔法装备'],sock:'镶嵌：完美红宝石'}),
+    neck: it('玛拉的万花筒',{q:'unique',g:'链',fit:['neck'],lvl:67,cat:'饰品',type:'amulet',props:['+2 所有技能','所有抗性 +28','+5 所有属性']}),
+    torso: it('海蛇皮甲',{q:'unique',g:'甲',fit:['torso'],lvl:29,cat:'防具',type:'armor',props:['+1 所有技能','30% 快速施法','所有抗性 +32','魔法伤害减少 13']}),
+    rh: it('眼球',{q:'unique',g:'球',fit:['rh','lh'],lvl:42,cat:'武器',type:'orb',props:['+3 法师技能','20% 快速施法','+20 体力','+20 精力','50% 更佳机会取得魔法装备']}),
+    lh: it('精神 · 君主盾',{q:'rune',g:'盾',fit:['rh','lh'],lvl:54,cat:'防具',type:'shield',props:['+2 所有技能','35% 快速施法','+22 体力','抗毒 +42%'],sock:'符文：塔尔 · 欧特 · 索尔 · 安姆'}),
+    ringR: it('乔丹之石',{q:'unique',g:'戒',fit:['ringR','ringL'],lvl:29,cat:'饰品',type:'ring',props:['+1 所有技能','法力上限 +25%','+20 法力']}),
+    ringL: it('乌鸦之霜',{q:'unique',g:'戒',fit:['ringR','ringL'],lvl:45,cat:'饰品',type:'ring',props:['+198 攻击准确率','+40 法力','抗寒 +45%','无法冰冻']}),
+    belt: it('蛛网腰带',{q:'unique',g:'带',fit:['belt'],lvl:46,cat:'防具',type:'belt',beltBoxes:16,props:['+1 所有技能','20% 快速施法','防御强化 120%']}),
+    gloves: it('法师之拳',{q:'unique',g:'套',fit:['gloves'],lvl:41,cat:'防具',type:'gloves',props:['+1 火焰技能','20% 快速施法','回复法力 25%']}),
+    feet: it('战争旅者',{q:'unique',g:'靴',fit:['feet'],lvl:42,cat:'防具',type:'boots',props:['30% 高速跑步/行走','+48% 更佳机会取得魔法装备','+10 力量','+10 体力']}),
+  };
+  const swap = {
+    rh: it('战争召唤 · 水晶剑',{q:'rune',g:'剑',fit:['rh','lh'],lvl:57,cat:'武器',type:'sword',props:['+5 战斗指令','+6 战斗体制','+3 战嗥'],sock:'符文：安姆 · 拉尔 · 马尔 · 伊司特 · 欧姆'}),
+    lh: it('精神 · 君主盾',{q:'rune',g:'盾',fit:['rh','lh'],lvl:54,cat:'防具',type:'shield',props:['+2 所有技能','35% 快速施法','+22 体力']}),
+  };
+  const belt = new Array(16).fill(null);
+  belt[0]=potion('强力治疗药剂'); belt[1]=potion('强力法力药剂'); belt[2]=potion('强力治疗药剂'); belt[3]=potion('回复活力药剂');
+  belt[4]=potion('强力治疗药剂'); belt[5]=potion('强力法力药剂'); belt[8]=potion('强力治疗药剂');
+  const inv = [
+    it('地狱火炬',{q:'unique',g:'炬',w:1,h:2,x:0,y:0,cat:'护符',type:'charm',lvl:75,props:['+3 法师技能','+18 所有属性','所有抗性 +17','8% 机会施展九头蛇']}),
+    it('基德的幸运',{q:'magic',g:'符',w:1,h:3,x:1,y:0,cat:'护符',type:'charm',props:['142% 更佳机会取得魔法装备','金币掉落 +38%']}),
+    it('闪电技能护符',{q:'magic',g:'符',w:1,h:3,x:2,y:0,cat:'护符',type:'charm',props:['+1 闪电技能（限法师）','+32 生命']}),
+    it('毁灭',{q:'unique',g:'灭',w:1,h:1,x:3,y:0,cat:'护符',type:'charm',lvl:75,props:['+1 所有技能','+19 所有属性','所有抗性 +18']}),
+    it('毒抗小护符',{q:'magic',g:'符',w:1,h:1,x:3,y:1,cat:'护符',type:'charm',props:['抗毒 +11%','+17 生命']}),
+    it('生命小护符',{q:'magic',g:'符',w:1,h:1,x:3,y:2,cat:'护符',type:'charm',props:['+20 生命']}),
+    it('贝 · 符文',{q:'rune',g:'贝',x:4,y:0,cat:'材料',type:'rune',lvl:63,props:['武器：20% 压碎性打击','防具：伤害减少 8%']}),
+    it('乔 · 符文',{q:'rune',g:'乔',x:5,y:0,cat:'材料',type:'rune',lvl:65,props:['武器：忽视目标防御','防具：+50 生命']}),
+    it('传送卷轴之书',{q:'normal',g:'书',w:1,h:2,x:6,y:0,cat:'其他',type:'tome',qty:20,props:['内含 20 张城镇传送卷轴']}),
+    it('赫拉迪克方块',{q:'normal',g:'块',w:2,h:2,x:7,y:0,cat:'其他',type:'cube',props:['右键打开 · 合成物品']}),
+    potion('强力治疗药剂'), potion('强力法力药剂'),
+  ];
+  inv[10].x=9; inv[10].y=0; inv[11].x=9; inv[11].y=1;
+  const cube = [
+    it('完美红宝石',{q:'gem',g:'宝',x:0,y:0,cat:'材料',type:'gem',props:['武器：+31 火焰伤害','盾牌：+40 生命']}),
+    it('完美蓝宝石',{q:'gem',g:'宝',x:1,y:0,cat:'材料',type:'gem',props:['武器：+24 冰冷伤害','盾牌：+40 法力']}),
+    it('塔尔 · 符文',{q:'rune',g:'塔',x:2,y:0,cat:'材料',type:'rune',lvl:17,props:['武器：+75 毒素伤害']}),
+    it('裂开的钻石',{q:'gem',g:'钻',x:0,y:1,cat:'材料',type:'gem',props:['盾牌：所有抗性 +6']}),
+  ];
+  return {
+    key:'sor', name:'SorStar', cls:'法师', level:89, goldInv:125400, goldBank:864000,
+    doll, swap, belt, inv, cube,
+    merc:{ name:'米山', kind:'第二幕雇佣兵 · 力量光环', level:88, doll:{
+      head: it('安达利尔的面容',{q:'unique',g:'帽',fit:['head'],lvl:83,cat:'防具',type:'helm',props:['+2 所有技能','20% 攻击提速','10% 生命偷取','抗火 -30%']}),
+      torso: it('刚毅 · 执政官铠甲',{q:'rune',g:'甲',fit:['torso'],lvl:59,cat:'防具',type:'armor',props:['所有抗性 +30','防御强化 200%','伤害 +300%'],sock:'符文：艾尔 · 索尔 · 多尔 · 罗'}),
+      rh: it('无限 · 巨型长柄',{q:'rune',g:'戟',fit:['rh'],lvl:63,cat:'武器',type:'polearm',props:['等级 12 信念光环','-55% 敌人电抗','40% 压碎性打击'],sock:'符文：贝 · 马尔 · 贝 · 伊司特'}),
+      lh: null,
+    }},
+    attrs:{
+      stats:[['力量',36,120],['敏捷',25,63],['体力',320,58],['精力',35,40]],
+      vitals:[['生命',1284,'orb-hp'],['法力',986,'orb-mp'],['耐力',402,'orb-st']],
+      resists:[['火焰',75],['冰冷',75],['闪电',85],['毒素',70]],
+      skills:[
+        {tree:'闪电系', rows:[['闪电',20,14],['新星',20,14],['闪电支配',20,14],['传送',1,14],['心灵传动',1,14]]},
+        {tree:'冰冷系', rows:[['冰封球',20,13],['冰冷支配',12,13],['温暖',1,13]]},
+        {tree:'火焰系', rows:[['火球',1,12],['火墙',1,12]]},
+      ],
+      bonusGear:[['快速施法速度','105%'],['更佳机会取得魔法装备','218%'],['所有技能','+11'],['快速打击恢复','86%'],['偷取法力','—'],['无法冰冻','是']],
+      bonusCharm:[['所有抗性（护符）','+46'],['生命（护符）','+69'],['更佳机会取得魔法装备（护符）','142%']],
+    },
+  };
+}
+function davidChar(){ _uid = 500;
+  const doll = { head:null, neck:it('稀有护符',{q:'rare',g:'链',fit:['neck'],lvl:6,cat:'饰品',type:'amulet',props:['+8 法力','抗电 +12%']}),
+    torso: it('皮甲',{q:'normal',g:'甲',fit:['torso'],lvl:3,cat:'防具',type:'armor',props:['防御：15']}),
+    rh: it('术士法杖',{q:'magic',g:'杖',fit:['rh','lh'],lvl:8,cat:'武器',type:'staff',props:['+2 骨矛（限死灵/术士）','+18 法力']}),
+    lh:null, ringR:null, ringL:null,
+    belt: it('饰带',{q:'normal',g:'带',fit:['belt'],lvl:1,cat:'防具',type:'belt',beltBoxes:8,props:['防御：2']}),
+    gloves:null, feet:null };
+  const belt = new Array(16).fill(null);
+  belt[0]=potion('轻型治疗药剂'); belt[1]=potion('轻型法力药剂');
+  return { key:'david', name:'David', cls:'术士', level:9, goldInv:3200, goldBank:56626,
+    doll, swap:{rh:null,lh:null}, belt,
+    inv:[ it('稀有戒指',{q:'rare',g:'戒',x:0,y:0,cat:'饰品',type:'ring',props:['+12 法力','抗火 +9%']}), potion('轻型治疗药剂'), ],
+    cube:[], merc:null,
+    attrs:{ stats:[['力量',20,2],['敏捷',18,0],['体力',24,4],['精力',30,3]],
+      vitals:[['生命',86,'orb-hp'],['法力',64,'orb-mp'],['耐力',92,'orb-st']],
+      resists:[['火焰',4],['冰冷',0],['闪电',12],['毒素',0]],
+      skills:[{tree:'诅咒与召唤', rows:[['骷髅复苏',3,0],['骨矛',2,0]]}],
+      bonusGear:[['所有技能','+0']], bonusCharm:[] },
+  };
+}
+/* ================= state ================= */
+const S = {
+  tab:'char', charView:'list', cur:'sor', sub:'equip', swapView:false, beltOpen:false, gridView:'inv',
+  stashSeg:'personal', sharedTab:0, stashChar:'sor',
+  goldShared:5230000, goldVault:910000,
+  chars:{}, tray:[], activeGrid:'inv',
+  vaultFilter:{ text:'', q:'all', cat:'all', lvlMin:'', lvlMax:'', eth:false, sock:false },
+};
+S.chars.sor = sorChar(); S.chars.david = davidChar();
+S.personal = {
+  sor:[ it('西刚的守护 · 手套',{q:'set',g:'套',w:2,h:2,x:0,y:0,cat:'防具',type:'gloves',lvl:6,props:['30% 攻击提速','防御 +20']}),
+        it('塔格奥之翼 · 盾',{q:'set',g:'盾',w:2,h:3,x:2,y:0,cat:'防具',type:'shield',lvl:49,props:['+2 死灵技能','格挡率 +30%']}),
+        it('稀有法杖',{q:'rare',g:'杖',w:1,h:4,x:4,y:0,cat:'武器',type:'staff',lvl:24,props:['+2 闪电技能','20% 快速施法','+31 法力']}),
+        it('安姆 · 符文',{q:'rune',g:'安',x:6,y:0,cat:'材料',type:'rune',lvl:25,props:['武器：7% 生命偷取']}),
+        it('完美绿宝石',{q:'gem',g:'宝',x:7,y:0,cat:'材料',type:'gem',props:['盾牌：抗毒 +40%']}) ],
+  david:[ potion('轻型法力药剂') ],
+};
+S.personal.david[0].x=0; S.personal.david[0].y=0;
+S.shared = [0,1,2,3,4,5,6].map(()=>[]);
+S.shared[0] = [ it('风之力 · 九头蛇弓',{q:'unique',g:'弓',w:2,h:4,x:0,y:0,cat:'武器',type:'bow',lvl:69,props:['伤害强化 250%','击退','7% 法力偷取']}),
+  it('年纪之冠',{q:'unique',g:'冠',w:2,h:2,x:2,y:0,cat:'防具',type:'helm',lvl:82,props:['所有抗性 +28','伤害减少 14%','+1 所有技能'],sock:'凹槽（2）'}) ];
+S.shared[1] = [ it('马尔 · 符文',{q:'rune',g:'马',x:0,y:0,cat:'材料',type:'rune',lvl:49,props:[]}), it('伊司特 · 符文',{q:'rune',g:'伊',x:1,y:0,cat:'材料',type:'rune',lvl:51,props:[]}), it('古尔 · 符文',{q:'rune',g:'古',x:2,y:0,cat:'材料',type:'rune',lvl:53,props:[]}) ];
+S.shared[2] = [ it('完美钻石',{q:'gem',g:'钻',x:0,y:0,cat:'材料',type:'gem',props:[]}), it('完美骷髅',{q:'gem',g:'髅',x:1,y:0,cat:'材料',type:'gem',props:[]}) ];
+S.shared[3] = [ it('攻击护符',{q:'magic',g:'符',w:1,h:3,x:0,y:0,cat:'护符',type:'charm',props:['+121 攻击准确率','+33 生命']}) ];
+S.vault = [
+  it('死神的丧钟',{q:'unique',g:'镰',cat:'武器',type:'reaper',lvl:75,eth:true,props:['33% 机会施展衰老','忽视目标防御','生命偷取 13%'],base:'锐利之斧（无形）'}),
+  it('泰瑞尔的力量',{q:'unique',g:'甲',cat:'防具',type:'armor',lvl:84,props:['+2 攻击技能','所有抗性 +28','无法冰冻','无破坏'],base:'神圣盔甲'}),
+  it('大君之怒',{q:'unique',g:'链',cat:'饰品',type:'amulet',lvl:85,props:['+1 所有技能','32% 致命攻击','闪电吸收 20%'],base:'护身符'}),
+  it('金属网格',{q:'unique',g:'链',cat:'饰品',type:'amulet',lvl:78,props:['+428 攻击准确率','所有抗性 +33'],base:'护身符'}),
+  it('谜团 · 法师铠甲',{q:'rune',g:'甲',cat:'防具',type:'armor',lvl:65,props:['+2 所有技能','+1 传送','45% 高速跑步'],base:'法师铠甲',sock:'符文：乔 · 伊司特 · 贝'}),
+  it('悔恨 · 幻化之刃',{q:'rune',g:'剑',cat:'武器',type:'sword',lvl:59,props:['伤害 +398','35% 攻击提速','忽视目标防御'],base:'幻化之刃',sock:'符文：艾斯 · 罗 · 欧姆 · 拉尔 · 多尔'}),
+  it('塔拉夏的外袍',{q:'set',g:'甲',cat:'防具',type:'armor',lvl:71,props:['所有抗性 +40','88% 更佳机会取得魔法装备'],base:'漆甲'}),
+  it('不朽之王碎魂者',{q:'set',g:'锤',cat:'武器',type:'maul',lvl:76,sockN:2,props:['+3 野蛮人技能','伤害 +412','凹槽（2）'],base:'食人魔之锤'}),
+  it('稀有头环',{q:'rare',g:'环',cat:'防具',type:'circlet',lvl:67,sockN:2,props:['+2 法师技能','20% 快速施法','凹槽（2）'],base:'头环'}),
+  it('蓝色珠宝 · 彩虹刻面',{q:'unique',g:'珠',cat:'材料',type:'jewel',lvl:49,props:['死亡时 100% 施展 47 级连锁闪电','-5% 敌人电抗','+5% 闪电伤害'],base:'珠宝'}),
+  it('欧姆 · 符文',{q:'rune',g:'欧',cat:'材料',type:'rune',lvl:57,props:['武器：伤害 +50%']}),
+  it('罗 · 符文',{q:'rune',g:'罗',cat:'材料',type:'rune',lvl:59,props:['防具：无法冰冻']}),
+  it('战争召唤 · 连枷',{q:'rune',g:'枷',cat:'武器',type:'flail',lvl:57,props:['+6 战斗体制','+5 战斗指令'],base:'连枷',sock:'符文：安姆 · 拉尔 · 马尔 · 伊司特 · 欧姆'}),
+  it('手工戒指 · 血戒',{q:'crafted',g:'戒',cat:'饰品',type:'ring',lvl:71,props:['3% 生命偷取','+18 力量','+37 生命'],base:'戒指'}),
+];
+/* ================= utils ================= */
+const $ = (s,r)=> (r||document).querySelector(s);
+const main = $('#main');
+const cur = ()=> S.chars[S.cur];
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+function fmt(n){ return n.toLocaleString('en-US'); }
+function toast(msg, ms){ const t=$('#toast'); t.innerHTML=msg; t.classList.add('on'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('on'), ms||2100); }
+function flashSave(){ const b=$('#savebox'); $('#savetxt').textContent='已保存 '+new Date().toTimeString().slice(0,8)+' · 实时保存'; b.classList.remove('flash'); void b.offsetWidth; b.classList.add('flash'); }
+function rectFree(items, x, y, w, h, ignoreId){
+  return !items.some(o=> o.id!==ignoreId && x < o.x+o.w && o.x < x+w && y < o.y+o.h && o.y < y+h);
+}
+const GRIDS = {
+  inv:  {cols:10, rows:4,  cell:CELL, get:()=>cur().inv},
+  cube: {cols:4,  rows:3,  cell:CELL, get:()=>cur().cube},
+  personal:{cols:10, rows:10, cell:CELL, get:()=>S.personal[S.stashChar]},
+  shared:{cols:10, rows:10, cell:CELL, get:()=>S.shared[S.sharedTab]},
+  belt: {cols:4,  rows:4,  cell:CELL, get:()=>{ const c=cur(); return c.belt.map((b,i)=> b? Object.assign(b,{x:i%4, y:Math.floor(i/4)}) : null).filter(Boolean); }},
+};
+function findSpot(area, w, h){
+  const g = GRIDS[area]; if(!g) return null;
+  const items = g.get();
+  for(let y=0; y<=g.rows-h; y++) for(let x=0; x<=g.cols-w; x++)
+    if(rectFree(items,x,y,w,h)) return {x,y};
+  return null;
+}
+function itemEl(item, area, cell){
+  const d = document.createElement('div');
+  d.className = 'item q-'+item.q; d.dataset.area = area; d.dataset.id = item.id;
+  d.style.width = item.w*cell-2+'px'; d.style.height = item.h*cell-2+'px';
+  d.innerHTML = '<div class="g">'+esc(item.g)+'</div>' + (item.h>=2||item.w>=2 ? '<div class="n">'+esc(item.name.split(' ·')[0])+'</div>' : '') + (item.qty? '<div class="qty">'+item.qty+'</div>':'');
+  return d;
+}
+function gridHTML(area){
+  const g = GRIDS[area];
+  return '<div class="gridwrap" data-droptarget="grid" data-area="'+area+'" style="width:'+(g.cols*g.cell)+'px;height:'+(g.rows*g.cell)+'px"><div class="gridbg"></div><div class="drop-hl"></div></div>';
+}
+function fillGrid(area){
+  const wrap = main.querySelector('.gridwrap[data-area="'+area+'"]'); if(!wrap) return;
+  const g = GRIDS[area];
+  g.get().forEach(o=>{ const el=itemEl(o, area, g.cell); el.style.left=(o.x*g.cell+1)+'px'; el.style.top=(o.y*g.cell+1)+'px'; wrap.appendChild(el); });
+}
+function beltRows(){ const b = cur().doll.belt; return b && b.beltBoxes ? b.beltBoxes/4 : 1; }
+/* ================= render: shell ================= */
+const TABS = [ ['char','🧙','角色'], ['stash','🗄️','仓库'], ['vault','💎','宝库'], ['set','⚙️','设置'] ];
+function renderTabbar(){
+  $('#tabbar').innerHTML = TABS.map(t=>'<button data-tab="'+t[0]+'" class="'+(S.tab===t[0]?'on':'')+'"><span class="ic">'+t[1]+'</span>'+t[2]+'</button>').join('');
+  $('#tabbar').querySelectorAll('button').forEach(b=> b.onclick = ()=>{ S.tab=b.dataset.tab; S.beltOpen=false; render(); });
+}
+function renderHeader(){
+  const inDetail = S.tab==='char' && S.charView==='detail';
+  $('#backbtn').style.display = inDetail? 'block':'none';
+  $('#crumb').textContent = '· ' + (S.tab==='char' ? (inDetail? cur().name+'（'+cur().cls+'）' : '角色') : S.tab==='stash' ? '仓库' : S.tab==='vault' ? '宝库' : '设置');
+}
+$('#backbtn').onclick = ()=>{ S.charView='list'; render(); };
+function render(){
+  renderTabbar(); renderHeader(); renderTray();
+  main.innerHTML='';
+  const scr = document.createElement('div'); scr.className='screen on'; main.appendChild(scr);
+  if(S.tab==='char') S.charView==='list' ? buildCharList(scr) : buildCharDetail(scr);
+  else if(S.tab==='stash') buildStash(scr);
+  else if(S.tab==='vault') buildVault(scr);
+  else buildSettings(scr);
+}
+/* ================= char: list ================= */
+function buildCharList(scr){
+  scr.innerHTML = '<div class="hintline" style="padding-top:12px">选择角色进入 · 演示存档数据</div>' +
+    Object.values(S.chars).map(c=>
+      '<div class="charcard" data-char="'+c.key+'"><div class="ava">'+(c.cls==='法师'?'🔮':'🪄')+'</div>'+
+      '<div><div class="nm">'+c.name+'</div><div class="meta">'+c.level+' 级 · '+c.cls+' · 携带金币 '+fmt(c.goldInv)+'</div></div>'+
+      '<div class="go">›</div></div>').join('') +
+    '<div class="hintline" style="margin-top:14px">从 D2R Mobile 文件夹考入的存档会出现在这里</div>';
+  scr.querySelectorAll('.charcard').forEach(el=> el.onclick=()=>{ S.cur=el.dataset.char; S.charView='detail'; S.sub='equip'; S.swapView=false; render(); });
+}
+/* ================= char: detail ================= */
+function subtabHTML(){
+  return '<div class="subtabs">'+[['attrs','属性'],['equip','装备'],['merc','佣兵']].map(t=>'<button data-sub="'+t[0]+'" class="'+(S.sub===t[0]?'on':'')+'">'+t[1]+'</button>').join('')+'</div>';
+}
+function buildCharDetail(scr){
+  scr.innerHTML = subtabHTML() + '<div class="padwrap" id="subbody"></div>';
+  scr.querySelectorAll('[data-sub]').forEach(b=> b.onclick=()=>{ S.sub=b.dataset.sub; S.beltOpen=false; render(); });
+  const body = scr.querySelector('#subbody');
+  if(S.sub==='equip') buildEquip(body); else if(S.sub==='attrs') buildAttrs(body); else buildMerc(body);
+}
+/* ---- paper doll ---- */
+const DOLL = [
+  ['head',2,0,2,2,'头盔'],['neck',4,0.5,1,1,'护符'],
+  ['rh',0,2.2,2,4,'武器'],['torso',2,2.2,2,3,'铠甲'],['lh',4,2.2,2,4,'盾牌'],
+  ['belt',2,5.4,2,1,'腰带'],
+  ['gloves',0,6.6,2,2,'手套'],['ringR',2,7.2,1,1,'戒指'],['ringL',3,7.2,1,1,'戒指'],['feet',4,6.6,2,2,'靴子'],
+];
+const px = v => Math.round(v*(CELL+1.5));
+const FIGURE = '<svg class="figure" width="'+(px(4)+2*CELL)+'" height="'+(px(7.2)+CELL)+'" viewBox="0 0 '+(px(4)+2*CELL)+' '+(px(7.2)+CELL)+'">'+
+  '<ellipse cx="50%" cy="52%" rx="46%" ry="48%" fill="rgba(212,182,106,.055)"/>'+
+  '<path d="M105 12c18 0 30 14 30 32 0 10-4 18-10 24l27 11c15 6 23 17 25 34l8 92c1 15-7 24-20 26l-13 2 6 44H52l6-44-13-2c-13-2-21-11-20-26l8-92c2-17 10-28 25-34l27-11c-6-6-10-14-10-24 0-18 12-32 30-32z" fill="#241d12" stroke="#5a4a28" stroke-width="1.5" transform="translate(-8,0) scale(1.02)"/></svg>';
+function dollHTML(area){
+  const src = area==='swap' ? cur().swap : cur().doll;
+  return '<div class="dollwrap" style="width:'+(px(4)+2*CELL)+'px;height:'+(px(7.2)+CELL)+'px">'+FIGURE+
+    DOLL.map(s=>{
+      const item = src[s[0]];
+      return '<div class="slot'+(item?' filled':'')+'" data-droptarget="slot" data-area="'+area+'" data-loc="'+s[0]+'" style="left:'+px(s[1])+'px;top:'+px(s[2])+'px;width:'+(s[3]*CELL)+'px;height:'+(s[4]*CELL)+'px">'+
+        (item? '' : '<span class="lab">'+s[5]+'</span>')+'</div>';
+    }).join('')+'</div>';
+}
+function fillDoll(area){
+  const src = area==='swap' ? cur().swap : cur().doll;
+  main.querySelectorAll('.slot[data-area="'+area+'"]').forEach(sl=>{
+    const item = src[sl.dataset.loc]; if(!item) return;
+    const el = itemEl(item, area, CELL); el.style.left='0'; el.style.top='0';
+    el.style.width='100%'; el.style.height='100%'; el.dataset.loc = sl.dataset.loc;
+    sl.appendChild(el);
+  });
+}
+/* ---- equip screen ---- */
+function goldrowHTML(label, amt, from){
+  return '<div class="goldrow" data-gold="'+from+'"><span>🪙 '+label+'</span><span class="amt">'+fmt(amt)+'</span><span class="act">存 / 取</span></div>';
+}
+function buildEquip(body){
+  S.activeGrid = S.gridView;
+  const c = cur();
+  const rows = beltRows();
+  body.innerHTML =
+    dollHTML(S.swapView? 'swap':'doll') +
+    '<div class="swapctl"><span>武器</span><button data-swap="0" class="'+(!S.swapView?'on':'')+'">主手 I</button><button data-swap="1" class="'+(S.swapView?'on':'')+'">副手 II</button></div>' +
+    '<div class="beltrow"><span class="cap">腰带</span><div class="beltcells gridwrap" data-droptarget="grid" data-area="belt" data-disp="1" style="width:'+(4*CELL)+'px;height:'+CELL+'px;position:relative"><div class="gridbg"></div><div class="drop-hl"></div></div>'+
+      '<button class="backbtn" id="belttoggle">'+(S.beltOpen?'收起':'展开 '+rows+' 排')+'</button></div>' +
+    '<div class="beltpanel'+(S.beltOpen?' on':'')+'" id="beltpanel"></div>' +
+    goldrowHTML('携带金币', c.goldInv, 'inv') +
+    '<div style="display:flex;align-items:center;gap:6px;padding:9px 12px 5px"><span style="font-size:12px;color:var(--ink-dim)">'+(S.gridView==='inv'?'背包':'赫拉迪克方块')+'</span>'+
+      '<span style="margin-left:auto"></span>'+
+      '<button class="backbtn" data-gv="inv" style="'+(S.gridView==='inv'?'border-color:var(--gold);color:var(--gold)':'')+'">背包</button>'+
+      '<button class="backbtn" data-gv="cube" style="'+(S.gridView==='cube'?'border-color:var(--gold);color:var(--gold)':'')+'">方块</button></div>' +
+    gridHTML(S.gridView) +
+    '<div class="hintline" style="padding-top:7px">单击看属性 · 双击入托盘 · 按住拖动换位置</div>';
+  body.querySelectorAll('[data-swap]').forEach(b=> b.onclick=()=>{ S.swapView = b.dataset.swap==='1'; render(); });
+  body.querySelectorAll('[data-gv]').forEach(b=> b.onclick=()=>{ S.gridView=b.dataset.gv; render(); });
+  body.querySelector('#belttoggle').onclick = ()=>{ S.beltOpen=!S.beltOpen; render(); };
+  body.querySelector('[data-gold]').onclick = ()=> openGoldSheet('inv');
+  fillDoll(S.swapView? 'swap':'doll');
+  // belt bottom row (row 0)
+  const strip = body.querySelector('.beltcells');
+  for(let i=0;i<4;i++){ const o=c.belt[i]; if(!o) continue; const el=itemEl(o,'belt',CELL); el.style.left=(i*CELL+1)+'px'; el.style.top='1px'; strip.appendChild(el); }
+  if(S.beltOpen){
+    const p = body.querySelector('#beltpanel');
+    p.innerHTML = '<div style="font-size:11px;color:var(--ink-faint);margin-bottom:6px">腰带共 '+rows+' 排（由所穿腰带决定）· 最下排是游戏里直接显示的一排</div>' +
+      '<div class="gridwrap" data-droptarget="grid" data-area="belt" data-disp="'+rows+'" style="width:'+(4*CELL)+'px;height:'+(rows*CELL)+'px;position:relative"><div class="gridbg"></div><div class="drop-hl"></div></div>';
+    const wrap = p.querySelector('.gridwrap');
+    c.belt.forEach((o,i)=>{ if(!o) return; const r = Math.floor(i/4); if(r>=rows) return;
+      const el=itemEl(o,'belt',CELL); el.style.left=((i%4)*CELL+1)+'px'; el.style.top=((rows-1-r)*CELL+1)+'px'; wrap.appendChild(el); });
+  }
+  fillGrid(S.gridView);
+}
+/* ---- attrs screen ---- */
+function buildAttrs(body){
+  S.activeGrid = null;
+  const a = cur().attrs;
+  body.classList.add('scrollable'); body.style.overflowY='auto';
+  body.innerHTML =
+    '<div class="panel"><h3>人物属性</h3><div class="vitals">'+
+      a.vitals.map(v=>'<div class="vital"><div class="t">'+v[0]+'</div><div class="n '+v[2]+'">'+v[1]+'</div></div>').join('')+'</div>'+
+      '<div class="statgrid" style="margin-top:10px">'+
+      a.stats.map(s=>'<span class="k">'+s[0]+'</span><span class="v"><b>'+(s[1]+s[2])+'</b> <span style="color:var(--ink-faint);font-size:11px">（自身 '+s[1]+' + 装备 '+s[2]+'）</span></span>').join('')+
+      a.resists.map(r=>'<span class="k">'+r[0]+'抗性</span><span class="v"><b>'+r[1]+'%</b></span>').join('')+
+      '</div></div>' +
+    '<div class="panel"><h3>技能（基础点 + 装备加成）</h3>'+
+      a.skills.map(t=>'<div class="skilltree"><h4>'+t.tree+'</h4>'+ t.rows.map(r=>'<div class="skillrow"><span>'+r[0]+'</span><span class="pts"><b>'+(r[1]+r[2])+'</b> <span style="font-size:11px">（'+r[1]+' <span class="plus">+'+r[2]+'</span>）</span></span></div>').join('') +'</div>').join('')+
+      '<div style="font-size:11px;color:var(--ink-faint)">技能 / 属性修改为后续版本功能，本页先只读展示</div></div>' +
+    '<div class="panel"><h3>装备加成汇总（隐藏属性）</h3>'+
+      a.bonusGear.map(b=>'<div class="bonusline"><span>'+b[0]+'</span><span class="bv">'+b[1]+'</span></div>').join('')+'</div>' +
+    (a.bonusCharm.length? '<div class="panel"><h3>背包护符加成</h3>'+ a.bonusCharm.map(b=>'<div class="bonusline"><span>'+b[0]+'</span><span class="bv">'+b[1]+'</span></div>').join('')+'</div>' : '') +
+    '<div style="height:14px"></div>';
+}
+/* ---- merc screen ---- */
+const MERC = [ ['head',0,0,2,2,'头盔'],['torso',0,2.2,2,3,'铠甲'],['rh',2.2,0,2,4,'武器'],['lh',2.2,4.45,2,2,'盾牌'] ];
+function buildMerc(body){
+  const c = cur();
+  if(!c.merc){ body.innerHTML = subtabMercEmpty(); return; }
+  S.activeGrid = 'inv';
+  const m = c.merc;
+  body.innerHTML =
+    '<div class="mercinfo" style="padding-top:10px"><span class="mn">'+m.name+'</span> · '+m.level+' 级<br>'+m.kind+'</div>' +
+    '<div class="dollwrap" style="width:'+(px(2.2)+2*CELL)+'px;height:'+(px(4.45)+2*CELL)+'px;margin-top:8px">'+
+      MERC.map(s=>{ const item = m.doll[s[0]]; const unusable = s[0]==='lh';
+        return '<div class="slot'+(item?' filled':'')+'" data-droptarget="slot" data-area="merc" data-loc="'+s[0]+'" style="left:'+px(s[1])+'px;top:'+px(s[2])+'px;width:'+(s[3]*CELL)+'px;height:'+(s[4]*CELL)+'px">'+
+        (item? '' : '<span class="lab">'+(unusable? s[5]+'<br><span style="font-size:8.5px">此佣兵不可用</span>' : s[5])+'</span>')+'</div>'; }).join('')+'</div>' +
+    '<div style="padding:12px 12px 5px;font-size:12px;color:var(--ink-dim)">角色背包（拖物品到上方槽位给佣兵换装）</div>' +
+    gridHTML('inv') +
+    '<div class="hintline" style="padding-top:7px">佣兵能用什么武器由类型决定 · 拖错会给出原因</div>';
+  main.querySelectorAll('.slot[data-area="merc"]').forEach(sl=>{
+    const item = m.doll[sl.dataset.loc]; if(!item) return;
+    const el = itemEl(item,'merc',CELL); el.style.left='0'; el.style.top='0'; el.style.width='100%'; el.style.height='100%'; el.dataset.loc=sl.dataset.loc; sl.appendChild(el);
+  });
+  fillGrid('inv');
+}
+function subtabMercEmpty(){
+  return '<div class="emptybox">🪦<br>尚未雇佣佣兵<br><span style="font-size:12px">在游戏里雇佣后，这里会出现佣兵的属性与装备面板</span></div>';
+}
+/* ================= stash ================= */
+function buildStash(scr){
+  const sc = S.chars[S.stashChar];
+  let h = '<div class="charchips">'+Object.values(S.chars).map(c=>'<button data-sc="'+c.key+'" class="'+(S.stashChar===c.key?'on':'')+'">'+c.name+' · '+c.level+' 级 '+c.cls+'</button>').join('')+'</div>';
+  h += '<div class="seg"><button data-seg="personal" class="'+(S.stashSeg==='personal'?'on':'')+'">个人仓库</button><button data-seg="shared" class="'+(S.stashSeg==='shared'?'on':'')+'">共享仓库</button></div>';
+  if(S.stashSeg==='personal'){
+    S.activeGrid='personal';
+    h += goldrowHTML(sc.name+' 的仓库金币', sc.goldBank, 'bank') + '<div style="height:10px"></div>' + gridHTML('personal') +
+      '<div class="hintline" style="padding-top:8px">个人仓库跟角色走 · 金币点上方金币行取出</div>';
+  } else {
+    S.activeGrid='shared';
+    h += '<div class="tabchips">'+S.shared.map((t,i)=>'<button data-stab="'+i+'" class="'+(S.sharedTab===i?'on':'')+'">页签 '+(i+1)+'</button>').join('')+'</div>' +
+      goldrowHTML('共享金币（全部页签共用一池）', S.goldShared, 'shared') + '<div style="height:10px"></div>' + gridHTML('shared') +
+      '<div class="hintline" style="padding-top:8px">共享仓库对全部角色可见</div>';
+  }
+  scr.innerHTML = h;
+  scr.querySelectorAll('[data-sc]').forEach(b=> b.onclick=()=>{ S.stashChar=b.dataset.sc; render(); });
+  scr.querySelectorAll('[data-seg]').forEach(b=> b.onclick=()=>{ S.stashSeg=b.dataset.seg; render(); });
+  scr.querySelectorAll('[data-stab]').forEach(b=> b.onclick=()=>{ S.sharedTab=+b.dataset.stab; render(); });
+  scr.querySelector('[data-gold]').onclick = (e)=> openGoldSheet(e.currentTarget.dataset.gold);
+  fillGrid(S.activeGrid);
+}
+/* ================= vault ================= */
+const QCHIPS = [['all','全部品质'],['unique','独特'],['set','套装'],['rare','稀有'],['magic','魔法'],['rune','符文之语'],['crafted','手工']];
+const CATCHIPS = [['all','全部类型'],['武器','武器'],['防具','防具'],['饰品','饰品'],['护符','护符'],['材料','材料']];
+function vaultFiltered(){
+  const f = S.vaultFilter;
+  return S.vault.filter(o=>{
+    if(f.q!=='all' && o.q!==f.q) return false;
+    if(f.cat!=='all' && o.cat!==f.cat) return false;
+    if(f.text && !(o.name+(o.base||'')).includes(f.text)) return false;
+    if(f.lvlMin!=='' && o.lvl < +f.lvlMin) return false;
+    if(f.lvlMax!=='' && o.lvl > +f.lvlMax) return false;
+    if(f.eth && !o.eth) return false;
+    if(f.sock && !(o.sockN>0 || o.sock)) return false;
+    return true;
+  });
+}
+function buildVault(scr){
+  S.activeGrid = null;
+  const list = vaultFiltered();
+  scr.innerHTML =
+    '<div class="vsearch"><input id="vq" placeholder="搜索名称 / 底材…" value="'+esc(S.vaultFilter.text)+'"><button class="fbtn" id="vfilter">筛选 ⚙</button></div>' +
+    '<div class="fchips">'+QCHIPS.map(c=>'<button data-vq="'+c[0]+'" class="'+(S.vaultFilter.q===c[0]?'on':'')+'">'+c[1]+'</button>').join('')+'</div>' +
+    '<div class="fchips">'+CATCHIPS.map(c=>'<button data-vc="'+c[0]+'" class="'+(S.vaultFilter.cat===c[0]?'on':'')+'">'+c[1]+'</button>').join('')+'</div>' +
+    goldrowHTML('宝库金池（按版本 / HC·SC 分池）', S.goldVault, 'vault') +
+    '<div class="hintline" style="padding-top:8px;text-align:left;padding-left:14px">共 '+list.length+' 件 · 单击看属性 · 双击入托盘取出</div>' +
+    '<div class="scrollable" style="flex:1;padding-bottom:16px">' +
+    (list.length? list.map(o=>'<div class="vrow" data-area="vault" data-id="'+o.id+'"><div class="vic">'+esc(o.g)+'</div><div><div class="vn q-'+o.q+'-t">'+esc(o.name)+(o.eth?' <span style="font-size:10px">(无形)</span>':'')+'</div><div class="vm">'+esc(o.base||QNAME[o.q])+' · '+o.cat+' · 需要等级 '+o.lvl+'</div></div><div class="vl">宝库</div></div>').join('')
+      : '<div class="emptybox">没有符合条件的物品<br><span style="font-size:12px">放宽筛选条件试试</span></div>') +
+    '</div>';
+  const inp = scr.querySelector('#vq');
+  inp.oninput = ()=>{ S.vaultFilter.text = inp.value; const pos = inp.selectionStart; render(); const n=$('#vq'); n.focus(); n.setSelectionRange(pos,pos); };
+  scr.querySelector('#vfilter').onclick = openFilterSheet;
+  scr.querySelectorAll('[data-vq]').forEach(b=> b.onclick=()=>{ S.vaultFilter.q=b.dataset.vq; render(); });
+  scr.querySelectorAll('[data-vc]').forEach(b=> b.onclick=()=>{ S.vaultFilter.cat=b.dataset.vc; render(); });
+  scr.querySelector('[data-gold]').onclick = (e)=> openGoldSheet(e.currentTarget.dataset.gold);
+}
+/* ================= settings ================= */
+function buildSettings(scr){
+  S.activeGrid = null;
+  scr.innerHTML = '<div style="padding-top:6px">' +
+    [['💾','实时保存','每次操作后自动写盘 · 写前自动备份 · 顶栏显示保存时间','已启用','live'],
+     ['📥','存档同步（考进考出）','从文件 App 选择 D2R Mobile 存档夹考入 / 考出回游戏','预留',''],
+     ['🎨','美术资源包','从自己购买的 D2R 提取物品图标后导入，替换占位字形','未导入',''],
+     ['🗂️','备份管理','查看 / 恢复自动备份（每次写盘保留最近若干份）','预留',''],
+     ['🧺','装备托盘','托盘内容实时落盘于 app 私有存储，退出不丢失','已启用','live'],
+     ['ℹ️','关于','Horadric Loot Box 移动版 · 原型 v2','v2',''],
+    ].map(r=>'<div class="setrow"><span style="font-size:19px">'+r[0]+'</span><div><div class="st">'+r[1]+'</div><div class="sd">'+r[2]+'</div></div><span class="tag '+r[4]+'">'+r[3]+'</span></div>').join('') +
+    '<div class="hintline" style="margin-top:16px">设置页本次只预留结构，功能随后版本补齐</div></div>';
+}
+/* ================= tray ================= */
+function packTray(){
+  const cols=6; const occ=[]; const pos={};
+  const free=(x,y,w,h)=> !occ.some(o=> x<o.x+o.w && o.x<x+w && y<o.y+o.h && o.y<y+h);
+  S.tray.forEach(o=>{ let done=false;
+    for(let y=0;!done;y++) for(let x=0;x<=cols-o.w;x++){ if(free(x,y,o.w,o.h)){ pos[o.id]={x,y}; occ.push({x,y,w:o.w,h:o.h}); done=true; break; } }
+  });
+  return pos;
+}
+function renderTray(){
+  $('#traycnt').textContent = S.tray.length;
+  const body = $('#traybody');
+  if(!S.tray.length){ body.innerHTML = '<div style="color:var(--ink-faint);font-size:12.5px;line-height:1.8;padding:8px 2px">托盘是空的。<br>在任意网格里<b style="color:var(--gold)">双击</b>一件物品，或把物品<b style="color:var(--gold)">拖</b>到右侧把手上，就能放进来。</div>'; return; }
+  const pos = packTray();
+  const rows = Math.max(...S.tray.map(o=> pos[o.id].y + o.h));
+  body.innerHTML = '<div class="gridwrap" data-area="traygrid" style="width:'+(6*TRAYCELL)+'px;height:'+(rows*TRAYCELL)+'px;position:relative;margin:0"><div class="gridbg" style="--c:'+TRAYCELL+'px"></div></div>';
+  const wrap = body.querySelector('.gridwrap');
+  S.tray.forEach(o=>{ const el=itemEl(o,'tray',TRAYCELL); el.style.left=(pos[o.id].x*TRAYCELL+1)+'px'; el.style.top=(pos[o.id].y*TRAYCELL+1)+'px'; wrap.appendChild(el); });
+}
+function openTray(){ $('#tray').classList.add('on'); $('#scrim').classList.add('on'); }
+function closeTray(){ $('#tray').classList.remove('on'); $('#scrim').classList.remove('on'); }
+$('#trayhandle').onclick = openTray;
+$('#trayclose').onclick = closeTray;
+$('#scrim').onclick = closeTray;
+/* ================= item location ================= */
+function locateItem(area, id){
+  id = +id;
+  const arr = a => { const i = a.findIndex(o=>o && o.id===id); return i<0? null : {item:a[i], arr:a, idx:i, remove(){ a.splice(i,1); }}; };
+  if(area==='doll'||area==='swap'){ const src = area==='swap'? cur().swap : cur().doll;
+    for(const loc in src) if(src[loc] && src[loc].id===id) return {item:src[loc], loc, remove(){ src[loc]=null; }};
+    return null; }
+  if(area==='merc'){ const src = cur().merc.doll;
+    for(const loc in src) if(src[loc] && src[loc].id===id) return {item:src[loc], loc, remove(){ src[loc]=null; }};
+    return null; }
+  if(area==='belt'){ const a = cur().belt; const i = a.findIndex(o=>o && o.id===id); return i<0? null : {item:a[i], idx:i, remove(){ a[i]=null; }}; }
+  if(area==='inv') return arr(cur().inv);
+  if(area==='cube') return arr(cur().cube);
+  if(area==='personal') return arr(S.personal[S.stashChar]);
+  if(area==='shared') return arr(S.shared[S.sharedTab]);
+  if(area==='tray') return arr(S.tray);
+  if(area==='vault') return arr(S.vault);
+  return null;
+}
+function toTray(loc){
+  const item = loc.item; loc.remove(); S.tray.push(item); flashSave(); render();
+  const h = $('#trayhandle'); h.classList.remove('bump'); void h.offsetWidth; h.classList.add('bump');
+  toast('「'+esc(item.name)+'」已放入托盘（已落盘）');
+}
+function fromTrayTo(area, id){
+  if(!area || !GRIDS[area]){ toast('当前页面没有网格区<br>切到装备页 / 仓库页再双击取出'); return; }
+  const item = id!=null ? S.tray.find(o=>o.id===+id) : S.tray[S.tray.length-1]; if(!item) return;
+  const spot = findSpot(area, item.w, item.h);
+  if(!spot){ toast('放不下：当前网格没有足够空间'); return; }
+  S.tray.splice(S.tray.indexOf(item),1);
+  item.x = spot.x; item.y = spot.y; GRIDS[area].get().push(item);
+  closeTray(); flashSave(); render();
+  toast('「'+esc(item.name)+'」已放入'+({inv:'背包',cube:'方块',personal:'个人仓库',shared:'共享仓库'})[area]);
+}
+/* ================= sheets ================= */
+function openSheet(html){
+  closeSheet();
+  const w = document.createElement('div'); w.className='sheetwrap on'; w.id='sheetwrap';
+  w.innerHTML = '<div class="bg"></div><div class="sheet"><div class="grab"></div>'+html+'</div>';
+  $('#app').appendChild(w); w.querySelector('.bg').onclick = closeSheet;
+  return w;
+}
+function closeSheet(){ const w=$('#sheetwrap'); if(w) w.remove(); }
+const AREA_LABEL = {doll:'装备',swap:'副手',merc:'佣兵',belt:'腰带',inv:'背包',cube:'方块',personal:'个人仓库',shared:'共享仓库',tray:'托盘',vault:'宝库'};
+function openItemSheet(area, id){
+  const loc = locateItem(area, id); if(!loc) return;
+  const o = loc.item;
+  S.sheetRef = {area, id:o.id};
+  let btns = '';
+  if(area==='tray') btns += '<button class="primary" id="sh-back">放回当前网格</button>';
+  else btns += '<button class="primary" id="sh-tray">放入托盘</button>';
+  if(o.fit && (area!=='doll' && area!=='swap' && area!=='merc')) btns += '<button id="sh-equip">装备到空槽</button>';
+  btns += '<button id="sh-move">移动到…</button><button id="sh-export">导出 .d2i</button><button class="danger" id="sh-del">删除</button>';
+  const w = openSheet(
+    '<h3 class="q-'+o.q+'-t">'+esc(o.name)+(o.eth?'（无形）':'')+'</h3>'+
+    '<div class="base">'+esc(o.base||QNAME[o.q])+' · 位于'+AREA_LABEL[area]+(o.lvl>1? ' · 需要等级 '+o.lvl : '')+'</div>'+
+    (o.props.length? '<div class="props">'+o.props.map(p=>'<div>'+esc(p)+'</div>').join('')+'</div>':'')+
+    (o.sock? '<div class="sock">'+esc(o.sock)+'</div>':'')+
+    '<div class="btns">'+btns+'</div>');
+  const q = s => w.querySelector(s);
+  if(q('#sh-tray')) q('#sh-tray').onclick = ()=>{ closeSheet(); const l=locateItem(area,id); if(l) toTray(l); };
+  if(q('#sh-back')) q('#sh-back').onclick = ()=>{ closeSheet(); fromTrayTo(S.activeGrid); };
+  if(q('#sh-equip')) q('#sh-equip').onclick = ()=>{ closeSheet(); tryEquip(area, id); };
+  if(q('#sh-move')) q('#sh-move').onclick = ()=> openMoveSheet(area, id);
+  if(q('#sh-export')) q('#sh-export').onclick = ()=>{ closeSheet(); toast('已导出到 Documents/exports/<br>'+esc(o.name)+'.d2i（演示）'); flashSave(); };
+  if(q('#sh-del')) q('#sh-del').onclick = ()=>{ const l=locateItem(area,id); if(l){ l.remove(); } closeSheet(); flashSave(); render(); toast('已删除「'+esc(o.name)+'」（演示：真实版删除前会再确认）'); };
+}
+function tryEquip(area, id){
+  const loc = locateItem(area, id); if(!loc) return;
+  const o = loc.item; if(!o.fit){ toast('这件物品不能装备'); return; }
+  if(S.tab!=='char'){ toast('请到角色页再装备'); return; }
+  const VIEW = { doll: cur().doll, swap: cur().swap };
+  for(const viewName of ['doll','swap']){
+    const src = VIEW[viewName];
+    for(const f of o.fit){ if(src[f]===null || src[f]===undefined){ loc.remove(); src[f]=o; flashSave(); S.charView='detail'; S.sub='equip'; S.swapView = viewName==='swap'; render(); toast('已装备「'+esc(o.name)+'」'); return; } }
+  }
+  toast('对应槽位都被占用了<br>用拖动直接换装，或先把原装备放进托盘');
+}
+function openMoveSheet(area, id){
+  const loc = locateItem(area, id); if(!loc) return;
+  const targets = [['inv','背包'],['cube','方块'],['personal','个人仓库'],['shared','共享仓库'],['vault','宝库'],['tray','托盘']].filter(t=>t[0]!==area);
+  const w = openSheet('<h3>移动「'+esc(loc.item.name)+'」到…</h3><div class="btns">'+
+    targets.map(t=>'<button data-tgt="'+t[0]+'" class="wide" style="text-align:left;padding-left:14px">'+t[1]+'</button>').join('')+'</div>');
+  w.querySelectorAll('[data-tgt]').forEach(b=> b.onclick = ()=>{
+    const l = locateItem(area, id); if(!l) { closeSheet(); return; }
+    const o = l.item, tgt = b.dataset.tgt;
+    if(tgt==='tray'){ closeSheet(); toTray(l); return; }
+    if(tgt==='vault'){ l.remove(); S.vault.push(o); }
+    else { const spot = findSpot(tgt, o.w, o.h); if(!spot){ toast('放不下：'+b.textContent+'没有足够空间'); return; } l.remove(); o.x=spot.x; o.y=spot.y; GRIDS[tgt].get().push(o); }
+    closeSheet(); flashSave(); render(); toast('已移动到'+b.textContent);
+  });
+}
+/* ---- gold ---- */
+function goldAccounts(){
+  const bankChar = S.tab==='stash' ? S.chars[S.stashChar] : cur();
+  return [
+    {key:'inv', label: cur().name+' 携带', cap: 100000 + cur().level*10000, get:()=>cur().goldInv, set:v=>{cur().goldInv=v;}},
+    {key:'bank', label: bankChar.name+' 个人仓库', cap: 2500000, get:()=>bankChar.goldBank, set:v=>{bankChar.goldBank=v;}},
+    {key:'shared', label:'共享仓库（金池）', cap: 999999999, get:()=>S.goldShared, set:v=>{S.goldShared=v;}},
+    {key:'vault', label:'宝库金池', cap: 999999999, get:()=>S.goldVault, set:v=>{S.goldVault=v;}},
+  ];
+}
+function openGoldSheet(fromKey){
+  const accs = goldAccounts();
+  const from = accs.find(a=>a.key===fromKey); if(!from) return;
+  let destKey = accs.find(a=>a.key!==fromKey).key;
+  const w = openSheet(
+    '<h3>🪙 金币转移</h3><div class="base">从「'+from.label+'」转出 · 余额 <b style="color:var(--gold)">'+fmt(from.get())+'</b></div>'+
+    '<div class="frow"><div class="fl">转入</div><div class="destchips">'+accs.filter(a=>a.key!==fromKey).map(a=>'<button data-dest="'+a.key+'">'+a.label+'</button>').join('')+'</div></div>'+
+    '<div class="gamount"><input id="gamt" type="number" inputmode="numeric" placeholder="输入金额"><button id="gmax">最大</button></div>'+
+    '<div class="gbal" id="gbal"></div>'+
+    '<div class="btns"><button class="primary wide" id="gok">确认转移</button></div>');
+  const bal = ()=>{ const d = accs.find(a=>a.key===destKey);
+    w.querySelector('#gbal').innerHTML = '目标「'+d.label+'」当前 <b>'+fmt(d.get())+'</b>'+(d.cap<999999999? ' · 上限 <b>'+fmt(d.cap)+'</b> · 还可存 <b>'+fmt(Math.max(0,d.cap-d.get()))+'</b>':' · 无上限'); };
+  const chips = ()=> w.querySelectorAll('[data-dest]').forEach(b=> b.classList.toggle('on', b.dataset.dest===destKey));
+  w.querySelectorAll('[data-dest]').forEach(b=> b.onclick=()=>{ destKey=b.dataset.dest; chips(); bal(); });
+  w.querySelector('#gmax').onclick = ()=>{ const d = accs.find(a=>a.key===destKey); w.querySelector('#gamt').value = Math.min(from.get(), Math.max(0, d.cap-d.get())); };
+  w.querySelector('#gok').onclick = ()=>{ const d = accs.find(a=>a.key===destKey);
+    let n = Math.floor(+w.querySelector('#gamt').value || 0);
+    n = Math.max(0, Math.min(n, from.get(), d.cap - d.get()));
+    if(n<=0){ toast('没有可转移的金额（检查余额与上限）'); return; }
+    from.set(from.get()-n); d.set(d.get()+n); closeSheet(); flashSave(); render(); toast('已转移 '+fmt(n)+' 金币到「'+d.label+'」'); };
+  chips(); bal();
+}
+/* ---- vault filter ---- */
+function openFilterSheet(){
+  const f = S.vaultFilter;
+  const w = openSheet('<h3>宝库筛选（参考 GoMule）</h3>'+
+    '<div class="frow"><div class="fl">品质</div><div class="destchips">'+QCHIPS.map(c=>'<button data-fq="'+c[0]+'" class="'+(f.q===c[0]?'on':'')+'">'+c[1]+'</button>').join('')+'</div></div>'+
+    '<div class="frow"><div class="fl">类型</div><div class="destchips">'+CATCHIPS.map(c=>'<button data-fc="'+c[0]+'" class="'+(f.cat===c[0]?'on':'')+'">'+c[1]+'</button>').join('')+'</div></div>'+
+    '<div class="frow"><div class="fl">需要等级区间</div><div class="rng"><input id="flmin" type="number" placeholder="最低" value="'+f.lvlMin+'"><span>—</span><input id="flmax" type="number" placeholder="最高" value="'+f.lvlMax+'"></div></div>'+
+    '<div class="frow"><div class="fl">其他条件</div><div class="togrow"><label><input type="checkbox" id="feth" '+(f.eth?'checked':'')+'> 无形</label><label><input type="checkbox" id="fsock" '+(f.sock?'checked':'')+'> 带凹槽</label></div></div>'+
+    '<div class="frow" style="font-size:11.5px;color:var(--ink-faint);line-height:1.6">二期：一期先做以上条件；属性条件行（如「快速施法 ≥ 20%」）的构建器放二期。</div>'+
+    '<div class="btns"><button id="fclear">清空条件</button><button class="primary" id="fapply">应用</button></div>');
+  w.querySelectorAll('[data-fq]').forEach(b=> b.onclick=()=>{ f.q=b.dataset.fq; openFilterSheet(); });
+  w.querySelectorAll('[data-fc]').forEach(b=> b.onclick=()=>{ f.cat=b.dataset.fc; openFilterSheet(); });
+  w.querySelector('#fclear').onclick = ()=>{ S.vaultFilter = {text:S.vaultFilter.text, q:'all', cat:'all', lvlMin:'', lvlMax:'', eth:false, sock:false}; closeSheet(); render(); };
+  w.querySelector('#fapply').onclick = ()=>{ f.lvlMin=w.querySelector('#flmin').value; f.lvlMax=w.querySelector('#flmax').value; f.eth=w.querySelector('#feth').checked; f.sock=w.querySelector('#fsock').checked; closeSheet(); render(); };
+}
+/* ================= gestures: tap / double-tap / drag ================= */
+const DRAGGABLE = ['doll','swap','merc','belt','inv','cube','personal','shared','tray'];
+let P = null, tapTimer = null, lastTap = {key:null, t:0};
+const ghost = $('#ghost');
+function slotItem(area, loc){ return area==='merc' ? cur().merc.doll[loc] : area==='swap' ? cur().swap[loc] : cur().doll[loc]; }
+function slotSet(area, loc, item){ if(area==='merc') cur().merc.doll[loc]=item; else if(area==='swap') cur().swap[loc]=item; else cur().doll[loc]=item; }
+function normLoc(l){ return l.replace(/s$/,''); }
+function slotCheck(item, area, loc, src){
+  if(!item.fit || !item.fit.map(normLoc).includes(normLoc(loc))) return {ok:false, reason:'「'+item.name+'」放不到这个槽位'};
+  if(area==='merc' && loc==='lh') return {ok:false, reason:'第二幕佣兵不能使用盾牌'};
+  if(loc==='belt'){ const used = cur().belt.reduce((m,o,i)=> o? Math.max(m, Math.floor(i/4)+1):m, 0);
+    if((item.beltBoxes||4) < used*4) return {ok:false, reason:'腰带上层还有药水，先清空再换腰带'}; }
+  const occ = slotItem(area, loc);
+  if(!occ) return {ok:true};
+  if(src && (src.area==='doll'||src.area==='swap'||src.area==='merc')){
+    if(occ.fit && occ.fit.map(normLoc).includes(normLoc(src.loc))) return {ok:true, swap:true};
+    return {ok:false, reason:'槽位已被占用，且不能直接对换'};
+  }
+  if(src && src.gridItem){
+    const gi = src.gridItem;
+    if(occ.w<=gi.w && occ.h<=gi.h) return {ok:true, swap:true};
+  }
+  return {ok:false, reason:'槽位已被占用 · 先把原装备拖走或放进托盘'};
+}
+function gridCheck(area, item, x, y, ignoreId){
+  const g = GRIDS[area]; if(!g) return {ok:false};
+  const rows = area==='belt' ? beltRows() : g.rows;
+  if(x<0 || y<0 || x+item.w>g.cols || y+item.h>rows) return {ok:false, reason:'超出区域边界'};
+  if(!rectFree(g.get(), x, y, item.w, item.h, ignoreId)) return {ok:false, reason:'位置被占用'};
+  return {ok:true};
+}
+document.addEventListener('pointerdown', e=>{
+  const el = e.target.closest('[data-area][data-id]'); if(!el) return;
+  P = {el, area:el.dataset.area, id:+el.dataset.id, x0:e.clientX, y0:e.clientY, pid:e.pointerId, dragging:false};
+});
+document.addEventListener('pointermove', e=>{
+  if(!P || e.pointerId!==P.pid) return;
+  if(!P.dragging){
+    if(Math.hypot(e.clientX-P.x0, e.clientY-P.y0) > 9){
+      if(!DRAGGABLE.includes(P.area)){ P=null; return; }
+      if(!startDrag(e)){ P=null; return; }
+    } else return;
+  }
+  e.preventDefault(); moveDrag(e);
+}, {passive:false});
+document.addEventListener('pointerup', e=>{
+  if(!P || e.pointerId!==P.pid) return;
+  const was = P; P = null;
+  if(was.dragging){ endDrag(e); return; }
+  const key = was.area+':'+was.id, now = Date.now();
+  if(lastTap.key===key && now-lastTap.t<330){ lastTap={key:null,t:0}; clearTimeout(tapTimer); dblAction(was.area, was.id); }
+  else { lastTap={key, t:now}; clearTimeout(tapTimer); tapTimer=setTimeout(()=>openItemSheet(was.area, was.id), 250); }
+});
+document.addEventListener('pointercancel', e=>{ if(P && P.dragging) cancelDrag(); P=null; });
+function startDrag(e){
+  const loc = locateItem(P.area, P.id); if(!loc) return false;
+  const r = P.el.getBoundingClientRect();
+  P.dragging = true; P.item = loc.item; P.fromTray = P.area==='tray';
+  P.offX = e.clientX - r.left; P.offY = e.clientY - r.top; P.gw = r.width; P.gh = r.height;
+  P.srcLoc = loc.loc || null; P.srcGridItem = (P.area==='inv'||P.area==='cube'||P.area==='personal'||P.area==='shared') ? loc.item : null;
+  ghost.textContent = loc.item.g; ghost.style.width = r.width+'px'; ghost.style.height = r.height+'px';
+  ghost.style.display = 'flex'; ghost.classList.remove('bad');
+  P.el.classList.add('drag-src'); P.el.style.pointerEvents = 'none';
+  if(P.fromTray) closeTray(); /* 托盘自动收起，不遮挡落点 */
+  moveDrag(e);
+  return true;
+}
+function clearHl(){
+  main.querySelectorAll('.slot.drop-ok,.slot.drop-bad').forEach(s=>s.classList.remove('drop-ok','drop-bad'));
+  document.querySelectorAll('.drop-hl').forEach(h=> h.style.display='none');
+  $('#trayhandle').classList.remove('droptarget');
+}
+function moveDrag(e){
+  ghost.style.left = (e.clientX - P.offX)+'px'; ghost.style.top = (e.clientY - P.offY)+'px';
+  clearHl(); P.drop = null;
+  const hit = document.elementFromPoint(e.clientX, e.clientY); if(!hit) { ghost.classList.add('bad'); return; }
+  const handle = hit.closest && hit.closest('#trayhandle');
+  if(handle && !P.fromTray){ P.drop = {kind:'tray', ok:true}; handle.classList.add('droptarget'); ghost.classList.remove('bad'); return; }
+  const slot = hit.closest && hit.closest('.slot[data-droptarget]');
+  if(slot){
+    const area = slot.dataset.area, loc = slot.dataset.loc;
+    const chk = slotCheck(P.item, area, loc, {area:P.area, loc:P.srcLoc, gridItem:P.srcGridItem});
+    P.drop = {kind:'slot', area, loc, ok:chk.ok, swap:!!chk.swap, reason:chk.reason};
+    slot.classList.add(chk.ok? 'drop-ok':'drop-bad'); ghost.classList.toggle('bad', !chk.ok); return;
+  }
+  const wrap = hit.closest && hit.closest('.gridwrap[data-droptarget]');
+  if(wrap){
+    const area = wrap.dataset.area, g = GRIDS[area]; if(!g) return;
+    const rect = wrap.getBoundingClientRect();
+    let x = Math.floor((e.clientX - rect.left)/g.cell), yT = Math.floor((e.clientY - rect.top)/g.cell);
+    let y = area==='belt' ? (+(wrap.dataset.disp||1) - 1 - yT) : yT;
+    x = Math.max(0, Math.min(g.cols - P.item.w, x)); y = Math.max(0, y);
+    const chk = gridCheck(area, P.item, x, y, P.id);
+    P.drop = {kind:'grid', area, x, y, ok:chk.ok, reason:chk.reason};
+    const hl = wrap.querySelector('.drop-hl');
+    if(hl){ hl.style.display='block'; hl.style.left=(x*g.cell)+'px'; hl.style.top=((area==='belt'? (+(wrap.dataset.disp||1)-1-y) : y)*g.cell)+'px'; hl.style.width=(P.item.w*g.cell)+'px'; hl.style.height=(P.item.h*g.cell)+'px'; hl.classList.toggle('bad', !chk.ok); }
+    ghost.classList.toggle('bad', !chk.ok); return;
+  }
+  ghost.classList.add('bad');
+}
+function cleanupDragVisual(){
+  ghost.style.display='none'; clearHl();
+  if(P && P.el){ P.el.classList.remove('drag-src'); P.el.style.pointerEvents=''; }
+}
+function endDrag(e){
+  const d = P.drop, item = P.item;
+  cleanupDragVisual();
+  if(d && d.ok){
+    const loc = locateItem(P.area, P.id); if(!loc){ render(); return; }
+    if(d.kind==='tray'){ toTray(loc); return; }
+    if(d.kind==='slot'){
+      const occ = slotItem(d.area, d.loc);
+      loc.remove();
+      if(occ && d.swap){
+        if(P.srcLoc){ slotSet(P.area, P.srcLoc, occ); }
+        else if(P.srcGridItem){ occ.x = P.srcGridItem.x; occ.y = P.srcGridItem.y; GRIDS[P.area].get().push(occ); }
+      }
+      slotSet(d.area, d.loc, item);
+    } else if(d.kind==='grid'){
+      loc.remove();
+      if(d.area==='belt'){ cur().belt[d.y*4 + d.x] = item; }
+      else { item.x = d.x; item.y = d.y; GRIDS[d.area].get().push(item); }
+    }
+    flashSave(); render(); return;
+  }
+  /* 落空：回滚 */
+  if(d && d.reason) toast(d.reason);
+  if(P.fromTray){ openTray(); const h=$('#trayhandle'); h.classList.remove('bump'); void h.offsetWidth; h.classList.add('bump'); }
+}
+function cancelDrag(){ cleanupDragVisual(); if(P && P.fromTray) openTray(); }
+function dblAction(area, id){
+  if(area==='tray'){ fromTrayTo(S.activeGrid, id); return; }
+  const loc = locateItem(area, id); if(loc) toTray(loc);
+}
+/* ================= init ================= */
+render();
+</script>
+</body>
+</html>
