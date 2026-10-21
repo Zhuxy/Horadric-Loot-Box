@@ -13,7 +13,7 @@
     --q-normal:#c8c8c8; --q-magic:#6969ff; --q-rare:#ffff64; --q-set:#1fdc1f;
     --q-unique:#c7b377; --q-rune:#ffa033; --q-crafted:#ff8c1a; --q-gem:#b48ce8;
     --ok:#3fae5a; --bad:#d84545;
-    --c:30px; /* grid cell */
+    --c:28px; /* grid cell */
   }
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{height:100%}
@@ -143,17 +143,25 @@
   .beltrow{display:flex;align-items:center;gap:8px;justify-content:center;padding:5px 12px 0}
   .beltrow .cap{font-size:11px;color:var(--ink-faint)}
   .beltcells{position:relative}
-  .beltcells .item{--c:30px}
+  .beltcells .item{--c:28px}
   .beltpanel{
     position:absolute;left:12px;right:12px;z-index:30;margin-top:4px;
     border:1px solid var(--gold-faint);border-radius:6px;padding:8px 10px;
     background:linear-gradient(180deg,rgba(34,29,20,.97),rgba(18,15,10,.97));display:none;
     box-shadow:0 14px 30px rgba(0,0,0,.6);
   }
-  .screen .padwrap{position:relative;flex:1;display:flex;flex-direction:column}
+  .screen .padwrap{position:relative;flex:1;display:flex;flex-direction:column;justify-content:space-between}
+  .dollzone{position:relative}
+  .swapov{position:absolute;right:10px;top:2px;display:flex;gap:4px;z-index:6}
+  .swapov button{background:rgba(0,0,0,.5);border:1px solid var(--panel-edge);color:var(--ink-dim);border-radius:4px;padding:4px 9px;font-size:11.5px;cursor:pointer}
+  .swapov button.on{color:var(--gold);border-color:var(--gold-faint);background:rgba(50,40,16,.6)}
+  .beltgold{display:flex;align-items:center;gap:9px;padding:6px 12px 0}
+  .bg-gold{margin-left:auto;display:flex;align-items:center;gap:7px;font-size:13.5px;color:var(--ink);cursor:pointer;border:1px solid var(--panel-edge);border-radius:6px;padding:5px 10px;background:linear-gradient(180deg,rgba(46,38,18,.55),rgba(22,18,10,.55))}
+  .bg-gold b{color:var(--gold);font-variant-numeric:tabular-nums}
+  .bg-gold span{font-size:11px;color:var(--gold);border:1px solid var(--gold-faint);border-radius:4px;padding:2px 6px}
   #trayhandle.droptarget{outline:2px solid var(--ok);outline-offset:-2px;background:linear-gradient(180deg,#5d4d1c,#3a2d10)}
   .beltpanel.on{display:block}
-  .beltpanel .gridwrap{--c:30px}
+  .beltpanel .gridwrap{--c:28px}
   /* ---------- gold ---------- */
   .goldrow{
     display:flex;align-items:center;gap:8px;margin:6px 12px 0;padding:7px 12px;cursor:pointer;
@@ -335,7 +343,7 @@
 <script>
 'use strict';
 /* ================= data ================= */
-const CELL = 30, TRAYCELL = 40;
+const CELL = 28, TRAYCELL = 40;
 const QNAME = {normal:'普通',magic:'魔法',rare:'稀有',set:'套装',unique:'独特',rune:'符文之语',crafted:'手工',gem:'宝石'};
 let _uid = 1;
 function it(name,o){ return Object.assign({id:_uid++, name, q:'normal', g:'◆', w:1, h:1, x:0, y:0, cat:'其他', type:'misc', lvl:1, props:[], fit:null, qty:0}, o||{}); }
@@ -477,7 +485,7 @@ function rectFree(items, x, y, w, h, ignoreId){
 }
 const GRIDS = {
   inv:  {cols:10, rows:4,  cell:CELL, get:()=>cur().inv},
-  cube: {cols:4,  rows:3,  cell:CELL, get:()=>cur().cube},
+  cube: {cols:3,  rows:4,  cell:CELL, get:()=>cur().cube},
   personal:{cols:10, rows:10, cell:CELL, get:()=>S.personal[S.stashChar]},
   shared:{cols:10, rows:10, cell:CELL, get:()=>S.shared[S.sharedTab]},
   belt: {cols:4,  rows:4,  cell:CELL, get:()=>{ const c=cur(); return c.belt.map((b,i)=> b? Object.assign(b,{x:i%4, y:Math.floor(i/4)}) : null).filter(Boolean); }},
@@ -555,7 +563,7 @@ const DOLL = [
   ['gloves',0,6.6,2,2,'手套'],['ringR',2,7.2,1,1,'戒指'],['ringL',3,7.2,1,1,'戒指'],['feet',4,6.6,2,2,'靴子'],
 ];
 const px = v => Math.round(v*(CELL+1.5));
-const FIGURE = '<svg class="figure" width="'+(px(4)+2*CELL)+'" height="'+(px(7.2)+CELL)+'" viewBox="0 0 '+(px(4)+2*CELL)+' '+(px(7.2)+CELL)+'">'+
+const FIGURE = '<svg class="figure" width="'+(px(4)+2*CELL)+'" height="'+(px(7.2)+CELL)+'" viewBox="0 0 210 290" preserveAspectRatio="xMidYMid meet">'+
   '<ellipse cx="50%" cy="52%" rx="46%" ry="48%" fill="rgba(212,182,106,.055)"/>'+
   '<path d="M105 12c18 0 30 14 30 32 0 10-4 18-10 24l27 11c15 6 23 17 25 34l8 92c1 15-7 24-20 26l-13 2 6 44H52l6-44-13-2c-13-2-21-11-20-26l8-92c2-17 10-28 25-34l27-11c-6-6-10-14-10-24 0-18 12-32 30-32z" fill="#241d12" stroke="#5a4a28" stroke-width="1.5" transform="translate(-8,0) scale(1.02)"/></svg>';
 function dollHTML(area){
@@ -585,12 +593,12 @@ function buildEquip(body){
   const c = cur();
   const rows = beltRows();
   body.innerHTML =
-    dollHTML(S.swapView? 'swap':'doll') +
-    '<div class="swapctl"><span>武器</span><button data-swap="0" class="'+(!S.swapView?'on':'')+'">主手 I</button><button data-swap="1" class="'+(S.swapView?'on':'')+'">副手 II</button></div>' +
-    '<div class="beltrow"><span class="cap">腰带</span><div class="beltcells gridwrap" data-droptarget="grid" data-area="belt" data-disp="1" style="width:'+(4*CELL)+'px;height:'+CELL+'px;position:relative"><div class="gridbg"></div><div class="drop-hl"></div></div>'+
-      '<button class="backbtn" id="belttoggle">'+(S.beltOpen?'收起':'展开 '+rows+' 排')+'</button></div>' +
-    '<div class="beltpanel'+(S.beltOpen?' on':'')+'" id="beltpanel"></div>' +
-    goldrowHTML('携带金币', c.goldInv, 'inv') +
+    '<div><div class="dollzone">' + dollHTML(S.swapView? 'swap':'doll') +
+      '<div class="swapov"><button data-swap="0" class="'+(!S.swapView?'on':'')+'">I 主手</button><button data-swap="1" class="'+(S.swapView?'on':'')+'">II 副手</button></div></div>' +
+    '<div class="beltgold"><div class="beltcells gridwrap" data-droptarget="grid" data-area="belt" data-disp="1" style="width:'+(4*CELL)+'px;height:'+CELL+'px;position:relative"><div class="gridbg"></div><div class="drop-hl"></div></div>'+
+      '<button class="backbtn" id="belttoggle">'+(S.beltOpen?'收起':'展开 '+rows+' 排')+'</button>' +
+      '<div class="bg-gold" data-gold="inv">🪙 <b>'+fmt(c.goldInv)+'</b><span>存 / 取</span></div></div>' +
+    '<div class="beltpanel'+(S.beltOpen?' on':'')+'" id="beltpanel"></div></div>' +
     '<div style="display:flex;align-items:center;gap:6px;padding:6px 12px 4px"><span style="font-size:12px;color:var(--ink-dim)">'+(S.gridView==='inv'?'背包':'赫拉迪克方块')+'</span>'+
       '<span style="margin-left:auto"></span>'+
       '<button class="backbtn" data-gv="inv" style="'+(S.gridView==='inv'?'border-color:var(--gold);color:var(--gold)':'')+'">背包</button>'+
@@ -667,13 +675,13 @@ function buildStash(scr){
   h += '<div class="seg"><button data-seg="personal" class="'+(S.stashSeg==='personal'?'on':'')+'">个人仓库</button><button data-seg="shared" class="'+(S.stashSeg==='shared'?'on':'')+'">共享仓库</button></div>';
   if(S.stashSeg==='personal'){
     S.activeGrid='personal';
-    h += goldrowHTML(sc.name+' 的仓库金币', sc.goldBank, 'bank') + '<div style="height:10px"></div>' + gridHTML('personal') +
-      '<div class="hintline" style="padding-top:8px">个人仓库跟角色走 · 金币点上方金币行取出</div>';
+    h += goldrowHTML(sc.name+' 的仓库金币', sc.goldBank, 'bank') + '<div style="flex:1"></div>' + gridHTML('personal') +
+      '<div class="hintline" style="padding-top:8px">个人仓库跟角色走 · 金币点上方金币行取出</div>' + '<div style="flex:1"></div>';
   } else {
     S.activeGrid='shared';
     h += '<div class="tabchips">'+S.shared.map((t,i)=>'<button data-stab="'+i+'" class="'+(S.sharedTab===i?'on':'')+'">页签 '+(i+1)+'</button>').join('')+'</div>' +
-      goldrowHTML('共享金币（全部页签共用一池）', S.goldShared, 'shared') + '<div style="height:10px"></div>' + gridHTML('shared') +
-      '<div class="hintline" style="padding-top:8px">共享仓库对全部角色可见</div>';
+      goldrowHTML('共享金币（全部页签共用一池）', S.goldShared, 'shared') + '<div style="flex:1"></div>' + gridHTML('shared') +
+      '<div class="hintline" style="padding-top:8px">共享仓库对全部角色可见</div>' + '<div style="flex:1"></div>';
   }
   scr.innerHTML = h;
   scr.querySelectorAll('[data-sc]').forEach(b=> b.onclick=()=>{ S.stashChar=b.dataset.sc; render(); });
