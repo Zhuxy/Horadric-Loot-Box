@@ -12,7 +12,7 @@ import type { Platform } from '../../src/platform/types';
  * - art: the player imports extracted sprites into Documents/resources; the
  *   existing Rust art backend decodes them for the webview.
  *
- * The Rust side opens Documents/save. The Sync tab invokes native folder
+ * The Rust side opens Documents/save. The Settings tab invokes native folder
  * import/export commands, which handle security-scoped access on iOS.
  */
 export const iosPlatform: Platform = {

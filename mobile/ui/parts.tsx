@@ -2,17 +2,27 @@ import { useEffect, type ReactNode } from 'react';
 import type { D2Item, QualityClass } from '../../src/core';
 import { desc } from '../../src/state/store';
 import { useStore } from '../../src/ui/context';
-import { ItemFace, QUALITY_BORDER } from '../../src/ui/ItemArt';
+import { ItemThumb } from '../../src/ui/ItemArt';
 
-/** Quality -> text color (desktop palette hex; Tailwind q-* classes aren't generated for the mobile entry). */
+/** Quality colours from the desktop recipe (SPEC §4). */
 export const qText: Record<QualityClass, string> = {
-  unique: '#c7b377', runeword: '#c7b377', quest: '#c7b377', gold: '#c7b377',
-  set: '#1fdc1f', magic: '#6969ff', rare: '#ffff64', crafted: '#ffa800',
-  tempered: '#e07cff', normal: '#e6e0d6', superior: '#e6e0d6',
-  inferior: '#8f8f8f', rune: '#ffa033', gem: '#e6e0d6',
+  unique: '#c7b377',
+  runeword: '#c7b377',
+  quest: '#c7b377',
+  gold: '#c7b377',
+  set: '#1fdc1f',
+  magic: '#6969ff',
+  rare: '#ffff64',
+  crafted: '#ff8c1a',
+  tempered: '#e07cff',
+  normal: '#e8e0cc',
+  superior: '#e8e0cc',
+  inferior: '#8f8f8f',
+  rune: '#ffa033',
+  gem: '#b48ce8',
 };
 
-/** Bottom sheet. */
+/** Bottom sheet, styled like the prototype's panel. */
 export function Sheet({ open, onClose, children }: { open: boolean; onClose: () => void; children: ReactNode }) {
   useEffect(() => {
     if (!open) return;
@@ -21,42 +31,24 @@ export function Sheet({ open, onClose, children }: { open: boolean; onClose: () 
     return () => window.removeEventListener('keydown', h);
   }, [open, onClose]);
   return (
-    <>
-      <div className={`m-scrim${open ? ' show' : ''}`} onClick={onClose} />
-      <div className={`m-sheet${open ? ' show' : ''}`} role="dialog" aria-hidden={!open}>
+    <div className={`m-sheetwrap${open ? ' on' : ''}`}>
+      <div className="m-sheet-bg" onClick={onClose} />
+      <div className="m-sheet" role="dialog" aria-hidden={!open}>
         <div className="m-grab" />
         {children}
       </div>
-    </>
+    </div>
   );
 }
 
-/** Renders store toasts (import results, save confirmations, errors). */
+/** Renders the newest store toast. */
 export function Toasts() {
   const store = useStore();
   const current = store.toasts[store.toasts.length - 1];
-  return <div className={`m-toast${current ? ' show' : ''}${current?.kind === 'error' ? ' err' : ''}`}>{current?.text}</div>;
+  return <div className={`m-toast${current ? ' on' : ''}${current?.kind === 'error' ? ' m-err' : ''}`}>{current?.text}</div>;
 }
 
-/** Small item tile: game art when available, glyph fallback otherwise (SPEC §8). */
-export function Tile({ item, size = 46, empty }: { item?: D2Item; size?: number; empty?: boolean }) {
-  const store = useStore();
-  if (empty || !item) return <span className="m-tile empty" style={{ width: size, height: size }}>·</span>;
-  const d = desc(item);
-  return (
-    <span
-      className="m-tile"
-      style={{ width: size, height: size, borderColor: QUALITY_BORDER[d.qualityClass] ?? undefined }}
-      title={d.name}
-    >
-      <span style={{ position: 'relative', width: '88%', height: '88%', display: 'block' }}>
-        <ItemFace item={item} width={size} height={size} cell={size / 2} view="art" art={store.art} />
-      </span>
-    </span>
-  );
-}
-
-/** Item name in its quality color. */
+/** Item name in its quality colour. */
 export function QName({ item, className = 'm-inm' }: { item: D2Item; className?: string }) {
   const d = desc(item);
   return (
@@ -66,15 +58,19 @@ export function QName({ item, className = 'm-inm' }: { item: D2Item; className?:
   );
 }
 
-/** One-line type subtitle, e.g. "Long Sword · 1H weapon". */
-export function typeSub(item: D2Item): string {
-  const d = desc(item);
-  return d.baseName && d.baseName !== d.name ? `${d.baseName}` : shortKind(item);
+/** Small item picture for lists and sheets. */
+export function ItemIcon({ item, size = 42 }: { item: D2Item; size?: number }) {
+  return (
+    <span className="m-vic" style={{ width: size, height: size }}>
+      <ItemThumb item={item} size={size - 4} />
+    </span>
+  );
 }
 
-function shortKind(item: D2Item): string {
-  const code = item.code;
-  if (/^r[0-9]{2}$/.test(code)) return 'Rune';
-  if (/^g[ms][wvlbyp]$/.test(code)) return 'Gem';
-  return item.def?.type ?? '';
+/** One-line base/type subtitle. */
+export function typeSub(item: D2Item): string {
+  const d = desc(item);
+  const def = item.def;
+  if (def && d.baseName && d.baseName !== d.name) return def.name;
+  return def?.type ?? d.baseName;
 }

@@ -86,6 +86,24 @@ describe('equipment', () => {
     roundTrip(chaos());
   });
 
+  test('two rings swap slots as one undo step and the new slots are written', () => {
+    const ch = chaos();
+    const a = worn(ch, 6)!;
+    const b = worn(ch, 7)!;
+    const aId = a.id;
+    const bId = b.id;
+    expect(store.canSwapWorn('t/ChaosSC.d2s', a, b)).toEqual({ ok: true });
+    expect(store.swapWorn('t/ChaosSC.d2s', a, b)).toBe(true);
+    expect(worn(ch, 6)!.id).toBe(bId);
+    expect(worn(ch, 7)!.id).toBe(aId);
+    const again = roundTrip(ch) as D2Character;
+    expect(worn(again, 6)!.id).toBe(bId);
+    expect(worn(again, 7)!.id).toBe(aId);
+    store.undo();
+    expect(worn(ch, 6)!.id).toBe(aId);
+    expect(worn(ch, 7)!.id).toBe(bId);
+  });
+
   const fake = (code: string, extra: Partial<D2Item> = {}) =>
     ({ code, def: GD.items[code], quality: Quality.Normal, stats: [], sockets: [], socketCount: 0, saveVersion: 105, mode: 0, ethereal: false, prefixes: [], suffixes: [], ...extra }) as unknown as D2Item;
 

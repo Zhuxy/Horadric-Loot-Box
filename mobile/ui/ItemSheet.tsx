@@ -1,19 +1,50 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
-import { StashTabType, itemBytes, itemName, type D2Item, type ItemDescription } from '../../src/core';
+import { StashTabType, itemBytes, itemName, slotCodes, type D2Item } from '../../src/core';
 import { desc, docLabel } from '../../src/state/store';
 import { useStore } from '../../src/ui/context';
 import { isTauri } from '../../src/platform/tauri';
 import { download } from '../../src/platform/dropped';
-import { Sheet, Tile, QName, qText, typeSub } from './parts';
+import { ItemProperties } from './items';
+import { Sheet, ItemIcon, QName, qText, typeSub } from './parts';
+import {
+  areaLabel,
+  isTrayDoc,
+  toStoreLoc,
+  trayDoc,
+  vaultDocs,
+  stashDocs,
+  tabLabel,
+  type ItemLoc,
+} from './model';
 
 export interface ItemRef {
   item: D2Item;
-  docId: string;
+  loc: ItemLoc;
 }
 
-/** Bottom action sheet for one item (SPEC §5.2): 放入宝库 / 移动到… / 导出为 .d2i / 删除. */
-export function ItemSheet({ selected, onClose }: { selected: ItemRef | null; onClose: () => void }) {
+/** Main equipment slots an item might fit (weapon-swap hands are filled by dragging in the II view). */
+const SLOTS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+interface MoveTarget {
+  label: string;
+  loc: ItemLoc;
+}
+
+/** Bottom action sheet for one item (SPEC §7.3). */
+export function ItemSheet({
+  selected,
+  activeLoc,
+  charId,
+  onClose,
+  afterChange,
+}: {
+  selected: ItemRef | null;
+  activeLoc?: ItemLoc;
+  charId?: string;
+  onClose: () => void;
+  afterChange: () => void;
+}) {
   const store = useStore();
   const [moving, setMoving] = useState(false);
   const [confirmDel, setConfirmDel] = useState(false);
@@ -25,21 +56,102 @@ export function ItemSheet({ selected, onClose }: { selected: ItemRef | null; onC
     onClose();
   };
 
-  if (!selected) return <Sheet open={false} onClose={close}>{null}</Sheet>;
-  const { item, docId } = selected;
-  const d = desc(item);
+  const item = selected?.item;
+  const loc = selected?.loc;
+  const d = item ? desc(item) : undefined;
 
-  const vaults = [...store.docs.entries()].filter(([, e]) => e.doc?.kind === 'vault');
+  const targets = useMemo<MoveTarget[]>(() => {
+    if (!item || !loc) return [];
+    const out: MoveTarget[] = [];
+    const add = (label: string, target: ItemLoc) => {
+      const same = JSON.stringify(target) === JSON.stringify(loc);
+      if (!same) out.push({ label, loc: target });
+    };
+    const ch = charId ? store.docs.get(charId)?.doc : undefined;
+    if (ch?.kind === 'character') {
+      add(`${ch.name} · 背包`, { docId: charId!, kind: 'grid', area: 'inventory', tab: 0 });
+      add(`${ch.name} · 方块`, { docId: charId!, kind: 'grid', area: 'cube', tab: 0 });
+      add(`${ch.name} · 个人仓库`, { docId: charId!, kind: 'grid', area: 'stash', tab: 0 });
+    }
+    for (const { id, stash } of stashDocs(store)) {
+      stash.tabs.forEach((t, i) => {
+        if (t.type !== StashTabType.Normal) return;
+        add(`${docLabel(stash, id)} · ${tabLabel(i)}`, { docId: id, kind: 'grid', area: 'shared', tab: i });
+      });
+    }
+    for (const { id, vault } of vaultDocs(store)) add(`${vault.name} · 宝库`, { docId: id, kind: 'vault' });
+    const tray = trayDoc(store);
+    if (tray && !isTrayDoc(store, loc.docId)) add('装备托盘', { docId: tray.id, kind: 'vault' });
+    return out;
+  }, [item, loc, store, charId]);
 
-  const toVault = async () => {
-    const v = vaults[0];
-    if (!v) {
-      store.toast('error', 'No vault yet — create one from the Characters tab');
+  const tray = trayDoc(store);
+  const inTray = isTrayDoc(store, loc?.docId);
+
+  if (!selected || !item || !loc || !d) return <Sheet open={false} onClose={close}>{null}</Sheet>;
+
+  const toTray = () => {
+    if (!tray) {
+      store.toast('error', '托盘尚未准备好');
       return;
     }
     setBusy(true);
     try {
-      if (store.move(item, docId, { docId: v[0], area: 'vault' })) await store.saveAll();
+      if (store.move(item, loc.docId, { docId: tray.id, area: 'vault' })) afterChange();
+    } finally {
+      setBusy(false);
+      close();
+    }
+  };
+
+  const backToGrid = () => {
+    if (!activeLoc) {
+      store.toast('info', '当前页面没有网格区，切到装备页 / 仓库页再放回');
+      return;
+    }
+    setBusy(true);
+    try {
+      if (store.move(item, loc.docId, toStoreLoc(activeLoc))) afterChange();
+    } finally {
+      setBusy(false);
+      close();
+    }
+  };
+
+  const equipCandidate = () => {
+    if (!charId) {
+      store.toast('error', '没有当前角色');
+      return;
+    }
+    for (const bodyLoc of SLOTS) {
+      if (store.check(item, loc.docId, { docId: charId, area: 'equip', bodyLoc }).ok) return bodyLoc;
+    }
+    return undefined;
+  };
+
+  const couldEquip = slotCodes(item).size > 0;
+  const equipTo = equipCandidate();
+
+  const doEquip = () => {
+    if (!charId) return;
+    if (equipTo === undefined) {
+      store.toast('error', '对应槽位都被占用了，用拖动直接换装，或先把原装备放进托盘');
+      return;
+    }
+    setBusy(true);
+    try {
+      if (store.move(item, loc.docId, { docId: charId, area: 'equip', bodyLoc: equipTo })) afterChange();
+    } finally {
+      setBusy(false);
+      close();
+    }
+  };
+
+  const doMove = (target: ItemLoc) => {
+    setBusy(true);
+    try {
+      const ok = store.move(item, loc.docId, toStoreLoc(target));
+      if (ok) afterChange();
     } finally {
       setBusy(false);
       close();
@@ -53,27 +165,25 @@ export function ItemSheet({ selected, onClose }: { selected: ItemRef | null; onC
       const name = `${item.code}_${safe}.d2i`;
       const bytes = itemBytes(item);
       if (isTauri()) {
-        // iOS app: export_item writes into Documents/exports/ (app-owned, no
-        // security-scoped URL needed); the user moves it in the Files app ("考出").
         await invoke<string>('export_item', { name, data: Array.from(bytes) });
         store.toast('success', '已导出到文件 App → Horadric Loot Box → exports');
       } else {
         download(name, bytes);
-        store.toast('success', `Exported ${name}`);
+        store.toast('success', `已导出 ${name}`);
       }
     } catch (e) {
-      store.toast('error', `Export failed: ${(e as Error).message}`);
+      store.toast('error', `导出失败：${(e as Error).message}`);
     } finally {
       setBusy(false);
       close();
     }
   };
 
-  const doDelete = async () => {
+  const doDelete = () => {
     setBusy(true);
     try {
-      store.deleteItems(docId, [item]);
-      await store.saveAll();
+      const n = store.deleteItems(loc.docId, [item]);
+      if (n > 0) afterChange();
     } finally {
       setBusy(false);
       close();
@@ -82,113 +192,73 @@ export function ItemSheet({ selected, onClose }: { selected: ItemRef | null; onC
 
   return (
     <Sheet open onClose={close}>
-      <div className="m-sheet-title">
-        <h3 className="font-display">装备属性</h3>
-        <button type="button" className="m-sheet-close" aria-label="关闭装备属性" onClick={close}>×</button>
+      <div className="m-sheethead">
+        <div>
+          <h3 style={{ color: qText[d.qualityClass] }}>{d.name}</h3>
+          <div className="m-sheet-base">
+            {typeSub(item)} · 位于{areaLabel(store, loc)}
+            {d.requiredLevel > 1 ? ` · 需要等级 ${d.requiredLevel}` : ''}
+          </div>
+        </div>
+        <button className="m-sheetclose" aria-label="关闭" onClick={close}>
+          ×
+        </button>
       </div>
-      <div className="m-vitem" style={{ cursor: 'default' }}>
-        <Tile item={item} />
-        <span>
+      <div className="m-sheetitem">
+        <ItemIcon item={item} size={46} />
+        <div>
           <QName item={item} />
-          <br />
-          <span className="m-ity">{typeSub(item)}</span>
-        </span>
+          <div className="m-ity">{typeSub(item)}</div>
+        </div>
       </div>
       <ItemProperties description={d} />
+
       {moving ? (
-        <MoveTargets item={item} docId={docId} onDone={close} />
+        <div className="m-movetargets">
+          <div className="m-sheet-base">选择目标位置（放不下会提示）</div>
+          {targets.map((t) => (
+            <button key={t.label} className="m-movetarget" disabled={busy} onClick={() => doMove(t.loc)}>
+              {t.label}
+            </button>
+          ))}
+          {targets.length === 0 && <div className="m-empty">没有可移动的位置</div>}
+          <button className="m-movetarget" onClick={() => setMoving(false)}>
+            返回
+          </button>
+        </div>
       ) : (
-        <>
-          <button className="m-abtn primary" disabled={busy} onClick={toVault}>放入宝库</button>
-          <button className="m-abtn" disabled={busy} onClick={() => setMoving(true)}>移动到…</button>
-          <button className="m-abtn" disabled={busy} onClick={doExport}>导出为 .d2i</button>
-          {confirmDel ? (
-            <button className="m-abtn danger" disabled={busy} onClick={doDelete}>确认删除？（备份保留）</button>
+        <div className="m-sheet-btns">
+          {inTray ? (
+            <button className="m-primary m-wide" disabled={busy} onClick={backToGrid}>
+              放回当前网格
+            </button>
           ) : (
-            <button className="m-abtn danger" disabled={busy} onClick={() => setConfirmDel(true)}>删除</button>
+            <button className="m-primary m-wide" disabled={busy} onClick={toTray}>
+              放入托盘
+            </button>
           )}
-        </>
+          {!inTray && loc.kind !== 'equip' && loc.kind !== 'merc' && couldEquip && (
+            <button className="m-wide" disabled={busy} onClick={doEquip}>
+              装备到空槽
+            </button>
+          )}
+          <button disabled={busy} onClick={() => setMoving(true)}>
+            移动到…
+          </button>
+          <button disabled={busy} onClick={doExport}>
+            导出 .d2i
+          </button>
+          {confirmDel ? (
+            <button className="m-danger m-wide" disabled={busy} onClick={doDelete}>
+              确认删除？（备份保留）
+            </button>
+          ) : (
+            <button className="m-danger m-wide" disabled={busy} onClick={() => setConfirmDel(true)}>
+              删除
+            </button>
+          )}
+        </div>
       )}
     </Sheet>
-  );
-}
-
-function ItemProperties({ description: d }: { description: ItemDescription }) {
-  return (
-    <div className="m-item-props">
-      {d.lines.map((line, i) => {
-        if (line.heading) return <div key={i} className="m-item-prop-heading">{line.text}</div>;
-        const previous = d.lines[i - 1];
-        const bonusStart = line.bonus && (!previous?.bonus || previous.bonus.scope !== line.bonus.scope || previous.bonus.when !== line.bonus.when);
-        return (
-          <div key={i}>
-            {bonusStart && <div className="m-item-bonus-label">{line.bonus!.scope === 'item' ? `This item · ${line.bonus!.when}` : line.bonus!.when}</div>}
-            <div className={`m-item-prop m-item-prop-${line.kind}`} style={line.kind === 'base' && i === 0 && d.baseName === line.text ? { color: qText[d.qualityClass] } : undefined}>
-              {line.text}
-              {line.range && <span className={`m-item-range${line.perfect ? ' perfect' : ''}`} title={line.perfect ? 'Perfect roll' : `Possible roll: ${line.range}`}> [{line.range}]{line.perfect ? ' ★' : ''}</span>}
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-function MoveTargets({ item, docId, onDone }: { item: D2Item; docId: string; onDone: () => void }) {
-  const store = useStore();
-  const [busy, setBusy] = useState(false);
-
-  const targets: { label: string; sub: string; go: () => boolean }[] = [];
-  for (const [id, e] of store.docs) {
-    if (id === docId || !e.doc) continue;
-    const doc = e.doc;
-    if (doc.kind === 'vault') {
-      targets.push({ label: docLabel(doc, 'Vault'), sub: `${doc.entries.length} items · unlimited`, go: () => store.move(item, docId, { docId: id, area: 'vault' }) });
-    } else if (doc.kind === 'character') {
-      targets.push({
-        label: `${doc.name} · 背包`, sub: `Lv ${doc.level} ${doc.className}`,
-        go: () => {
-          const c = store.check(item, docId, { docId: id, area: 'inventory' });
-          return c.ok ? store.move(item, docId, { docId: id, area: 'inventory', x: c.x, y: c.y }) : (store.toast('error', c.reason ?? 'No space'), false);
-        },
-      });
-    } else if (doc.kind === 'stash') {
-      doc.tabs.forEach((t, i) => {
-        if (t.type !== StashTabType.Normal) return;
-        targets.push({
-          label: `${docLabel(doc, 'Stash')} · Tab ${i + 1}`, sub: `${t.items.length} items`,
-          go: () => {
-            const c = store.check(item, docId, { docId: id, area: 'shared', tab: i });
-            return c.ok ? store.move(item, docId, { docId: id, area: 'shared', tab: i, x: c.x, y: c.y }) : (store.toast('error', c.reason ?? 'No space'), false);
-          },
-        });
-      });
-    }
-  }
-
-  const go = async (t: (typeof targets)[number]) => {
-    setBusy(true);
-    try {
-      if (t.go()) await store.saveAll();
-    } finally {
-      setBusy(false);
-      onDone();
-    }
-  };
-
-  return (
-    <>
-      <div className="sub">选择目标位置（放不下会提示）</div>
-      {targets.length === 0 && <div className="m-empty">没有其他可移动的位置</div>}
-      {targets.map((t) => (
-        <button key={t.label} className="m-vitem" disabled={busy} onClick={() => go(t)}>
-          <span>
-            <span className="m-inm">{t.label}</span>
-            <br />
-            <span className="m-ity">{t.sub}</span>
-          </span>
-        </button>
-      ))}
-    </>
   );
 }

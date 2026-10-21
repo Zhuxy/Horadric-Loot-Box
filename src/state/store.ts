@@ -820,6 +820,57 @@ export class Store {
     return true;
   }
 
+  /**
+   * Whether two worn items can trade slots (drag one ring onto the other, or a weapon onto the other hand).
+   * Only partner slots swap: main/off hand, the two rings and the two weapon-swap hands.
+   */
+  canSwapWorn(docId: string, a: D2Item, b: D2Item): { ok: boolean; reason?: string } {
+    if (this.settings.readOnly) return { ok: false, reason: 'Read-only mode is on (turn it off in Settings to move items).' };
+    const d = this.docs.get(docId)?.doc;
+    if (d?.kind !== 'character') return { ok: false, reason: 'Not a character' };
+    const aMerc = d.mercItems.includes(a);
+    const bMerc = d.mercItems.includes(b);
+    if (aMerc !== bMerc) return { ok: false, reason: "One item is worn by the mercenary; move it there first." };
+    const list = aMerc ? d.mercItems : d.items;
+    if (!list.includes(a) || !list.includes(b)) return { ok: false, reason: 'Those items are not both worn.' };
+    if (a.mode !== ItemMode.Equipped || b.mode !== ItemMode.Equipped) return { ok: false, reason: 'Only worn items can swap slots.' };
+    const pairs = new Set(['4-5', '5-4', '6-7', '7-6', '11-12', '12-11']);
+    if (!pairs.has(`${a.bodyLoc}-${b.bodyLoc}`)) return { ok: false, reason: 'Those two slots cannot trade items.' };
+    const outA = canUnequip(d, a);
+    if (!outA.ok) return outA;
+    const outB = canUnequip(d, b);
+    if (!outB.ok) return outB;
+    // validate each item's new slot with both items taken out, so the old occupant doesn't block it
+    const stripped: D2Character = { ...d, items: d.items.filter((i) => i !== a && i !== b), mercItems: d.mercItems.filter((i) => i !== a && i !== b) };
+    const ca = canEquip(stripped, a, b.bodyLoc, { merc: aMerc });
+    if (!ca.ok) return ca;
+    const cb = canEquip(stripped, b, a.bodyLoc, { merc: bMerc });
+    if (!cb.ok) return cb;
+    return { ok: true };
+  }
+
+  /** Swaps two worn items as one undo step (drag-and-drop in the mobile UI). */
+  swapWorn(docId: string, a: D2Item, b: D2Item): boolean {
+    const check = this.canSwapWorn(docId, a, b);
+    if (!check.ok) {
+      this.toast('error', check.reason ?? 'Cannot swap those items');
+      return false;
+    }
+    const e = this.docs.get(docId);
+    if (!e) return false;
+    this.snapshot(`swap ${desc(a).name} and ${desc(b).name}`, [docId]);
+    const d = e.doc as D2Character;
+    const list = d.mercItems.includes(a) ? d.mercItems : d.items;
+    const ai = list.indexOf(a);
+    const bi = list.indexOf(b);
+    // withPlacement writes the body location into the item's own bytes, so the swap survives the save
+    list[ai] = withPlacement(a, equipPlacement(b.bodyLoc));
+    list[bi] = withPlacement(b, equipPlacement(a.bodyLoc));
+    e.dirty = true;
+    this.emit();
+    return true;
+  }
+
   private undoQuiet() {
     const snap = this.history.pop();
     snap?.lists.forEach((s) => s.restore());
