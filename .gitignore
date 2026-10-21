@@ -49,3 +49,6 @@ desktop.ini
 !public/demo/*.d2i
 public/ocr/
 dist-mobile/
+
+# prototype real-save data (lab-only, never commit)
+mobile/prototype2/data.js
