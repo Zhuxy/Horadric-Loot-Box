@@ -236,6 +236,21 @@ export interface StoreOptions {
   vaults?: boolean;
 }
 
+/** Run `fn` over `items` with at most `limit` promises in flight; results keep input order. */
+async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
+  const out: R[] = new Array(items.length);
+  let next = 0;
+  await Promise.all(
+    Array.from({ length: Math.min(limit, items.length) }, async () => {
+      while (next < items.length) {
+        const i = next++;
+        out[i] = await fn(items[i]);
+      }
+    }),
+  );
+  return out;
+}
+
 export class Store {
   platform: Platform;
   readonly options: StoreOptions;
@@ -442,10 +457,13 @@ export class Store {
       this.history = [];
       // trades that were never saved didn't happen; ones undone after a save are still in the files
       this.tradeLog = loadTradeLog();
-      for (const f of this.files) await this.loadFile(f);
+      // loads run concurrently (each is an IPC read + a parse), but docs enter the map in
+      // file order so pane arrangement and "first vault" lookups stay deterministic
+      for (const e of await mapLimit(this.files, 6, (f) => this.loadFile(f))) if (e) this.docs.set(e.id, e);
       this.files = this.files.filter((f) => this.docs.has(f.path));
       if (this.options.vaults !== false) {
-        for (const v of await this.platform.listVaults(folder).catch(() => [])) await this.loadVault(v);
+        for (const e of await mapLimit(await this.platform.listVaults(folder).catch(() => []), 6, (v) => this.loadVault(v)))
+          if (e) this.docs.set(e.id, e);
         if (![...this.docs.values()].some((d) => d.doc?.kind === 'vault')) this.addVault('MainVault', false, false);
       }
       this.arrangePanes();
@@ -523,7 +541,7 @@ export class Store {
     this.panes = [{ docId: (vault ?? stash)?.id, tab: 0 }, { docId: (char ?? stash)?.id, tab: 0 }];
   }
 
-  private async loadFile(f: SaveFileEntry) {
+  private async loadFile(f: SaveFileEntry): Promise<LoadedDoc | undefined> {
     const entry: LoadedDoc = { id: f.path, path: f.path, name: f.name, dirty: false, backedUp: false };
     try {
       const data = await this.platform.readFile(f.path);
@@ -533,18 +551,18 @@ export class Store {
     } catch (e) {
       entry.error = (e as Error).message;
     }
-    if (!this.accepts(entry.doc, f)) return;
-    this.docs.set(entry.id, entry);
+    if (!this.accepts(entry.doc, f)) return undefined;
+    return entry;
   }
 
-  private async loadVault(f: SaveFileEntry) {
+  private async loadVault(f: SaveFileEntry): Promise<LoadedDoc> {
     const entry: LoadedDoc = { id: f.path, path: f.path, name: f.name, dirty: false, backedUp: true };
     try {
       entry.doc = parseVault(await this.platform.readText(f.path), f.name);
     } catch (e) {
       entry.error = (e as Error).message;
     }
-    this.docs.set(entry.id, entry);
+    return entry;
   }
 
   /** Names of the loaded vaults (for the uniqueness check). */

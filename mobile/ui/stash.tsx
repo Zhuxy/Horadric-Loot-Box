@@ -5,7 +5,7 @@ import { Grid } from './items';
 import { GoldRow } from './gold';
 import { characterDocs, isEditableTab, stashDocs, tabLabel } from './model';
 
-/** Stash tab: current character chips, personal/shared segments, 10×10 grid, one shared gold pool. */
+/** Stash tab: current character chips, personal/shared segments, grid sized to the save (SPEC §10), one shared gold pool. */
 export function StashScreen({
   charId,
   onChar,

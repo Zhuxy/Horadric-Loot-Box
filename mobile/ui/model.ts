@@ -204,14 +204,23 @@ export const CATEGORY_FILTERS = [
 
 export type Category = Exclude<(typeof CATEGORY_FILTERS)[number][0], 'all'>;
 
+const categoryCache = new Map<string, Category>();
+
+/** The category depends only on the item's code (its def and type are static table data). */
 export function categoryOf(item: D2Item): Category {
-  if (item.def?.flags.includes('C')) return 'charm';
-  const type = itemTypeOf(item.code);
-  const group = groupOfType(type);
-  if (group === 'Weapons') return 'weapon';
-  if (group === 'Armor' || group === 'Shields') return 'armor';
-  if (group === 'Jewelry & Charms') return 'jewelry';
-  return 'material';
+  const cached = categoryCache.get(item.code);
+  if (cached) return cached;
+  let out: Category;
+  if (item.def?.flags.includes('C')) out = 'charm';
+  else {
+    const group = groupOfType(itemTypeOf(item.code));
+    if (group === 'Weapons') out = 'weapon';
+    else if (group === 'Armor' || group === 'Shields') out = 'armor';
+    else if (group === 'Jewelry & Charms') out = 'jewelry';
+    else out = 'material';
+  }
+  categoryCache.set(item.code, out);
+  return out;
 }
 
 export interface VaultFilter {
@@ -377,10 +386,6 @@ export function transferTargets(store: Store, from: GoldRef, charId: string | un
 
 export function fmt(n: number): string {
   return n.toLocaleString('en-US');
-}
-
-export function normalizeSlot(loc: string): string {
-  return loc.replace(/s$/, '');
 }
 
 export function isEditableTab(stash: D2SharedStash, tab: number): boolean {

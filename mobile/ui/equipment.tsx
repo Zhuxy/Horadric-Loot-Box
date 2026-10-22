@@ -7,6 +7,8 @@ import {
   type D2Item,
   type MercInfo,
 } from '../../src/core';
+import { useMemo } from 'react';
+import { useStore } from '../../src/ui/context';
 import { EquipDoll, MercDoll } from './doll';
 import { Grid, ItemBox } from './items';
 import { CELL, beltRows, charmStats, fmt, skillTrees, type ItemLoc } from './model';
@@ -193,10 +195,18 @@ function StatRow({ label, base, bonus }: { label: string; base: number; bonus: n
 
 /** Read-only attributes page (SPEC §5.1.2). Scrolls; it has no draggable items. */
 export function AttributesScreen({ ch }: { ch: D2Character }) {
-  const s = characterStats(ch);
-  const gearOnly = characterStats({ ...ch, items: ch.items.filter((i) => !isCharm(i)) });
-  const charm = charmStats(ch);
-  const skills = skillTrees(ch);
+  const store = useStore();
+  // ch is mutated in place, so identity alone can't key the memo — the store rev is the change signal
+  const { s, gearOnly, charm, skills } = useMemo(
+    () => ({
+      s: characterStats(ch),
+      gearOnly: characterStats({ ...ch, items: ch.items.filter((i) => !isCharm(i)) }),
+      charm: charmStats(ch),
+      skills: skillTrees(ch),
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [ch, store.rev],
+  );
   const base = (k: string) => ch.stats[k] ?? 0;
   const advanced = gearOnly.advanced.map((l) => l.text);
   const combat = [

@@ -130,7 +130,9 @@ export function ItemSheet({
   };
 
   const couldEquip = slotCodes(item).size > 0;
-  const equipTo = equipCandidate();
+  // up to ten store.check calls — don't rerun them on every render of the open sheet
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const equipTo = useMemo(() => equipCandidate(), [item, loc.docId, charId, store.rev]);
 
   const doEquip = () => {
     if (!charId) return;

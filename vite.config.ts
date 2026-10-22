@@ -14,7 +14,8 @@ export default defineConfig(({ mode }) => ({
   define: { __APP_VERSION__: JSON.stringify(pkg.version) },
   base: './',
   clearScreen: false,
-  ...(altRoot(mode) ? { root: altRoot(mode), publicDir: '../public' } : {}),
+  // mobile ships only its icon: the OCR engine (6.7 MB) and demo saves in public/ are desktop/web-only
+  ...(altRoot(mode) ? { root: altRoot(mode), publicDir: mode === 'mobile' ? '../public-mobile' : '../public' } : {}),
   server: {
     port: altPort(mode),
     strictPort: true,
