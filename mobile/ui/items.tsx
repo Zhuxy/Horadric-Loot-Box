@@ -24,7 +24,6 @@ export function ItemBox({
   width,
   height,
   cell,
-  showName,
   className = '',
   style,
 }: {
@@ -33,15 +32,12 @@ export function ItemBox({
   width: number;
   height: number;
   cell: number;
-  showName?: boolean;
   className?: string;
   style?: React.CSSProperties;
 }) {
   const store = useStore();
   const drag = useDragApi();
   const d = desc(item);
-  const { w, h } = itemSize(item);
-  const large = w * h > 1 || d.qualityClass === 'rune' || d.qualityClass === 'gem';
   return (
     <div
       className={`m-item m-q-${d.qualityClass}${className ? ` ${className}` : ''}`}
@@ -58,8 +54,10 @@ export function ItemBox({
         view={store.art ? 'art' : 'tiles'}
         art={store.art}
         count={stackCount(item)}
+        labels="runes"
       />
-      {showName && store.art && large && (
+      {/* Item boxes stay pictorial: only runes keep a name (stack counts are drawn by ItemFace). */}
+      {d.qualityClass === 'rune' && store.art && (
         <span className="m-item-name" style={{ color: qText[d.qualityClass] }}>
           {d.short}
         </span>
@@ -122,7 +120,6 @@ export function Grid({
               width={w * cell - 2}
               height={h * cell - 2}
               cell={cell}
-              showName
               style={{ left: item.x * cell + 1, top: item.y * cell + 1 }}
             />
           );

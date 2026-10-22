@@ -88,7 +88,21 @@ export function ItemSheet({
   const tray = trayDoc(store);
   const inTray = isTrayDoc(store, loc?.docId);
 
+  // Hooks run on every render — the sheet is mounted while closed (selected === null) too, so this
+  // memo must stay above the early return or React aborts the whole tree (black screen on first tap).
+  // Up to ten store.check calls — don't rerun them on every render of the open sheet.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const equipTo = useMemo(() => {
+    if (!item || !loc || !charId) return undefined;
+    for (const bodyLoc of SLOTS) {
+      if (store.check(item, loc.docId, { docId: charId, area: 'equip', bodyLoc }).ok) return bodyLoc;
+    }
+    return undefined;
+  }, [item, loc, charId, store.rev]);
+
   if (!selected || !item || !loc || !d) return <Sheet open={false} onClose={close}>{null}</Sheet>;
+
+  const couldEquip = slotCodes(item).size > 0;
 
   const toTray = () => {
     if (!tray) {
@@ -117,22 +131,6 @@ export function ItemSheet({
       close();
     }
   };
-
-  const equipCandidate = () => {
-    if (!charId) {
-      store.toast('error', '没有当前角色');
-      return;
-    }
-    for (const bodyLoc of SLOTS) {
-      if (store.check(item, loc.docId, { docId: charId, area: 'equip', bodyLoc }).ok) return bodyLoc;
-    }
-    return undefined;
-  };
-
-  const couldEquip = slotCodes(item).size > 0;
-  // up to ten store.check calls — don't rerun them on every render of the open sheet
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const equipTo = useMemo(() => equipCandidate(), [item, loc.docId, charId, store.rev]);
 
   const doEquip = () => {
     if (!charId) return;

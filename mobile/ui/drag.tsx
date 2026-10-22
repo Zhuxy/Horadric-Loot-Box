@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useRef } from 'react';
 import { itemSize, type D2Item } from '../../src/core';
-import { desc, itemKey, type Store } from '../../src/state/store';
+import { itemKey, type Store } from '../../src/state/store';
 import { isTrayDoc, itemAtSlot, locKey, type ItemLoc } from './model';
 
 export interface DragApi {
@@ -91,6 +91,23 @@ export function useDragController(opts: Options): DragApi {
     [clearHighlights],
   );
 
+  /** Park the ghost exactly on the target cells so the picture and the drop frame agree. */
+  const snapGhost = useCallback((left: number, top: number) => {
+    const g = ghost.current;
+    if (!g) return;
+    g.style.left = `${left}px`;
+    g.style.top = `${top}px`;
+  }, []);
+
+  /** Centre the ghost in a slot / belt cell (the item is drawn centred there). */
+  const centerGhost = useCallback((el: HTMLElement) => {
+    const g = ghost.current;
+    if (!g) return;
+    const r = el.getBoundingClientRect();
+    g.style.left = `${r.left + (r.width - g.offsetWidth) / 2}px`;
+    g.style.top = `${r.top + (r.height - g.offsetHeight) / 2}px`;
+  }, []);
+
   const hitTest = useCallback((p: Pending, x: number, y: number) => {
     const { store, trayId } = optsRef.current;
     clearHighlights();
@@ -127,6 +144,7 @@ export function useDragController(opts: Options): DragApi {
       }
       p.drop = { kind: 'slot', docId, area, bodyLoc, ok: check.ok, reason: check.reason, swapItem };
       slot.classList.add(check.ok ? 'm-drop-ok' : 'm-drop-bad');
+      centerGhost(slot);
       ghost.current?.classList.toggle('m-ghost-bad', !check.ok);
       return;
     }
@@ -138,6 +156,7 @@ export function useDragController(opts: Options): DragApi {
       const check = store.check(p.item, p.loc.docId, { docId, area: 'belt', x: slot });
       p.drop = { kind: 'belt', docId, slot, ok: check.ok, reason: check.reason };
       belt.classList.add(check.ok ? 'm-drop-ok' : 'm-drop-bad');
+      centerGhost(belt);
       ghost.current?.classList.toggle('m-ghost-bad', !check.ok);
       return;
     }
@@ -152,8 +171,10 @@ export function useDragController(opts: Options): DragApi {
       const cell = Number(grid.dataset.cell);
       const rect = grid.getBoundingClientRect();
       const { w, h } = itemSize(p.item);
-      const cx = Math.floor((x - rect.left) / cell);
-      const cy = Math.floor((y - rect.top) / cell);
+      // The target comes from the item's top-left, not the finger: the drop lands exactly where the ghost is
+      // drawn, so the finger keeps the same grip it had when the drag started.
+      const cx = Math.floor((x - p.offX - rect.left) / cell);
+      const cy = Math.floor((y - p.offY - rect.top) / cell);
       const gx = Math.max(0, Math.min(cols - w, cx));
       const gy = Math.max(0, Math.min(rows - h, cy));
       const target =
@@ -162,6 +183,8 @@ export function useDragController(opts: Options): DragApi {
           : ({ docId, area: area as 'inventory' | 'stash' | 'cube', x: gx, y: gy } as const);
       const check = store.check(p.item, p.loc.docId, target);
       p.drop = { kind: 'grid', docId, area, tab, x: gx, y: gy, ok: check.ok, reason: check.reason };
+      // magnetic: the ghost snaps onto the highlighted cells
+      snapGhost(rect.left + gx * cell, rect.top + gy * cell);
       const hl = grid.querySelector<HTMLElement>('.m-drop-hl');
       if (hl) {
         hl.style.display = 'block';
@@ -175,7 +198,7 @@ export function useDragController(opts: Options): DragApi {
       return;
     }
     ghost.current?.classList.add('m-ghost-bad');
-  }, [clearHighlights]);
+  }, [clearHighlights, centerGhost, snapGhost]);
 
   const beginDrag = useCallback(
     (p: Pending, e: PointerEvent) => {
@@ -192,7 +215,10 @@ export function useDragController(opts: Options): DragApi {
         g.style.height = `${rect.height}px`;
         g.classList.add('on');
         g.classList.remove('m-ghost-bad');
-        g.textContent = desc(p.item).short.slice(0, 3);
+        // Carry the item's own picture (and its real footprint) along with the finger.
+        const face = p.el.cloneNode(true) as HTMLElement;
+        face.classList.add('m-ghost-face');
+        g.replaceChildren(face);
       }
       p.el.classList.add('m-drag-src');
       if (p.fromTray && trayOpen) closeTray();

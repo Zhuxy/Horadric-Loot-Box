@@ -40,22 +40,24 @@ function BeltRow({
 }) {
   const rows = beltRows(ch);
   return (
-    <div className="m-beltgold">
-      <div className="m-beltcells">
-        {[0, 1, 2, 3].map((slot) => (
-          <BeltCell key={slot} docId={docId} ch={ch} slot={slot} />
-        ))}
+    <div className="m-beltblock">
+      <div className="m-beltgold">
+        <div className="m-beltcells">
+          {[0, 1, 2, 3].map((slot) => (
+            <BeltCell key={slot} docId={docId} ch={ch} slot={slot} />
+          ))}
+        </div>
+        <button className="m-smallbtn" onClick={onToggle}>
+          {open ? '收起' : `展开 ${rows} 排`}
+        </button>
+        <button className="m-goldbtn" onClick={onGold} aria-label="金币转移">
+          🪙 <b>{fmt(gold)}</b>
+          <span>存 / 取</span>
+        </button>
       </div>
-      <button className="m-smallbtn" onClick={onToggle}>
-        {open ? '收起' : `展开 ${rows} 排`}
-      </button>
-      <button className="m-goldbtn" onClick={onGold} aria-label="金币转移">
-        🪙 <b>{fmt(gold)}</b>
-        <span>存 / 取</span>
-      </button>
+      {/* In the flow, not an overlay: the backpack below moves down with the panel's rows. */}
       {open && (
         <div className="m-beltpanel">
-          <div className="m-beltnote">腰带共 {rows} 排（由所穿腰带决定）· 最下排是游戏里直接显示的一排</div>
           <div className="m-beltgrid" style={{ width: 4 * CELL, height: rows * CELL }}>
             {Array.from({ length: rows * 4 }, (_, i) => {
               const slot = i;

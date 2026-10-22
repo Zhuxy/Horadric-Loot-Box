@@ -1,6 +1,6 @@
-import { ItemMode, type D2Character, type D2Item, type MercInfo } from '../../src/core';
+import { ItemMode, itemSize, type D2Character, type D2Item, type MercInfo } from '../../src/core';
 import { ItemBox } from './items';
-import { CELL, px, type ItemLoc } from './model';
+import { CELL, type ItemLoc } from './model';
 
 interface SlotDef {
   key: string;
@@ -27,12 +27,16 @@ const DOLL: SlotDef[] = [
   { key: 'feet', loc: 9, x: 4, y: 6.6, w: 2, h: 2, label: '靴子' },
 ];
 
-const DOLL_W = px(4) + 2 * CELL;
-const DOLL_H = px(7.2) + CELL;
+/** Positions are in cells; each cell also carries 1.5px of visual gap (desktop recipe). */
+const px = (v: number) => Math.round(v * (CELL + 1.5));
 
-function Figure() {
+/** Bottom-most slot edge in cell units — gloves and boots reach 8.6. */
+const DOLL_BOTTOM = Math.max(...DOLL.map((s) => s.y + s.h));
+const DOLL_RIGHT = Math.max(...DOLL.map((s) => s.x + s.w));
+
+function Figure({ width, height }: { width: number; height: number }) {
   return (
-    <svg className="m-figure" width={DOLL_W + 2 * CELL} height={DOLL_H} viewBox="0 0 210 290" preserveAspectRatio="xMidYMid meet" aria-hidden>
+    <svg className="m-figure" width={width} height={height} viewBox="0 0 210 290" preserveAspectRatio="xMidYMid meet" aria-hidden>
       <ellipse cx="50%" cy="52%" rx="46%" ry="48%" fill="rgba(212,182,106,.055)" />
       <path
         d="M105 12c18 0 30 14 30 32 0 10-4 18-10 24l27 11c15 6 23 17 25 34l8 92c1 15-7 24-20 26l-13 2 6 44H52l6-44-13-2c-13-2-21-11-20-26l8-92c2-17 10-28 25-34l27-11c-6-6-10-14-10-24 0-18 12-32 30-32z"
@@ -59,6 +63,10 @@ function Slot({
   disabled?: boolean;
 }) {
   const loc: ItemLoc = { docId, kind: area, bodyLoc: slot.loc };
+  // The slot is sized for the biggest item that fits it; the picture keeps the item's own footprint, centred.
+  const size = item && itemSize(item);
+  const iw = Math.min(size ? size.w : slot.w, slot.w);
+  const ih = Math.min(size ? size.h : slot.h, slot.h);
   return (
     <div
       className={`m-slot${item ? ' m-filled' : ''}${disabled ? ' m-disabled' : ''}`}
@@ -70,7 +78,14 @@ function Slot({
       style={{ left: px(slot.x), top: px(slot.y), width: slot.w * CELL, height: slot.h * CELL }}
     >
       {item ? (
-        <ItemBox item={item} loc={loc} width={slot.w * CELL} height={slot.h * CELL} cell={CELL} />
+        <ItemBox
+          item={item}
+          loc={loc}
+          width={iw * CELL - 2}
+          height={ih * CELL - 2}
+          cell={CELL}
+          style={{ left: ((slot.w - iw) * CELL) / 2 + 1, top: ((slot.h - ih) * CELL) / 2 + 1 }}
+        />
       ) : (
         <span className="m-slot-label">
           {disabled ? (
@@ -88,12 +103,15 @@ function Slot({
   );
 }
 
+/** Equipped gear stays the same cell size as the backpack and stash, so items never change size. */
 export function EquipDoll({ docId, ch, swap }: { docId: string; ch: D2Character; swap: boolean }) {
   const equipped = ch.items.filter((i) => i.mode === ItemMode.Equipped);
   const bodyLoc = (s: SlotDef) => (s.swapLoc !== undefined && swap ? s.swapLoc : s.loc);
+  const width = px(DOLL_RIGHT);
+  const height = px(DOLL_BOTTOM);
   return (
-    <div className="m-dollwrap" style={{ width: DOLL_W, height: DOLL_H }}>
-      <Figure />
+    <div className="m-dollwrap" style={{ width, height }}>
+      <Figure width={width + 2 * CELL} height={height} />
       {DOLL.map((s) => {
         const loc = bodyLoc(s);
         return <Slot key={s.key} docId={docId} area="equip" slot={{ ...s, loc }} item={equipped.find((i) => i.bodyLoc === loc)} />;
@@ -114,11 +132,11 @@ export function MercDoll({ docId, ch, info }: { docId: string; ch: D2Character; 
       ? { key: 'lh2', loc: 5, x: 4.4, y: 0, w: 2, h: 4, label: '第二武器' }
       : { key: 'lh', loc: 5, x: 2.2, y: 4.45, w: 2, h: 2, label: '盾牌' },
   ];
-  const width = px(off === 'weapon' ? 4.4 : 2.2) + 2 * CELL;
-  const height = px(4.45) + 2 * CELL;
+  const width = px(Math.max(...slots.map((s) => s.x + s.w)));
+  const height = px(Math.max(...slots.map((s) => s.y + s.h)));
   return (
     <div className="m-dollwrap" style={{ width, height }}>
-      <Figure />
+      <Figure width={width + 2 * CELL} height={height} />
       {slots.map((s) => (
         <Slot
           key={s.key}

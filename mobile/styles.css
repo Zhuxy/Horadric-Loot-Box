@@ -208,7 +208,9 @@ h4 {
   min-height: 0;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  /* Top-aligned: the backpack rides directly under the belt block and moves with it. */
+  justify-content: flex-start;
+  gap: 10px;
   padding-bottom: 4px;
 }
 .m-body {
@@ -448,6 +450,16 @@ h4 {
 .m-ghost.m-ghost-bad {
   border-color: var(--bad);
 }
+.m-ghost .m-ghost-face {
+  position: absolute !important;
+  inset: 0 !important;
+  left: 0 !important;
+  top: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 0;
+  box-shadow: none;
+}
 
 /* ---------------------------------------------------------------- paper doll */
 .m-dollzone {
@@ -504,10 +516,8 @@ h4 {
   border-style: dashed;
 }
 .m-slot .m-item {
+  /* Drawn at the item's own footprint (centred in the slot), never stretched to fill it. */
   position: absolute;
-  inset: 0;
-  width: 100% !important;
-  height: 100% !important;
   border-radius: 2px;
 }
 .m-slot.m-drop-ok,
@@ -544,6 +554,11 @@ h4 {
 }
 
 /* ---------------------------------------------------------------- belt */
+.m-beltblock {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+}
 .m-beltgold {
   position: relative;
   display: flex;
@@ -583,22 +598,14 @@ h4 {
   position: absolute;
 }
 .m-beltpanel {
-  position: absolute;
-  left: 12px;
-  right: 12px;
-  top: 100%;
-  z-index: 30;
-  margin-top: 4px;
+  /* Part of the page flow, so its height is exactly the belt's rows — nothing is reserved while it is closed. */
+  margin: 4px 12px 0;
   border: 1px solid var(--gold-faint);
   border-radius: 6px;
   padding: 8px 10px;
   background: linear-gradient(180deg, rgba(34, 29, 20, 0.97), rgba(18, 15, 10, 0.97));
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.6);
-}
-.m-beltnote {
-  font-size: 10.5px;
-  color: var(--ink-faint);
-  margin-bottom: 6px;
+  flex: 0 0 auto;
 }
 .m-beltgrid {
   position: relative;
@@ -1199,7 +1206,8 @@ h4 {
 .m-trayhandle {
   position: absolute;
   right: 0;
-  top: 44%;
+  /* Sit beside the paper doll's free right margin instead of over the belt/gold row. */
+  top: 18%;
   z-index: 40;
   cursor: pointer;
   background: linear-gradient(180deg, #4a3a14, #2c2210);

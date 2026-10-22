@@ -83,6 +83,8 @@ export interface ItemFaceProps {
   count?: number;
   /** Socket diameter in px. Pass one value for a whole view so every socket there is the same size. */
   socketPx?: number;
+  /** Which items get a text name in the glyph fallback: everything (desktop) or only runes (mobile). */
+  labels?: 'all' | 'runes';
 }
 
 /** The socket size used everywhere in a grid whose cells are `cell` px. */
@@ -92,7 +94,7 @@ export const socketPxFor = (cell: number) => Math.round(cell * 0.74);
  * The inside of an item box: game art (optionally with the name on top) or the classic glyph tile, plus
  * sockets and stack size. The caller draws the box itself.
  */
-export function ItemFace({ item, width, height, cell, view, art, count, socketPx }: ItemFaceProps) {
+export function ItemFace({ item, width, height, cell, view, art, count, socketPx, labels = 'all' }: ItemFaceProps) {
   const d = desc(item);
   const [, bump] = useState(0);
   const wanted = view !== 'tiles' ? art?.srcFor(item) : undefined;
@@ -102,6 +104,9 @@ export function ItemFace({ item, width, height, cell, view, art, count, socketPx
   // one size for empty and filled sockets alike
   const socketSize = socketPx ?? socketPxFor(cell);
   const sockets = socketLayout(item.socketCount, w, h);
+  // Mobile boxes carry no names except runes (stack counts are drawn below either way).
+  const showLabel =
+    view !== 'artNames' && (labels === 'runes' ? d.qualityClass === 'rune' : !small || ['rune', 'gem'].includes(d.qualityClass));
 
   return (
     <>
@@ -110,7 +115,7 @@ export function ItemFace({ item, width, height, cell, view, art, count, socketPx
       ) : (
         <div className="flex h-full w-full flex-col items-center justify-center">
           <GlyphIcon glyph={glyphFor(item)} className={`${QUALITY_TEXT[d.qualityClass]} ${small ? 'h-4 w-4' : 'h-6 w-6'} opacity-80`} />
-          {(!small || ['rune', 'gem'].includes(d.qualityClass)) && view !== 'artNames' && (
+          {showLabel && (
             <span className={`mt-0.5 line-clamp-2 px-0.5 font-medium leading-[1.05] ${QUALITY_TEXT[d.qualityClass]} ${small ? 'text-[8px]' : 'text-[10px]'}`}>{d.short}</span>
           )}
         </div>

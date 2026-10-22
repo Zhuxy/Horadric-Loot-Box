@@ -62,7 +62,6 @@ export function TrayDrawer({ open, onClose }: { open: boolean; onClose: () => vo
                       width={w * TRAY_CELL - 2}
                       height={h * TRAY_CELL - 2}
                       cell={TRAY_CELL}
-                      showName
                       style={{ left: p.x * TRAY_CELL + 1, top: p.y * TRAY_CELL + 1 }}
                     />
                   );
