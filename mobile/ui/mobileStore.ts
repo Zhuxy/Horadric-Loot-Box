@@ -18,24 +18,39 @@ export function scheduleSave(store: Store) {
 }
 
 /** Writes now (app going to the background, settings actions, undo). */
-export async function flushSave(store: Store): Promise<void> {
+export async function flushSave(store: Store, isRetry = false): Promise<void> {
   if (timer) {
     clearTimeout(timer);
     timer = undefined;
   }
   if (inFlight) {
-    await inFlight;
-    if (store.dirtyDocs.some((d) => d.doc)) await flushSave(store);
+    // a rejected save must never wedge later saves: swallow here, state is re-checked below
+    try {
+      await inFlight;
+    } catch {
+      /* saveAll reports its own failures */
+    }
+    if (store.dirtyDocs.some((d) => d.doc)) await flushSave(store, isRetry);
     return;
   }
   if (!store.dirtyDocs.some((d) => d.doc)) return;
-  inFlight = store.saveAll();
-  await inFlight;
-  inFlight = undefined;
+  const run = store.saveAll();
+  inFlight = run;
+  try {
+    await run;
+  } catch {
+    /* saveAll reports its own failures; the finally keeps future saves possible */
+  } finally {
+    if (inFlight === run) inFlight = undefined;
+  }
   if (!store.dirtyDocs.some((d) => d.doc)) {
     lastSavedAt = Date.now();
     // saveAll already emits; this one makes the header pick up the new time
     store.emit();
+  } else if (!isRetry) {
+    // still dirty — the save failed, or edits landed mid-write (they stay dirty by design):
+    // one delayed retry; after that, the next edit's scheduleSave is the retry path
+    timer = setTimeout(() => void flushSave(store, true), 2000);
   }
 }
 

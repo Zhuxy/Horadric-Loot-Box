@@ -83,6 +83,10 @@ export interface LoadedDoc {
   backedUp: boolean;
   /** How many times it has been saved this session (so undo knows whether "unchanged" still means "saved"). */
   saves?: number;
+  /** Bumped on every content mutation (via snapshot, undo, rename). saveAll snapshots it next to the
+   * serialized bytes and only clears `dirty` if it is unchanged when the write lands — an edit that
+   * arrives mid-save must stay dirty, or it would be marked saved without ever reaching disk. */
+  version?: number;
 }
 
 export type Loc =
@@ -633,6 +637,7 @@ export class Store {
         const [entries, gold] = [[...d.entries], { ...d.gold }];
         restore = () => Object.assign(d, { entries, gold });
       }
+      e.version = (e.version ?? 0) + 1;
       lists.set(id, { restore, dirty: e.dirty, saves: e.saves ?? 0 });
     }
     this.history = [...this.history.slice(-49), { label, lists, also }];
@@ -645,6 +650,7 @@ export class Store {
       const e = this.entryOf(id);
       if (!e?.doc) continue;
       s.restore();
+      e.version = (e.version ?? 0) + 1;
       // back to how it was: unsaved only if it was then, or if it has been saved since (the file on disk moved on)
       e.dirty = s.dirty || (e.saves ?? 0) !== s.saves;
     }
@@ -885,6 +891,7 @@ export class Store {
     const problem = vaultNameProblem(name, this.vaultNames(docId));
     if (problem) return problem;
     e.doc.name = name;
+    e.version = (e.version ?? 0) + 1;
     e.dirty = true;
     this.emit();
     return undefined;
@@ -1701,11 +1708,12 @@ export class Store {
         this.gameRunning = true;
         throw new Error('Diablo II: Resurrected is running. Close the game first — it keeps saves open and will overwrite your changes.');
       }
-      // 1) serialize + verify everything first; abort before touching disk if anything is off
-      const outputs: { doc: LoadedDoc; bytes?: Uint8Array; text?: string }[] = [];
+      // 1) serialize + verify everything first; abort before touching disk if anything is off.
+      // Step 1 is synchronous, so the version captured here is exactly the state that was serialized.
+      const outputs: { doc: LoadedDoc; version: number; bytes?: Uint8Array; text?: string }[] = [];
       for (const d of dirty) {
-        if (d.doc!.kind === 'vault') outputs.push({ doc: d, text: serializeVault(d.doc as Vault) });
-        else outputs.push({ doc: d, bytes: serializeVerified(d.doc as D2Character | D2SharedStash) });
+        if (d.doc!.kind === 'vault') outputs.push({ doc: d, version: d.version ?? 0, text: serializeVault(d.doc as Vault) });
+        else outputs.push({ doc: d, version: d.version ?? 0, bytes: serializeVerified(d.doc as D2Character | D2SharedStash) });
       }
       // 2) back up originals (once per session)
       const toBackup = outputs.filter((o) => o.bytes && !o.doc.backedUp).map((o) => o.doc.path);
@@ -1727,7 +1735,9 @@ export class Store {
             this.panes = this.panes.map((p) => (p.docId && !this.docs.has(p.docId) ? { ...p, docId: path } : p)) as [PaneState, PaneState];
           }
         }
-        o.doc.dirty = false;
+        // an edit that landed while this write was in flight bumped the version: it is not in the
+        // bytes just written, so the doc stays dirty and the next save picks it up
+        if ((o.doc.version ?? 0) === o.version) o.doc.dirty = false;
         o.doc.saves = (o.doc.saves ?? 0) + 1;
       }
       this.tradeLogKeep();
