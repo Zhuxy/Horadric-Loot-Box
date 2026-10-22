@@ -47,18 +47,33 @@ export type Rolls = Record<string, number>;
 
 const templateRow = (kind: TemplateKind, id: number) => (kind === 'unique' ? GD.uniques[id] : GD.setItems[id]);
 
+let currentUniqueNames: Set<string> | undefined;
+let latentReplacedNames: Set<string> | undefined;
+/** Name indexes over the unique table, built once (the tables are static per process). */
+function uniqueNameIndexes(): { current: Set<string>; latent: Set<string> } {
+  if (!currentUniqueNames || !latentReplacedNames) {
+    currentUniqueNames = new Set();
+    latentReplacedNames = new Set();
+    for (const u of Object.values(GD.uniques)) {
+      if (!u.noChronicle) currentUniqueNames.add(u.name);
+      if (u.name.startsWith('Latent ')) latentReplacedNames.add(u.name.slice('Latent '.length));
+    }
+  }
+  return { current: currentUniqueNames, latent: latentReplacedNames };
+}
+
 /** Why a unique or set item can't be built, or undefined if it can. */
 export function unbuildableReason(kind: TemplateKind, id: number): string | undefined {
   const row = templateRow(kind, id);
   if (!row) return 'Unknown item';
   if (kind === 'unique' && (row as (typeof GD.uniques)[string]).disabled) return 'Not in the game';
-  // an old row kept next to the current one (the Crystal Sword Azurewrath)
-  if (row.noChronicle && kind === 'unique' && Object.values(GD.uniques).some((u) => u !== row && u.name === row.name && !u.noChronicle))
-    return 'Old version of this item';
+  // an old row kept next to the current one (the Crystal Sword Azurewrath): the row itself is
+  // noChronicle, so any current row with the same name is necessarily a different row
+  if (row.noChronicle && kind === 'unique' && uniqueNameIndexes().current.has(row.name)) return 'Old version of this item';
   const def = itemDef(row.code);
   if (!def) return 'Unknown base item';
   // Reign of the Warlock replaced the old Sunder charms with droppable "Latent" versions (and crafted "Renewed" ones)
-  if (kind === 'unique' && Object.values(GD.uniques).some((u) => u.name === `Latent ${row.name}`)) return `Replaced by Latent ${row.name}`;
+  if (kind === 'unique' && uniqueNameIndexes().latent.has(row.name)) return `Replaced by Latent ${row.name}`;
   if (def.quest) return 'Quest items can’t be traded';
   const props = [...row.props, ...(kind === 'set' ? GD.setItems[id].partial.flatMap(([, p]) => p) : [])];
   for (const [code] of props) {
@@ -78,15 +93,21 @@ function variantTag(kind: TemplateKind, id: number): string {
   return [elem, when].filter(Boolean).join(', ') || (GD.items[row.code]?.name ?? row.code);
 }
 
-/** Every unique or set item that can be built, sorted by name. */
+const buildableCache: Partial<Record<TemplateKind, { id: number; name: string; code: string }[]>> = {};
+
+/** Every unique or set item that can be built, sorted by name. Memoized: the tables are static. */
 export function buildableTemplates(kind: TemplateKind): { id: number; name: string; code: string }[] {
+  const cached = buildableCache[kind];
+  if (cached) return cached;
   const table = kind === 'unique' ? GD.uniques : GD.setItems;
   const rows = Object.entries(table).filter(([k]) => !unbuildableReason(kind, Number(k)));
   const count = new Map<string, number>();
   for (const [, r] of rows) count.set(r.name, (count.get(r.name) ?? 0) + 1);
-  return rows
+  const out = rows
     .map(([k, r]) => ({ id: Number(k), name: count.get(r.name)! > 1 ? `${r.name} (${variantTag(kind, Number(k))})` : r.name, code: r.code }))
     .sort((a, b) => a.name.localeCompare(b.name));
+  buildableCache[kind] = out;
+  return out;
 }
 
 function slotFor(key: string, pieces: number, prop: PropDef, baseCode: string): RollSlot {

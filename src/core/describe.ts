@@ -111,6 +111,16 @@ function lineForStat(s: ItemStat): Line | null {
 }
 
 /** Collapses a stat list into tooltip lines, handling damage pairs and grouped stats. */
+let cachedStatGroups: Map<number, number[]> | undefined;
+/** Stat ids grouped by description group (dgrp), built once from the static tables. */
+function statGroups(): Map<number, number[]> {
+  if (!cachedStatGroups) {
+    cachedStatGroups = new Map();
+    for (const d of GD.stats) if (d.dgrp) cachedStatGroups.set(d.dgrp, [...(cachedStatGroups.get(d.dgrp) ?? []), d.id]);
+  }
+  return cachedStatGroups;
+}
+
 export function describeStats(stats: ItemStat[]): string[] {
   // Merge duplicate stat/param pairs (e.g. from sockets)
   const merged = new Map<string, ItemStat>();
@@ -182,8 +192,7 @@ export function describeStats(stats: ItemStat[]): string[] {
   if (pois) used.add(pois);
 
   // Description groups (all attributes, all resistances)
-  const groups = new Map<number, number[]>();
-  for (const d of GD.stats) if (d.dgrp) groups.set(d.dgrp, [...(groups.get(d.dgrp) ?? []), d.id]);
+  const groups = statGroups();
   for (const [, ids] of groups) {
     const members = ids.map((id) => get(id));
     if (members.every(Boolean)) {

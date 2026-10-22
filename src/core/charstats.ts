@@ -212,18 +212,20 @@ export function characterStats(ch: D2Character): CharStatsResult {
       sum.set(s.id, (sum.get(s.id) ?? 0) + s.value / 2 ** d.valShift);
     }
   };
-  for (const it of items) add(itemStats(it));
-  add(setBonuses(items));
+  const allItemStats = items.flatMap((i) => itemStats(i));
+  const sb = setBonuses(items);
+  add(allItemStats);
+  add(sb);
   const get = (key: string) => sum.get(idOf(key)) ?? 0;
   // auras the gear gives, by skill id (Faith gives Fanaticism, Hustle Burst of Speed...): the best level of each
   const auras: Record<number, number> = {};
-  for (const st of [...items.flatMap((i) => itemStats(i)), ...setBonuses(items)]) {
+  for (const st of [...allItemStats, ...sb]) {
     if (st.id === idOf('item_aura') && st.value > (auras[st.param] ?? 0)) auras[st.param] = st.value;
   }
 
   const gearSkills = [
     ...new Set(
-      [...items.flatMap((i) => itemStats(i)), ...setBonuses(items)]
+      [...allItemStats, ...sb]
         .filter((st) => st.id === idOf('item_nonclassskill') || st.id === idOf('item_singleskill'))
         .map((st) => st.param),
     ),

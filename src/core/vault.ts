@@ -36,9 +36,9 @@ interface VaultFileV1 {
 }
 
 function toB64(bytes: Uint8Array): string {
-  let s = '';
-  for (const b of bytes) s += String.fromCharCode(b);
-  return btoa(s);
+  const parts: string[] = [];
+  for (let i = 0; i < bytes.length; i += 0x8000) parts.push(String.fromCharCode(...bytes.subarray(i, i + 0x8000)));
+  return btoa(parts.join(''));
 }
 function fromB64(s: string): Uint8Array {
   const bin = atob(s);
