@@ -142,7 +142,8 @@ impl Source {
                 return;
             };
             let e = map.entry(key.to_string()).or_default();
-            let name = norm[norm.to_ascii_lowercase().find(ITEMS_DIR).unwrap()..].to_string();
+            // pos indexes `lower`, an ASCII-lowercased copy of `norm` — same byte offsets
+            let name = norm[pos..].to_string();
             if low {
                 e.low = Some(name);
             } else {
@@ -346,6 +347,14 @@ struct Opened {
 #[derive(Default)]
 pub struct ArtState(Mutex<Option<Opened>>);
 
+impl ArtState {
+    /// Lock the state, recovering a poisoned mutex (a panic while holding it must not
+    /// make every later art call panic too).
+    fn lock(&self) -> std::sync::MutexGuard<'_, Option<Opened>> {
+        self.0.lock().unwrap_or_else(|e| e.into_inner())
+    }
+}
+
 #[derive(Serialize)]
 pub struct ArtInfo {
     kind: &'static str,
@@ -393,7 +402,7 @@ pub fn art_open(state: tauri::State<'_, ArtState>, path: String) -> Result<ArtIn
     if info.sprites.is_empty() && info.items_json.is_none() {
         return Err(format!("No item artwork was found in {}", path));
     }
-    *state.0.lock().unwrap() = Some(Opened {
+    *state.lock() = Some(Opened {
         source,
         sprites,
         png: HashMap::new(),
@@ -403,13 +412,13 @@ pub fn art_open(state: tauri::State<'_, ArtState>, path: String) -> Result<ArtIn
 
 #[tauri::command]
 pub fn art_close(state: tauri::State<'_, ArtState>) {
-    *state.0.lock().unwrap() = None;
+    *state.lock() = None;
 }
 
 /// Checks sprite keys directly when the storage can't be listed. Returns the keys that exist.
 #[tauri::command]
 pub fn art_probe(state: tauri::State<'_, ArtState>, keys: Vec<String>) -> Vec<String> {
-    let mut guard = state.0.lock().unwrap();
+    let mut guard = state.lock();
     let Some(o) = guard.as_mut() else {
         return vec![];
     };
@@ -441,7 +450,7 @@ pub fn art_probe(state: tauri::State<'_, ArtState>, keys: Vec<String>) -> Vec<St
 /// PNG bytes for a sprite key, decoded once and kept in memory.
 pub fn sprite_png(state: &ArtState, key: &str) -> Option<Arc<Vec<u8>>> {
     let key = key.trim_matches('/').to_ascii_lowercase();
-    let mut guard = state.0.lock().unwrap();
+    let mut guard = state.lock();
     let o = guard.as_mut()?;
     if let Some(p) = o.png.get(&key) {
         return Some(p.clone());
@@ -666,7 +675,7 @@ mod tests {
         assert!(text(&src, "hd/items/items.json").unwrap().starts_with('['));
 
         let state = ArtState::default();
-        *state.0.lock().unwrap() = Some(Opened {
+        *state.lock() = Some(Opened {
             source: src,
             sprites,
             png: HashMap::new(),

@@ -414,9 +414,8 @@ fn export_item(app: AppHandle, name: String, data: Vec<u8>) -> Result<String, St
         let dir = app.path().document_dir().map_err(err)?.join("exports");
         fs::create_dir_all(&dir).map_err(err)?;
         let path = dir.join(safe);
-        let tmp = dir.join(".tmp-export.d2i");
-        fs::write(&tmp, &data).map_err(err)?;
-        fs::rename(&tmp, &path).map_err(err)?;
+        // atomic_write derives its temp name from the target (no shared ".tmp-export") and syncs
+        atomic_write(&path, &data)?;
         Ok(path.to_string_lossy().into_owned())
     }
 }
@@ -429,7 +428,9 @@ fn data_dir(app: &AppHandle, sub: &str) -> Result<PathBuf, String> {
 
 #[tauri::command]
 fn backup_files(app: AppHandle, paths: Vec<String>) -> Result<String, String> {
-    let stamp = chrono::Local::now().format("%Y-%m-%d_%H-%M-%S").to_string();
+    // milliseconds: two saves within one second must not share a folder (the second would
+    // overwrite the first one's "original" copies). Fixed width, so folder names still sort by time.
+    let stamp = chrono::Local::now().format("%Y-%m-%d_%H-%M-%S_%3f").to_string();
     let dir = data_dir(&app, "backups")?.join(stamp);
     fs::create_dir_all(&dir).map_err(err)?;
     for path in paths {
@@ -593,9 +594,18 @@ fn is_game_running() -> bool {
     // iOS sandbox: sysinfo can't see other processes, and the game can't run alongside anyway.
     #[cfg(target_os = "ios")]
     return false;
+    // Called on every save: a full process-table refresh each time is pure waste, so cache for a few seconds.
+    static CACHE: std::sync::Mutex<Option<(std::time::Instant, bool)>> = std::sync::Mutex::new(None);
+    if let Ok(c) = CACHE.lock() {
+        if let Some((at, v)) = *c {
+            if at.elapsed() < std::time::Duration::from_secs(3) {
+                return v;
+            }
+        }
+    }
     let mut sys = sysinfo::System::new();
     sys.refresh_processes(sysinfo::ProcessesToUpdate::All, true);
-    sys.processes().values().any(|p| {
+    let running = sys.processes().values().any(|p| {
         let name = p.name().to_string_lossy().to_ascii_lowercase();
         // Windows runs it as D2R.exe. Under Wine/CrossOver on macOS the process can show up as
         // the translated name, the full game name, or through the wrapper, so match loosely.
@@ -603,7 +613,11 @@ fn is_game_running() -> bool {
         stem == "d2r"
             || name.contains("diablo ii resurrected")
             || (name.contains("diablo") && name.contains("resurrected"))
-    })
+    });
+    if let Ok(mut c) = CACHE.lock() {
+        *c = Some((std::time::Instant::now(), running));
+    }
+    running
 }
 
 #[tauri::command]
