@@ -1,6 +1,10 @@
 /**
  * Bit-level I/O. Diablo II stores bit fields LSB-first within each byte.
  */
+
+/** One shared decoder: decode() without streaming is stateless per call. */
+const sharedDecoder = new TextDecoder();
+
 export class BitReader {
   bitPos = 0;
   constructor(readonly data: Uint8Array, byteOffset = 0) {
@@ -77,7 +81,7 @@ export class BitReader {
       if (ch === 0) break;
       bytes.push(ch);
     }
-    return new TextDecoder().decode(new Uint8Array(bytes));
+    return sharedDecoder.decode(new Uint8Array(bytes));
   }
 }
 

@@ -29,12 +29,17 @@ const ALIASES: [string[], string[]][] = [
  * A matcher for the vault's search box: every word (or alias like "magic find", "fcr", "ll") has to be in the item's text. Aliases
  * stand for how the game words the stat, so "magic find" finds "% Better Chance of Getting Magic Items".
  */
+let aliasKeys: (readonly [string, string[]])[] | undefined;
+/** Flattened alias table, longest first (so "all res" is taken before "res"). Built once: ALIASES is static. */
+function sortedAliasKeys(): (readonly [string, string[]])[] {
+  return (aliasKeys ??= ALIASES.flatMap(([ks, ts]) => ks.map((k) => [k, ts] as const)).sort((a, b) => b[0].length - a[0].length));
+}
+
 export function searchMatcher(query: string): ((text: string) => boolean) | undefined {
   let rest = ` ${query.toLowerCase().replace(/\s+/g, ' ').trim()} `;
   if (!rest.trim()) return undefined;
   const terms: string[][] = [];
-  // longest aliases first, so "all res" is taken before "res"
-  const keys = ALIASES.flatMap(([ks, ts]) => ks.map((k) => [k, ts] as const)).sort((a, b) => b[0].length - a[0].length);
+  const keys = sortedAliasKeys();
   for (const [k, ts] of keys) {
     const at = rest.indexOf(` ${k} `);
     if (at < 0) continue;

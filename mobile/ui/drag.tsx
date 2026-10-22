@@ -52,6 +52,8 @@ export function useDragController(opts: Options): DragApi {
   const ghost = useRef<HTMLDivElement | null>(null);
   const tapTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const lastTap = useRef<{ key: string; at: number }>({ key: '', at: 0 });
+  const hitRaf = useRef(0);
+  const hitPos = useRef<{ p: Pending; x: number; y: number } | null>(null);
 
   useEffect(() => {
     const el = document.createElement('div');
@@ -75,6 +77,11 @@ export function useDragController(opts: Options): DragApi {
 
   const cleanup = useCallback(
     (p: Pending) => {
+      if (hitRaf.current) {
+        cancelAnimationFrame(hitRaf.current);
+        hitRaf.current = 0;
+      }
+      hitPos.current = null;
       ghost.current?.classList.remove('on', 'm-ghost-bad');
       if (ghost.current) ghost.current.style.display = 'none';
       clearHighlights();
@@ -236,6 +243,24 @@ export function useDragController(opts: Options): DragApi {
   );
 
   useEffect(() => {
+    /** Coalesce hit-tests to one per frame (each does full-document queries); the ghost still tracks every event. */
+    const queueHit = (p: Pending, x: number, y: number) => {
+      hitPos.current = { p, x, y };
+      if (hitRaf.current) return;
+      hitRaf.current = requestAnimationFrame(() => {
+        hitRaf.current = 0;
+        const q = hitPos.current;
+        if (q && pending.current === q.p) hitTest(q.p, q.x, q.y);
+      });
+    };
+    /** Run a queued hit-test immediately, so a drop is decided by the final pointer position. */
+    const flushHit = () => {
+      if (!hitRaf.current) return;
+      cancelAnimationFrame(hitRaf.current);
+      hitRaf.current = 0;
+      const q = hitPos.current;
+      if (q && pending.current === q.p) hitTest(q.p, q.x, q.y);
+    };
     const onMove = (e: PointerEvent) => {
       const p = pending.current;
       if (!p || e.pointerId !== p.pointerId) return;
@@ -249,12 +274,13 @@ export function useDragController(opts: Options): DragApi {
         g.style.left = `${e.clientX - p.offX}px`;
         g.style.top = `${e.clientY - p.offY}px`;
       }
-      hitTest(p, e.clientX, e.clientY);
+      queueHit(p, e.clientX, e.clientY);
     };
     const onUp = (e: PointerEvent) => {
       const p = pending.current;
       if (!p || e.pointerId !== p.pointerId) return;
       if (p.dragging) {
+        flushHit();
         finishDrag(p);
         cleanup(p);
         return;
@@ -288,6 +314,8 @@ export function useDragController(opts: Options): DragApi {
       window.removeEventListener('pointerup', onUp);
       window.removeEventListener('pointercancel', onCancel);
       clearTimeout(tapTimer.current);
+      if (hitRaf.current) cancelAnimationFrame(hitRaf.current);
+      hitRaf.current = 0;
     };
   }, [beginDrag, cleanup, finishDrag, hitTest]);
 
