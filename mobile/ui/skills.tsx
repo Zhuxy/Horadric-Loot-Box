@@ -82,6 +82,7 @@ export function SkillsScreen({ ch }: { ch: D2Character }) {
             <div className="m-skilldline">
               基础 {sel.base} · 装备 +{sel.bonus} · 当前等级 <b>{sel.total}</b>
             </div>
+            {sel.desc && <div className="m-skillddesc">{sel.desc}</div>}
             <div className="m-skilldline m-faint">
               需要等级 {sel.reqLevel}
               {sel.prereq.length > 0 && <> · 前置：{sel.prereq.map((pid) => byId.get(pid)?.name ?? pid).join('、')}</>}

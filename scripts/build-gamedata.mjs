@@ -295,9 +295,11 @@ for (const r of skillRows) {
   if (id < 0) continue;
   const desc = skillDescRows[r.skilldesc];
   const page = desc ? int(desc.SkillPage) : 0;
+  const longDesc = desc ? str(desc['str long'], '').replace(/\s*\n\s*/g, ' ').trim() : '';
   skills[id] = {
     key: r.skill,
     name: desc ? str(desc['str name'], r.skill) : r.skill,
+    ...(longDesc ? { desc: longDesc } : {}),
     cls: r.charclass ? classCodes.indexOf(r.charclass) : -1,
     // skill tree tab (1-3), 0 for skills that aren't in a tree; and the level needed to learn it
     page,

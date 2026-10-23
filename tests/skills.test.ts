@@ -22,6 +22,9 @@ describe('skill tree data', () => {
         for (const p of s.prereq) expect(t.skills.some((x) => x.id === p)).toBe(true);
       }
     }
+    // every class skill carries the game's own description text
+    expect(skill(chaos, 'Summon Goatman').desc).toBe('Summons a Goatman to fight by your side');
+    expect(trees.flatMap((t) => t.skills).every((s) => !!s.desc)).toBe(true);
     // spot-check the layout against the game's own panel
     expect([skill(sorc, 'Fire Bolt').row, skill(sorc, 'Fire Bolt').col]).toEqual([1, 2]);
     expect([skill(sorc, 'Frozen Orb').row, skill(sorc, 'Frozen Orb').col]).toEqual([6, 1]);

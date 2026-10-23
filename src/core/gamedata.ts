@@ -142,6 +142,8 @@ export interface GameData {
     {
       key: string;
       name: string;
+      /** The game's own description text (skilldesc "str long"), when the skill has one. */
+      desc?: string;
       cls: number;
       page: number;
       reqLevel: number;

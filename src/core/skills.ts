@@ -104,6 +104,8 @@ export function grantedSkills(ch: D2Character): { id: number; name: string; leve
 export interface SkillLevelInfo {
   id: number;
   name: string;
+  /** The game's description text for the skill, when it has one. */
+  desc?: string;
   page: number;
   /** In-game tree position (1-based): row = tier 1–6, col = 1–3. */
   row: number;
@@ -137,6 +139,7 @@ export function skillTreeInfo(ch: D2Character): SkillTreeInfo[] {
     list.push({
       id: sk.id,
       name: sk.name,
+      desc: sk.desc,
       page: sk.page,
       row: row > 0 ? row : 1,
       col: sk.col ?? ((list.length % 3) + 1),
