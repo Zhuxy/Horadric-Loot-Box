@@ -197,6 +197,23 @@
   .skilltree h4{font-size:12px;color:var(--gold);letter-spacing:.08em;margin-bottom:4px;font-weight:600}
   .skillrow{display:flex;justify-content:space-between;font-size:12.5px;padding:2.5px 0;border-bottom:1px dashed rgba(255,255,255,.05)}
   .skillrow .pts{font-variant-numeric:tabular-nums;color:var(--ink-dim)}
+  .tg-seg{padding-left:0;padding-right:0}
+  .tg-grid{position:relative;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(6,1fr);gap:8px 10px;width:min(100%,400px);margin:2px auto 0;aspect-ratio:3/3.9}
+  .tg-links{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+  .tg-links path{fill:none;stroke:rgba(212,182,106,.16);stroke-width:2}
+  .tg-links path.lit{stroke:rgba(212,182,106,.55)}
+  .tg-tile{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:6px 3px 5px;background:linear-gradient(180deg,rgba(38,32,22,.92),rgba(16,13,9,.92));border:1px solid var(--panel-edge);border-radius:6px;color:inherit;cursor:pointer;text-align:center;font:inherit}
+  .tg-tile.sel{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold)}
+  .tg-tile.dim{opacity:.45}
+  .tg-name{font-size:10.5px;line-height:1.15;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .tg-lvl{font-size:19px;font-weight:700;color:#fff;line-height:1}
+  .tg-lvl i{font-style:normal;font-size:11px;color:#7ee2a0;margin-left:2px;vertical-align:super}
+  .tg-req{font-size:11px;color:var(--ink-dim)}
+  .tg-detail{width:min(100%,400px);margin:10px auto 0;min-height:58px;border:1px solid var(--panel-edge);border-radius:6px;padding:8px 10px;background:rgba(0,0,0,.3)}
+  .tg-dname{font-weight:700;color:var(--gold);margin-bottom:2px}
+  .tg-dline{font-size:12.5px}
+  .tg-dline.faint{color:var(--ink-faint)}
+  .tg-granted{width:min(100%,400px);margin:8px auto 0;font-size:12.5px;color:var(--ink-dim)}
   .skillrow .pts b{color:var(--ink)} .skillrow .pts .plus{color:var(--q-magic)}
   .bonusline{display:flex;justify-content:space-between;font-size:12.5px;padding:2.5px 0;border-bottom:1px dashed rgba(255,255,255,.05)}
   .bonusline .bv{color:var(--gold);font-variant-numeric:tabular-nums}
@@ -353,6 +370,7 @@ let _uid = 1;
 function it(name,o){ return Object.assign({id:_uid++, name, q:'normal', g:'◆', w:1, h:1, x:0, y:0, cat:'其他', type:'misc', lvl:1, props:[], fit:null, qty:0}, o||{}); }
 function potion(name,qty){ return it(name,{g:'药',q:'normal',type:'potion',qty:qty||0,props:['右键使用 · 立即恢复']}); }
 
+const MOCK_TREES = [{"page": 1, "title": "火焰系", "skills": [{"id": 36, "name": "Fire Bolt", "row": 1, "col": 2, "req": 1, "pre": [], "base": 0, "bonus": 0, "total": 0}, {"id": 37, "name": "Warmth", "row": 1, "col": 3, "req": 1, "pre": [], "base": 1, "bonus": 13, "total": 14}, {"id": 41, "name": "Inferno", "row": 2, "col": 1, "req": 6, "pre": [], "base": 0, "bonus": 0, "total": 0}, {"id": 46, "name": "Blaze", "row": 3, "col": 1, "req": 12, "pre": [41], "base": 0, "bonus": 0, "total": 0}, {"id": 47, "name": "Fire Ball", "row": 3, "col": 2, "req": 12, "pre": [36], "base": 1, "bonus": 12, "total": 13}, {"id": 51, "name": "Fire Wall", "row": 4, "col": 1, "req": 18, "pre": [46], "base": 1, "bonus": 12, "total": 13}, {"id": 52, "name": "Enchant", "row": 4, "col": 3, "req": 18, "pre": [37, 47], "base": 0, "bonus": 0, "total": 0}, {"id": 56, "name": "Meteor", "row": 5, "col": 2, "req": 24, "pre": [47, 51], "base": 0, "bonus": 0, "total": 0}, {"id": 61, "name": "Fire Mastery", "row": 6, "col": 2, "req": 30, "pre": [], "base": 0, "bonus": 0, "total": 0}, {"id": 62, "name": "Hydra", "row": 6, "col": 3, "req": 30, "pre": [52], "base": 0, "bonus": 0, "total": 0}]}, {"page": 2, "title": "闪电系", "skills": [{"id": 38, "name": "Charged Bolt", "row": 1, "col": 2, "req": 1, "pre": [], "base": 0, "bonus": 0, "total": 0}, {"id": 42, "name": "Static Field", "row": 2, "col": 1, "req": 6, "pre": [], "base": 0, "bonus": 0, "total": 0}, {"id": 43, "name": "Telekinesis", "row": 2, "col": 3, "req": 6, "pre": [], "base": 1, "bonus": 14, "total": 15}, {"id": 48, "name": "Nova", "row": 3, "col": 1, "req": 12, "pre": [42], "base": 20, "bonus": 14, "total": 34}, {"id": 49, "name": "Lightning", "row": 3, "col": 2, "req": 12, "pre": [38], "base": 20, "bonus": 14, "total": 34}, {"id": 53, "name": "Chain Lightning", "row": 4, "col": 2, "req": 18, "pre": [49], "base": 0, "bonus": 0, "total": 0}, {"id": 54, "name": "Teleport", "row": 4, "col": 3, "req": 18, "pre": [43], "base": 1, "bonus": 14, "total": 15}, {"id": 57, "name": "Thunder Storm", "row": 5, "col": 1, "req": 24, "pre": [48, 53], "base": 0, "bonus": 0, "total": 0}, {"id": 58, "name": "Energy Shield", "row": 5, "col": 3, "req": 24, "pre": [54, 53], "base": 0, "bonus": 0, "total": 0}, {"id": 63, "name": "Lightning Mastery", "row": 6, "col": 2, "req": 30, "pre": [], "base": 20, "bonus": 14, "total": 34}]}, {"page": 3, "title": "冰冷系", "skills": [{"id": 39, "name": "Ice Bolt", "row": 1, "col": 2, "req": 1, "pre": [], "base": 0, "bonus": 0, "total": 0}, {"id": 40, "name": "Frozen Armor", "row": 1, "col": 3, "req": 1, "pre": [], "base": 0, "bonus": 0, "total": 0}, {"id": 44, "name": "Frost Nova", "row": 2, "col": 1, "req": 6, "pre": [], "base": 0, "bonus": 0, "total": 0}, {"id": 45, "name": "Ice Blast", "row": 2, "col": 2, "req": 6, "pre": [39], "base": 0, "bonus": 0, "total": 0}, {"id": 50, "name": "Shiver Armor", "row": 3, "col": 3, "req": 12, "pre": [45, 40], "base": 0, "bonus": 0, "total": 0}, {"id": 55, "name": "Glacial Spike", "row": 4, "col": 2, "req": 18, "pre": [45], "base": 0, "bonus": 0, "total": 0}, {"id": 59, "name": "Blizzard", "row": 5, "col": 1, "req": 24, "pre": [44, 55], "base": 0, "bonus": 0, "total": 0}, {"id": 60, "name": "Chilling Armor", "row": 5, "col": 3, "req": 24, "pre": [50], "base": 0, "bonus": 0, "total": 0}, {"id": 64, "name": "Frozen Orb", "row": 6, "col": 1, "req": 30, "pre": [59], "base": 20, "bonus": 13, "total": 33}, {"id": 65, "name": "Cold Mastery", "row": 6, "col": 2, "req": 30, "pre": [], "base": 12, "bonus": 13, "total": 25}]}];
 function sorChar(){ _uid = 100;
   const doll = {
     head: it('谐角之冠',{q:'unique',g:'帽',fit:['head'],lvl:50,cat:'防具',type:'helm',props:['+2 所有技能','+2 角色等级基于生命','伤害减少 10%','50% 更佳机会取得魔法装备'],sock:'镶嵌：完美红宝石'}),
@@ -395,6 +413,7 @@ function sorChar(){ _uid = 100;
   ];
   return {
     key:'sor', name:'SorStar', cls:'法师', level:89, goldInv:125400, goldBank:864000,
+    skillTrees: MOCK_TREES, granted:[],
     doll, swap, belt, inv, cube,
     merc:{ name:'米山', kind:'第二幕雇佣兵 · 力量光环', level:88, doll:{
       head: it('安达利尔的面容',{q:'unique',g:'帽',fit:['head'],lvl:83,cat:'防具',type:'helm',props:['+2 所有技能','20% 攻击提速','10% 生命偷取','抗火 -30%']}),
@@ -517,6 +536,7 @@ if (window.PROTO_DATA) (function(){
     chars[key] = {
       key, name:rc.name, cls:CLSMAP[rc.className]||rc.className, level:rc.level,
       goldInv:rc.gold, goldBank:rc.goldbank, doll, swap, belt, inv, cube, merc:null,
+      skillTrees: rc.skillTrees||null, granted: rc.granted||[],
       attrs:{
         stats:[['力量',bs.strength,cs.strength-bs.strength],['敏捷',bs.dexterity,cs.dexterity-bs.dexterity],['体力',bs.vitality,cs.vitality-bs.vitality],['精力',bs.energy,cs.energy-bs.energy]],
         vitals:[['生命',cs.life,'orb-hp'],['法力',cs.mana,'orb-mp'],['耐力',cs.stamina,'orb-st']],
@@ -624,13 +644,13 @@ function buildCharList(scr){
 }
 /* ================= char: detail ================= */
 function subtabHTML(){
-  return '<div class="subtabs">'+[['attrs','属性'],['equip','装备'],['merc','佣兵']].map(t=>'<button data-sub="'+t[0]+'" class="'+(S.sub===t[0]?'on':'')+'">'+t[1]+'</button>').join('')+'</div>';
+  return '<div class="subtabs">'+[['attrs','属性'],['equip','装备'],['skills','技能'],['merc','佣兵']].map(t=>'<button data-sub="'+t[0]+'" class="'+(S.sub===t[0]?'on':'')+'">'+t[1]+'</button>').join('')+'</div>';
 }
 function buildCharDetail(scr){
   scr.innerHTML = subtabHTML() + '<div class="padwrap" id="subbody"></div>';
   scr.querySelectorAll('[data-sub]').forEach(b=> b.onclick=()=>{ S.sub=b.dataset.sub; S.beltOpen=false; render(); });
   const body = scr.querySelector('#subbody');
-  if(S.sub==='equip') buildEquip(body); else if(S.sub==='attrs') buildAttrs(body); else buildMerc(body);
+  if(S.sub==='equip') buildEquip(body); else if(S.sub==='attrs') buildAttrs(body); else if(S.sub==='skills') buildSkills(body); else buildMerc(body);
 }
 /* ---- paper doll ---- */
 const DOLL = [
@@ -719,6 +739,43 @@ function buildAttrs(body){
       a.bonusGear.map(b=>'<div class="bonusline"><span>'+b[0]+'</span><span class="bv">'+b[1]+'</span></div>').join('')+'</div>' +
     (a.bonusCharm.length? '<div class="panel"><h3>背包护符加成</h3>'+ a.bonusCharm.map(b=>'<div class="bonusline"><span>'+b[0]+'</span><span class="bv">'+b[1]+'</span></div>').join('')+'</div>' : '') +
     '<div style="height:14px"></div>';
+}
+/* ---- skills screen ---- */
+function buildSkills(body){
+  S.activeGrid = null;
+  const c = cur();
+  body.classList.add('scrollable'); body.style.overflowY='auto';
+  const trees = c.skillTrees;
+  if(!trees || !trees.length){ body.innerHTML = '<div class="hintline" style="padding-top:12px">这个角色没有技能树数据。</div>'; return; }
+  if(c.tgPage===undefined || !trees.some(t=>t.page===c.tgPage)){
+    c.tgPage = trees.reduce((a,b)=> (b.skills.reduce((n,s)=>n+s.base,0) > a.skills.reduce((n,s)=>n+s.base,0) ? b : a)).page;
+  }
+  const tree = trees.find(t=>t.page===c.tgPage);
+  const byId = {}; tree.skills.forEach(s=> byId[s.id]=s);
+  const sel = c.tgSel!=null ? byId[c.tgSel] : null;
+  const cx = s=> (s.col-0.5)*100, top = s=> (s.row-1)*100, bot = s=> s.row*100;
+  let links = '';
+  tree.skills.forEach(s=> (s.pre||[]).forEach(pid=>{ const p = byId[pid]; if(!p) return;
+    const mid = (bot(p)+top(s))/2, lit = p.total>0 && s.total>0;
+    links += '<path d="M '+cx(p)+' '+bot(p)+' V '+mid+' H '+cx(s)+' V '+top(s)+'" class="'+(lit?'lit':'')+'"/>';
+  }));
+  body.innerHTML =
+    '<div class="seg tg-seg">'+ trees.map(t=>'<button data-tgpage="'+t.page+'" class="'+(t.page===tree.page?'on':'')+'">'+t.title+'</button>').join('') +'</div>' +
+    '<div class="tg-grid"><svg class="tg-links" viewBox="0 0 300 600" preserveAspectRatio="none">'+links+'</svg>' +
+      tree.skills.map(s=> '<button class="tg-tile'+(s.total===0?' dim':'')+(sel&&sel.id===s.id?' sel':'')+'" data-tgskill="'+s.id+'" style="grid-row:'+s.row+';grid-column:'+s.col+'">' +
+        '<span class="tg-name">'+esc(s.name)+'</span>' +
+        (s.total>0 ? '<span class="tg-lvl">'+s.total+(s.bonus>0 ? '<i>+'+s.bonus+'</i>' : '')+'</span>' : '<span class="tg-req">Lv '+s.req+'</span>') +
+      '</button>').join('') +
+    '</div>' +
+    '<div class="tg-detail">' + (sel ?
+        '<div class="tg-dname">'+esc(sel.name)+'</div><div class="tg-dline">基础 '+sel.base+' · 装备 +'+sel.bonus+' · 当前等级 <b>'+sel.total+'</b></div>' +
+        '<div class="tg-dline faint">需要等级 '+sel.req + (sel.pre&&sel.pre.length ? ' · 前置：'+ sel.pre.map(pid=> (byId[pid]||{}).name||pid).join('、') : '') + '</div>'
+      : '<div class="tg-dline faint">点任意技能查看详情。等级含身上装备与背包护符的加成（+N 为装备部分）。</div>') +
+    '</div>' +
+    ((c.granted&&c.granted.length) ? '<div class="tg-granted">装备赋予：'+ c.granted.map(g=> esc(g.name)+' '+g.level).join(' · ') +'</div>' : '') +
+    '<div style="height:14px"></div>';
+  body.querySelectorAll('[data-tgpage]').forEach(b=> b.onclick = ()=>{ c.tgPage = Number(b.dataset.tgpage); c.tgSel = null; buildSkills(body); });
+  body.querySelectorAll('[data-tgskill]').forEach(b=> b.onclick = ()=>{ c.tgSel = Number(b.dataset.tgskill); buildSkills(body); });
 }
 /* ---- merc screen ---- */
 const MERC = [ ['head',0,0,2,2,'头盔'],['torso',0,2.2,2,3,'铠甲'],['rh',2.2,0,2,4,'武器'],['lh',2.2,4.45,2,2,'盾牌'] ];
