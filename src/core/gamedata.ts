@@ -137,7 +137,22 @@ export interface GameData {
   /** Crafting recipes: the item they're named for ("Blood Gloves"), the base code or type they take (any tier when `upgraded`), and the mods they add. */
   crafts: { name: string; input: string; upgraded: boolean; mods: PropDef[] }[];
   classes: { name: string; allSkills: string; tabs: string[]; classOnly: string }[];
-  skills: Record<string, { key: string; name: string; cls: number; page: number; reqLevel: number }>;
+  skills: Record<
+    string,
+    {
+      key: string;
+      name: string;
+      cls: number;
+      page: number;
+      reqLevel: number;
+      /** In-game tree layout (1-based row/column) and icon cell, class skills in a tree only. */
+      row?: number;
+      col?: number;
+      icon?: number;
+      /** Skill ids that must be learned first. */
+      prereq?: number[];
+    }
+  >;
   /** playerclass.txt codes by class index ('ama', 'sor', … 'war'). */
   classCodes: string[];
   /** qualityitems.txt: superior mods by row (the save's 3-bit superior id) and which bases they fit. */

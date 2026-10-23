@@ -287,18 +287,30 @@ const classes = readTsv('charstats')
   }));
 const classCodes = readTsv('playerclass').map((r) => r.Code).filter(Boolean);
 const skillDescRows = Object.fromEntries(readTsv('skilldesc').map((r) => [r.skilldesc, r]));
+const skillRows = readTsv('skills');
+const skillIdByKey = new Map(skillRows.map((r) => [r.skill, int(r['*Id'], -1)]));
 const skills = {};
-for (const r of readTsv('skills')) {
+for (const r of skillRows) {
   const id = int(r['*Id'], -1);
   if (id < 0) continue;
   const desc = skillDescRows[r.skilldesc];
+  const page = desc ? int(desc.SkillPage) : 0;
   skills[id] = {
     key: r.skill,
     name: desc ? str(desc['str name'], r.skill) : r.skill,
     cls: r.charclass ? classCodes.indexOf(r.charclass) : -1,
     // skill tree tab (1-3), 0 for skills that aren't in a tree; and the level needed to learn it
-    page: desc ? int(desc.SkillPage) : 0,
+    page,
     reqLevel: int(r.reqlevel),
+    // in-game tree layout (skilldesc.txt) and prerequisites (skills.txt reqskill1-3), class skills only
+    ...(page > 0 && desc
+      ? {
+          row: int(desc.SkillRow),
+          col: int(desc.SkillColumn),
+          icon: int(desc.IconCel),
+          prereq: [r.reqskill1, r.reqskill2, r.reqskill3].filter(Boolean).map((k) => skillIdByKey.get(k)).filter((n) => n >= 0),
+        }
+      : {}),
   };
 }
 

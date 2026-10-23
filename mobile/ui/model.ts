@@ -3,17 +3,14 @@ import {
   ItemMode,
   StorePage,
   StashTabType,
-  activeItems,
   characterStats,
   groupOfType,
   itemSize,
   itemTypeOf,
-  socketStats,
-  statByName,
+  skillTreeInfo,
   type D2Character,
   type D2Item,
   type D2SharedStash,
-  type ItemStat,
   type Vault,
   type VaultEntry,
 } from '../../src/core';
@@ -116,7 +113,7 @@ export function trayEntries(store: Store): VaultEntry[] {
 /** Where a double-click/panel move can put an item on the current screen. */
 export function activeGridLoc(
   tab: number,
-  sub: 'attrs' | 'equip' | 'merc',
+  sub: 'attrs' | 'equip' | 'skills' | 'merc',
   gridView: 'inv' | 'cube',
   stashSeg: 'personal' | 'shared',
   sharedTab: number,
@@ -252,12 +249,6 @@ export function filterVault(entries: VaultEntry[], f: VaultFilter): VaultEntry[]
 
 // ---------------------------------------------------------------- skills & charms
 
-const statId = (key: string) => statByName(key)?.id;
-const ALL_SKILLS = statId('item_allskills');
-const ADD_CLASS = statId('item_addclassskills');
-const ADD_TAB = statId('item_addskill_tab');
-const SINGLE = statId('item_singleskill');
-
 export interface SkillRow {
   id: number;
   name: string;
@@ -270,10 +261,6 @@ export interface SkillTree {
   rows: SkillRow[];
 }
 
-/**
- * Base points come straight from the save's skill section (30 bytes, one per class skill);
- * gear bonuses are summed from every stat on worn gear and charms (all skills, class, tab and single-skill).
- */
 const TREE_TITLES: Record<string, string[]> = {
   Amazon: ['弓与十字弓', '被动与魔法', '标枪与长矛'],
   Sorceress: ['火焰系', '闪电系', '冰冷系'],
@@ -285,64 +272,21 @@ const TREE_TITLES: Record<string, string[]> = {
   Warlock: ['恶魔系', '邪术系', '混沌系'],
 };
 
+export function treeTitle(ch: D2Character, page: number): string {
+  const raw = GD.classes[ch.classId]?.tabs[page - 1] ?? '';
+  const fallback = raw.replace(/^[+%]*\+?%?d to /, '').replace(/ Skills$/, '') || '技能';
+  return TREE_TITLES[ch.className]?.[page - 1] ?? fallback;
+}
+
+/** The attributes page's compact overview: only skills with points or gear bonuses, grouped by tree.
+ * The numbers come from core (skillTreeInfo) so this and the skill-tree page can never disagree. */
 export function skillTrees(ch: D2Character): SkillTree[] {
-  const byClass = Object.entries(GD.skills)
-    .filter(([, s]) => s.cls === ch.classId)
-    .map(([id, s]) => ({ id: Number(id), ...s }))
-    .sort((a, b) => a.id - b.id);
-  if (!byClass.length) return [];
-  const bytes = ch.head.subarray(ch.statsAt.end + 2, ch.statsAt.end + 2 + byClass.length);
-  const base = new Map<number, number>();
-  byClass.forEach((s, i) => base.set(s.id, bytes[i] ?? 0));
-
-  const bonus = new Map<number, number>();
-  const add = (id: number, n: number) => {
-    if (n) bonus.set(id, (bonus.get(id) ?? 0) + n);
-  };
-  const apply = (s: ItemStat) => {
-    if (!s.value) return;
-    if (s.id === ALL_SKILLS) byClass.forEach((sk) => add(sk.id, s.value));
-    else if (s.id === ADD_CLASS && s.param === ch.classId) byClass.forEach((sk) => add(sk.id, s.value));
-    else if (s.id === ADD_TAB && s.param >> 3 === ch.classId) {
-      const page = s.param & 7;
-      byClass.filter((sk) => sk.page === page).forEach((sk) => add(sk.id, s.value));
-    } else if (s.id === SINGLE && GD.skills[s.param]?.cls === ch.classId) add(s.param, s.value);
-  };
-  const items = activeItems(ch);
-  for (const item of items) {
-    item.stats.forEach(apply);
-    item.runewordStats.forEach(apply);
-    for (const socket of item.sockets) socketStats(item, socket).forEach(apply);
-  }
-  // set bonuses that are active with this many pieces
-  const setCount = new Map<string, number>();
-  for (const item of items) {
-    if (item.mode !== ItemMode.Equipped || item.setId === undefined) continue;
-    const key = GD.setItems[item.setId]?.setKey;
-    if (key) setCount.set(key, (setCount.get(key) ?? 0) + 1);
-  }
-  for (const item of items) {
-    if (item.setId === undefined) continue;
-    const key = GD.setItems[item.setId]?.setKey;
-    const n = key ? setCount.get(key) ?? 0 : 0;
-    item.setBonusStats.forEach((list, i) => {
-      if (n >= i + 2) list.forEach(apply);
-    });
-  }
-
-  const trees = new Map<number, SkillTree>();
-  for (const sk of byClass) {
-    const b = base.get(sk.id) ?? 0;
-    const g = bonus.get(sk.id) ?? 0;
-    if (!b && !g) continue;
-    const raw = GD.classes[ch.classId]?.tabs[sk.page - 1] ?? '';
-    const fallback = raw.replace(/^[+%]*\+?%?d to /, '').replace(/ Skills$/, '') || '技能';
-    const title = TREE_TITLES[ch.className]?.[sk.page - 1] ?? fallback;
-    const tree = trees.get(sk.page) ?? { title, rows: [] };
-    tree.rows.push({ id: sk.id, name: sk.name, base: b, bonus: g });
-    trees.set(sk.page, tree);
-  }
-  return [...trees.entries()].sort((a, b) => a[0] - b[0]).map(([, t]) => t);
+  return skillTreeInfo(ch)
+    .map((t) => ({
+      title: treeTitle(ch, t.page),
+      rows: t.skills.filter((s) => s.base || s.bonus).map((s) => ({ id: s.id, name: s.name, base: s.base, bonus: s.bonus })),
+    }))
+    .filter((t) => t.rows.length);
 }
 
 /** Stats the charms in the backpack contribute, computed separately (SPEC §5.1.3). */

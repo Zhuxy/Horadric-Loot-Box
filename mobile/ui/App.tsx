@@ -4,6 +4,7 @@ import type { GoldRef } from '../../src/state/store';
 import { useStore } from '../../src/ui/context';
 import { CharacterList, SubTabs, type SubPage } from './characters';
 import { AttributesScreen, EquipScreen, MercScreen } from './equipment';
+import { SkillsScreen } from './skills';
 import { FilterSheet } from './filter';
 import { GoldSheet } from './gold';
 import { ImportFlow, setImportEntry } from './ImportFlow';
@@ -199,6 +200,7 @@ export function MobileApp() {
               />
             )}
             {sub === 'attrs' && <AttributesScreen ch={ch} />}
+            {sub === 'skills' && <SkillsScreen ch={ch} />}
             {sub === 'merc' && <MercScreen docId={currentId} ch={ch} />}
           </div>
         </>

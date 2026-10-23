@@ -17,5 +17,6 @@ export * from './itemtype';
 export * from './build';
 export * from './wants';
 export * from './charstats';
+export * from './skills';
 export * from './ias';
 export * from './search';

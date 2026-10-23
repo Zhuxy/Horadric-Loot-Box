@@ -810,6 +810,107 @@ h4 {
   font-size: 13px;
   margin-top: 10px;
 }
+
+/* ---------------------------------------------------------------- skill tree */
+.m-skillseg {
+  padding-left: 0;
+  padding-right: 0;
+}
+.m-skillgrid {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(6, 1fr);
+  gap: 8px 10px;
+  width: min(100%, 400px);
+  margin: 2px auto 0;
+  aspect-ratio: 3 / 3.9;
+}
+.m-skilllinks {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.m-skilllinks path {
+  fill: none;
+  stroke: rgba(212, 182, 106, 0.16);
+  stroke-width: 2;
+}
+.m-skilllinks path.lit {
+  stroke: rgba(212, 182, 106, 0.55);
+}
+.m-skilltile {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 3px 5px;
+  background: linear-gradient(180deg, rgba(38, 32, 22, 0.92), rgba(16, 13, 9, 0.92));
+  border: 1px solid var(--panel-edge);
+  border-radius: 6px;
+  color: inherit;
+  cursor: pointer;
+  text-align: center;
+}
+.m-skilltile.sel {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 1px var(--gold);
+}
+.m-skilltile.dim {
+  opacity: 0.45;
+}
+.m-skillname {
+  font-size: 10.5px;
+  line-height: 1.15;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.m-skilllvl {
+  font-size: 19px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+}
+.m-skilllvl i {
+  font-style: normal;
+  font-size: 11px;
+  color: #7ee2a0;
+  margin-left: 2px;
+  vertical-align: super;
+}
+.m-skillreq {
+  font-size: 11px;
+  color: var(--ink-dim);
+}
+.m-skilldetail {
+  width: min(100%, 400px);
+  margin: 10px auto 0;
+  min-height: 58px;
+  border: 1px solid var(--panel-edge);
+  border-radius: 6px;
+  padding: 8px 10px;
+  background: rgba(0, 0, 0, 0.3);
+}
+.m-skilldname {
+  font-weight: 700;
+  color: var(--gold);
+  margin-bottom: 2px;
+}
+.m-skilldline {
+  font-size: 12.5px;
+}
+.m-skillgranted {
+  width: min(100%, 400px);
+  margin: 8px auto 0;
+  font-size: 12.5px;
+  color: var(--ink-dim);
+}
 .m-statgrid .m-k {
   color: var(--ink-dim);
 }

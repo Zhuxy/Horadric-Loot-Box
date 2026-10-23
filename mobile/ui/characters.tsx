@@ -12,7 +12,7 @@ const ICON: Record<string, string> = {
   Warlock: '🪄',
 };
 
-export type SubPage = 'attrs' | 'equip' | 'merc';
+export type SubPage = 'attrs' | 'equip' | 'skills' | 'merc';
 
 export function CharacterList({ chars, currentId, onOpen }: { chars: { id: string; ch: D2Character }[]; currentId?: string; onOpen: (id: string) => void }) {
   return (
@@ -50,6 +50,7 @@ export function SubTabs({ sub, onSub }: { sub: SubPage; onSub: (sub: SubPage) =>
         [
           ['attrs', '属性'],
           ['equip', '装备'],
+          ['skills', '技能'],
           ['merc', '佣兵'],
         ] as const
       ).map(([id, label]) => (
