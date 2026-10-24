@@ -144,7 +144,7 @@ ios: node_modules/.package-lock.json ## Build the iOS app and install it on the 
 	@echo "==> Installing to iPhone"
 	@IPA=$$(ls -t src-tauri/gen/apple/build/export/*.ipa 2>/dev/null | head -1); \
 	if [ -z "$$IPA" ]; then echo "==> No .ipa found under src-tauri/gen/apple/build/export/"; exit 1; fi; \
-	DEVICE="$${DEVICE:-$$(xcrun devicectl list devices 2>/dev/null | grep 'available (paired)' | grep -oE '[0-9A-Fa-f]{8}-([0-9A-Fa-f]{16}|[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12})' | head -1)}"; \
+	DEVICE="$${DEVICE:-$$(xcrun devicectl list devices 2>/dev/null | grep -v 'simulated' | grep -E 'available|connected' | grep -oE '[0-9A-Fa-f]{8}-([0-9A-Fa-f]{16}|[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12})' | head -1)}"; \
 	if [ -z "$$DEVICE" ]; then \
 		echo "==> No iPhone found. Plug it in, tap Trust, then re-run."; \
 		echo "    (or pass DEVICE=<uuid> explicitly; see: xcrun devicectl list devices)"; exit 1; fi; \
