@@ -91,23 +91,6 @@ export function useDragController(opts: Options): DragApi {
     [clearHighlights],
   );
 
-  /** Park the ghost exactly on the target cells so the picture and the drop frame agree. */
-  const snapGhost = useCallback((left: number, top: number) => {
-    const g = ghost.current;
-    if (!g) return;
-    g.style.left = `${left}px`;
-    g.style.top = `${top}px`;
-  }, []);
-
-  /** Centre the ghost in a slot / belt cell (the item is drawn centred there). */
-  const centerGhost = useCallback((el: HTMLElement) => {
-    const g = ghost.current;
-    if (!g) return;
-    const r = el.getBoundingClientRect();
-    g.style.left = `${r.left + (r.width - g.offsetWidth) / 2}px`;
-    g.style.top = `${r.top + (r.height - g.offsetHeight) / 2}px`;
-  }, []);
-
   const hitTest = useCallback((p: Pending, x: number, y: number) => {
     const { store, trayId } = optsRef.current;
     clearHighlights();
@@ -144,7 +127,6 @@ export function useDragController(opts: Options): DragApi {
       }
       p.drop = { kind: 'slot', docId, area, bodyLoc, ok: check.ok, reason: check.reason, swapItem };
       slot.classList.add(check.ok ? 'm-drop-ok' : 'm-drop-bad');
-      centerGhost(slot);
       ghost.current?.classList.toggle('m-ghost-bad', !check.ok);
       return;
     }
@@ -156,7 +138,6 @@ export function useDragController(opts: Options): DragApi {
       const check = store.check(p.item, p.loc.docId, { docId, area: 'belt', x: slot });
       p.drop = { kind: 'belt', docId, slot, ok: check.ok, reason: check.reason };
       belt.classList.add(check.ok ? 'm-drop-ok' : 'm-drop-bad');
-      centerGhost(belt);
       ghost.current?.classList.toggle('m-ghost-bad', !check.ok);
       return;
     }
@@ -171,42 +152,66 @@ export function useDragController(opts: Options): DragApi {
       const cell = Number(grid.dataset.cell);
       const rect = grid.getBoundingClientRect();
       const { w, h } = itemSize(p.item);
-      // The target comes from the item's top-left, not the finger: the drop lands exactly where the ghost is
-      // drawn, so the finger keeps the same grip it had when the drag started.
-      const cx = Math.floor((x - p.offX - rect.left) / cell);
-      const cy = Math.floor((y - p.offY - rect.top) / cell);
-      const gx = Math.max(0, Math.min(cols - w, cx));
-      const gy = Math.max(0, Math.min(rows - h, cy));
-      const target =
+      // The frame snaps by the item's own top-left, not the finger: the picture keeps following the finger
+      // (no magnet on the ghost), while the frame settles on the nearest cell the item can actually go to.
+      const lx = x - p.offX - rect.left;
+      const ly = y - p.offY - rect.top;
+      const bx = Math.max(0, Math.min(cols - w, Math.floor(lx / cell)));
+      const by = Math.max(0, Math.min(rows - h, Math.floor(ly / cell)));
+      // Candidates: the nearest in-bounds cell and its neighbours, so the frame can step around an occupied
+      // cell but never drift away from the item it belongs to (one cell is the whole search radius).
+      const cells: { gx: number; gy: number; d: number }[] = [];
+      for (let dy = -1; dy <= 1; dy++)
+        for (let dx = -1; dx <= 1; dx++) {
+          const gx = bx + dx;
+          const gy = by + dy;
+          if (gx < 0 || gy < 0 || gx > cols - w || gy > rows - h) continue;
+          cells.push({ gx, gy, d: (gx * cell - lx) ** 2 + (gy * cell - ly) ** 2 });
+        }
+      cells.sort((a, b) => a.d - b.d);
+      const targetAt = (gx: number, gy: number) =>
         area === 'shared'
           ? ({ docId, area: 'shared', tab, x: gx, y: gy } as const)
           : ({ docId, area: area as 'inventory' | 'stash' | 'cube', x: gx, y: gy } as const);
-      const check = store.check(p.item, p.loc.docId, target);
-      p.drop = { kind: 'grid', docId, area, tab, x: gx, y: gy, ok: check.ok, reason: check.reason };
-      // magnetic: the ghost snaps onto the highlighted cells
-      snapGhost(rect.left + gx * cell, rect.top + gy * cell);
+      // first legal candidate wins; if none is legal the nearest one is shown red (with its reason on release)
+      let pick: { gx: number; gy: number; ok: boolean; reason?: string } | undefined;
+      let nearestBad: typeof pick;
+      for (const c of cells) {
+        const check = store.check(p.item, p.loc.docId, targetAt(c.gx, c.gy));
+        if (check.ok) {
+          pick = { gx: c.gx, gy: c.gy, ok: true };
+          break;
+        }
+        nearestBad ??= { gx: c.gx, gy: c.gy, ok: false, reason: check.reason };
+      }
+      pick ??= nearestBad;
+      if (!pick) {
+        ghost.current?.classList.add('m-ghost-bad');
+        return;
+      }
+      p.drop = { kind: 'grid', docId, area, tab, x: pick.gx, y: pick.gy, ok: pick.ok, reason: pick.reason };
       const hl = grid.querySelector<HTMLElement>('.m-drop-hl');
       if (hl) {
         hl.style.display = 'block';
-        hl.style.left = `${gx * cell}px`;
-        hl.style.top = `${gy * cell}px`;
+        hl.style.left = `${pick.gx * cell}px`;
+        hl.style.top = `${pick.gy * cell}px`;
         hl.style.width = `${w * cell}px`;
         hl.style.height = `${h * cell}px`;
-        hl.classList.toggle('m-bad', !check.ok);
+        hl.classList.toggle('m-bad', !pick.ok);
       }
-      ghost.current?.classList.toggle('m-ghost-bad', !check.ok);
+      ghost.current?.classList.toggle('m-ghost-bad', !pick.ok);
       return;
     }
     ghost.current?.classList.add('m-ghost-bad');
-  }, [clearHighlights, centerGhost, snapGhost]);
+  }, [clearHighlights]);
 
   const beginDrag = useCallback(
     (p: Pending, e: PointerEvent) => {
       const { closeTray, trayOpen } = optsRef.current;
       const rect = p.el.getBoundingClientRect();
       p.dragging = true;
-      p.offX = e.clientX - rect.left;
-      p.offY = e.clientY - rect.top;
+      // Grip was taken at pointerdown; re-measuring it here would re-anchor the item to wherever the
+      // finger happened to be when the drag threshold was crossed (a visible jump, i.e. "not following").
       p.fromTray = isTrayDoc(optsRef.current.store, p.loc.docId);
       const g = ghost.current;
       if (g) {
@@ -350,15 +355,19 @@ export function useDragController(opts: Options): DragApi {
       if (e.pointerType === 'mouse' && e.button !== 0) return;
       if (pending.current) return;
       clearTimeout(tapTimer.current);
+      const el = e.currentTarget as HTMLElement;
+      const rect = el.getBoundingClientRect();
       pending.current = {
         item,
         loc,
-        el: e.currentTarget as HTMLElement,
+        el,
         pointerId: e.pointerId,
         x0: e.clientX,
         y0: e.clientY,
-        offX: 0,
-        offY: 0,
+        // The grip is where the finger sits inside the item at press time; the picture follows the finger
+        // from there, so it never jumps when the drag starts.
+        offX: e.clientX - rect.left,
+        offY: e.clientY - rect.top,
         dragging: false,
         fromTray: false,
         drop: null,
