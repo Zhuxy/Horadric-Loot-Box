@@ -11,7 +11,7 @@ import { useMemo } from 'react';
 import { useStore } from '../../src/ui/context';
 import { EquipDoll, MercDoll } from './doll';
 import { Grid, ItemBox } from './items';
-import { CELL, beltRows, charmStats, fmt, skillIconUrl, skillTrees, type ItemLoc } from './model';
+import { CELL, beltRows, charmStats, fmt, type ItemLoc } from './model';
 
 function BeltCell({ docId, ch, slot }: { docId: string; ch: D2Character; slot: number }) {
   const item = ch.items.find((i) => i.mode === ItemMode.Belt && i.x === slot);
@@ -199,12 +199,11 @@ function StatRow({ label, base, bonus }: { label: string; base: number; bonus: n
 export function AttributesScreen({ ch }: { ch: D2Character }) {
   const store = useStore();
   // ch is mutated in place, so identity alone can't key the memo — the store rev is the change signal
-  const { s, gearOnly, charm, skills } = useMemo(
+  const { s, gearOnly, charm } = useMemo(
     () => ({
       s: characterStats(ch),
       gearOnly: characterStats({ ...ch, items: ch.items.filter((i) => !isCharm(i)) }),
       charm: charmStats(ch),
-      skills: skillTrees(ch),
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [ch, store.rev],
@@ -260,34 +259,6 @@ export function AttributesScreen({ ch }: { ch: D2Character }) {
       </section>
 
       <section className="m-panel">
-        <h3>技能（基础点 + 装备加成）</h3>
-        {skills.length === 0 && <div className="m-faint m-center">这个角色还没有加点。</div>}
-        {skills.map((tree) => (
-          <div key={tree.title} className="m-skilltree">
-            <h4>{tree.title}</h4>
-            {tree.rows.map((row) => {
-              const icon = skillIconUrl(row.id);
-              return (
-                <div key={row.id} className="m-skillrow">
-                  <span className="m-skillrowname">
-                    {icon && <img src={icon} alt="" />}
-                    {row.name}
-                  </span>
-                  <span className="m-pts">
-                    <b>{row.base + row.bonus}</b>{' '}
-                    <span className="m-faint">
-                      （{row.base} <span className="m-plus">+{row.bonus}</span>）
-                    </span>
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        ))}
-        <div className="m-faint m-small">属性 / 技能修改为后续版本功能，本页只读。</div>
-      </section>
-
-      <section className="m-panel">
         <h3>装备加成汇总（隐藏属性）</h3>
         {combat.map(([k, v]) => (
           <div key={k} className="m-bonusline">
@@ -315,6 +286,7 @@ export function AttributesScreen({ ch }: { ch: D2Character }) {
           {charm.advanced.length === 0 && <div className="m-faint m-center">背包里没有生效的护符。</div>}
         </section>
       )}
+      <div className="m-faint m-small m-center">属性修改为后续版本功能，本页只读。</div>
       <div style={{ height: 16 }} />
     </div>
   );

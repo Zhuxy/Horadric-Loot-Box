@@ -1,15 +1,15 @@
 import { describe, expect, test } from 'vitest';
 import fs from 'node:fs';
-import { ItemMode, StorePage, parseCharacter, type D2Item, type VaultEntry } from '../src/core';
+import { ItemMode, StorePage, parseCharacter, skillTreeInfo, type D2Item, type VaultEntry } from '../src/core';
 import {
   activeGridLoc,
   categoryOf,
   filterVault,
   locKey,
   packTray,
-  skillTrees,
   tabLabel,
   toStoreLoc,
+  treeTitle,
   type VaultFilter,
 } from '../mobile/ui/model';
 
@@ -47,11 +47,13 @@ describe('materials page locations (SPEC §5.2.1)', () => {
 
 describe('mobile model helpers', () => {
   test('reads the save skill section and groups it by class tab', () => {
-    const trees = skillTrees(sorc);
+    // the attrs-page overview that used this helper was removed (2026-10-24); the skills page
+    // reads core skillTreeInfo + treeTitle directly, so the same expectations live there now
+    const trees = skillTreeInfo(sorc).map((t) => ({ title: treeTitle(sorc, t.page), skills: t.skills }));
     expect(trees.map((t) => t.title)).toEqual(['火焰系', '闪电系', '冰冷系']);
     const cold = trees.find((t) => t.title === '冰冷系')!;
-    expect(cold.rows.find((r) => r.name === 'Ice Blast')?.base).toBe(20);
-    expect(cold.rows.find((r) => r.name === 'Ice Blast')?.bonus).toBeGreaterThan(0);
+    expect(cold.skills.find((r) => r.name === 'Ice Blast')?.base).toBe(20);
+    expect(cold.skills.find((r) => r.name === 'Ice Blast')?.bonus).toBeGreaterThan(0);
   });
 
   test('tray packing never overlaps items', () => {

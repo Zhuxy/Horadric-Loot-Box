@@ -7,7 +7,6 @@ import {
   groupOfType,
   itemSize,
   itemTypeOf,
-  skillTreeInfo,
   type D2Character,
   type D2Item,
   type D2SharedStash,
@@ -259,18 +258,6 @@ export function filterVault(entries: VaultEntry[], f: VaultFilter): VaultEntry[]
 
 // ---------------------------------------------------------------- skills & charms
 
-export interface SkillRow {
-  id: number;
-  name: string;
-  base: number;
-  bonus: number;
-}
-
-export interface SkillTree {
-  title: string;
-  rows: SkillRow[];
-}
-
 const TREE_TITLES: Record<string, string[]> = {
   Amazon: ['弓与十字弓', '被动与魔法', '标枪与长矛'],
   Sorceress: ['火焰系', '闪电系', '冰冷系'],
@@ -301,17 +288,6 @@ export function skillIconFile(skillId: number): string | undefined {
 export function skillIconUrl(skillId: number): string | undefined {
   const file = skillIconFile(skillId);
   return file && `${import.meta.env.BASE_URL}${file}`;
-}
-
-/** The attributes page's compact overview: only skills with points or gear bonuses, grouped by tree.
- * The numbers come from core (skillTreeInfo) so this and the skill-tree page can never disagree. */
-export function skillTrees(ch: D2Character): SkillTree[] {
-  return skillTreeInfo(ch)
-    .map((t) => ({
-      title: treeTitle(ch, t.page),
-      rows: t.skills.filter((s) => s.base || s.bonus).map((s) => ({ id: s.id, name: s.name, base: s.base, bonus: s.bonus })),
-    }))
-    .filter((t) => t.rows.length);
 }
 
 /** Stats the charms in the backpack contribute, computed separately (SPEC §5.1.3). */
