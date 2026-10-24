@@ -36,6 +36,23 @@ fn is_save(path: &Path) -> bool {
     has_ext(path, &[".d2s", ".d2i"])
 }
 
+fn is_swpage(path: &Path) -> bool {
+    has_ext(path, &[".swpage"])
+}
+
+/// A .swpage (D2R Mobile's extra personal-stash pages) is only ever touched as the companion
+/// of the character file with the same stem — the game writes it into the character's own
+/// folder, next to the .d2s, and it never stands alone.
+fn swpage_belongs(path: &Path) -> bool {
+    if !is_swpage(path) {
+        return false;
+    }
+    match (path.file_stem(), path.parent()) {
+        (Some(stem), Some(parent)) => parent.join(stem).with_extension("d2s").is_file(),
+        _ => false,
+    }
+}
+
 fn is_vault(path: &Path) -> bool {
     has_ext(path, &[".hlb.json", ".hvault.json"])
 }
@@ -351,8 +368,8 @@ fn list_saves(folder: String) -> Result<Vec<SaveFileEntry>, String> {
 #[tauri::command]
 fn read_file(path: String) -> Result<Vec<u8>, String> {
     let p = PathBuf::from(&path);
-    if !is_save(&p) {
-        return Err("Only .d2s and .d2i files can be read".into());
+    if !is_save(&p) && !swpage_belongs(&p) {
+        return Err("Only .d2s and .d2i files (and a character's .swpage companion) can be read".into());
     }
     fs::read(&p).map_err(err)
 }
@@ -377,6 +394,14 @@ fn atomic_write(path: &Path, data: &[u8]) -> Result<(), String> {
 #[tauri::command]
 fn write_file_atomic(path: String, data: Vec<u8>) -> Result<(), String> {
     let p = PathBuf::from(&path);
+    if is_swpage(&p) {
+        // the extra-pages sidecar may be created on first use (the game creates it the same
+        // way, on the first page turn), but only ever next to its own character file
+        if !swpage_belongs(&p) {
+            return Err("A .swpage can only be written next to its character file".into());
+        }
+        return atomic_write(&p, &data);
+    }
     if !is_save(&p) {
         return Err("Only .d2s and .d2i files can be written".into());
     }

@@ -1837,7 +1837,8 @@ export class Store {
       const shortBackup = this.lastBackup?.split(/[\\/]/).slice(-2).join('/');
       this.toast('success', `Saved ${outputs.length} file${outputs.length > 1 ? 's' : ''}${shortBackup && toBackup.length ? ` · originals backed up to …/${shortBackup}` : ''}.`);
     } catch (e) {
-      this.toast('error', `Save failed: ${(e as Error).message}`);
+      // platform rejections are often plain strings (Tauri), not Error objects
+      this.toast('error', `Save failed: ${e instanceof Error ? e.message : String(e)}`);
     } finally {
       this.busy = false;
       this.emit();
