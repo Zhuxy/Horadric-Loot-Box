@@ -1886,26 +1886,6 @@ h4 {
   color: var(--gold);
   font-weight: 600;
 }
-.m-mattoggle {
-  display: flex;
-  gap: 5px;
-  flex: 0 0 auto;
-}
-.m-mattoggle button {
-  background: rgba(0, 0, 0, 0.35);
-  border: 1px solid var(--panel-edge);
-  color: var(--ink-dim);
-  border-radius: 4px;
-  padding: 5px 11px;
-  font-size: 12px;
-  cursor: pointer;
-}
-.m-mattoggle button.on {
-  color: #0d0b06;
-  background: linear-gradient(180deg, var(--gold), var(--gold-dim));
-  border-color: var(--gold);
-  font-weight: 700;
-}
 .m-mat-empty {
   position: absolute;
   border-radius: 3px;
@@ -1952,68 +1932,9 @@ h4 {
   line-height: 1.1;
   padding: 0 2px;
 }
-.m-matsec {
-  margin: 10px 0 0;
-  border: 1px solid var(--panel-edge);
-  border-radius: 6px;
-  background: linear-gradient(180deg, rgba(30, 26, 20, 0.5), rgba(14, 12, 9, 0.5));
-  padding: 9px 10px 11px;
-}
-.m-matsec h3 {
-  font-family: Georgia, serif;
-  font-size: 11px;
-  letter-spacing: 0.22em;
-  color: var(--gold);
-  text-align: center;
-  margin-bottom: 8px;
-  font-weight: 600;
-}
-.m-matgrid {
-  display: grid;
-  gap: 3px;
-  justify-content: center;
-}
 .m-matcell {
   position: relative;
   min-height: 0;
-}
-.m-matcap {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 2px;
-  font-size: 8.5px;
-  color: var(--ink-dim);
-  text-align: center;
-  pointer-events: none;
-  text-shadow: 0 1px 2px #000;
-  z-index: 3;
-}
-.m-matgemhead {
-  display: grid;
-  gap: 3px;
-  margin-bottom: 3px;
-  justify-content: center;
-}
-.m-matgemhead span {
-  font-size: 9.5px;
-  color: var(--ink-faint);
-  text-align: center;
-}
-.m-matgemrow {
-  display: grid;
-  gap: 3px;
-  margin-bottom: 3px;
-  justify-content: center;
-}
-.m-matgemlab {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 10px;
-  color: var(--ink-dim);
-  text-align: center;
-  line-height: 1.3;
 }
 .m-mat-extra {
   display: flex;
