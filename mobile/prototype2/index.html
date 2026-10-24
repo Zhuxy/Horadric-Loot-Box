@@ -329,6 +329,63 @@
   .togrow label{display:flex;gap:6px;align-items:center;cursor:pointer}
   .rng{display:flex;gap:8px;align-items:center}
   .rng input{width:76px;background:rgba(0,0,0,.5);border:1px solid var(--panel-edge);border-radius:5px;color:var(--ink);padding:7px 9px;font-size:13px;outline:none}
+  /* ---------- materials board ---------- */
+  .matbar{display:flex;align-items:center;gap:8px;padding:7px 12px 5px}
+  .matstats{font-size:11.5px;color:var(--ink-dim);flex:1;line-height:1.5}
+  .matstats b{color:var(--gold);font-weight:600}
+  .matseg{display:flex;gap:5px;flex:0 0 auto}
+  .matseg button{background:rgba(0,0,0,.35);border:1px solid var(--panel-edge);color:var(--ink-dim);border-radius:4px;padding:5px 11px;font-size:12px;cursor:pointer}
+  .matseg button.on{color:#0d0b06;background:linear-gradient(180deg,var(--gold),var(--gold-dim));border-color:var(--gold);font-weight:700}
+  .matlegend{display:flex;gap:13px;justify-content:center;padding:0 12px 6px;font-size:10.5px;color:var(--ink-faint);flex-wrap:wrap}
+  .matlegend .dot{display:inline-block;width:7px;height:7px;border-radius:2px;margin-right:4px;vertical-align:0}
+  .matboard{position:relative;margin:2px auto 0;flex:0 0 auto}
+  .mslot{
+    position:absolute;border-radius:3px;border:1px solid var(--cell-edge);
+    background:radial-gradient(120% 120% at 30% 20%,#241d5e,var(--cell) 70%);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;
+    box-shadow:inset 0 0 0 1px rgba(0,0,0,.5);
+  }
+  .mslot img.art{width:100%;height:100%;object-fit:contain;pointer-events:none}
+  .mslot .qty{position:absolute;right:2px;bottom:1px;font-size:10px;font-weight:700;color:#fff;text-shadow:0 1px 3px #000,0 0 4px #000;pointer-events:none}
+  .mslot.empty{background:rgba(10,9,20,.55);border-color:var(--cell-edge-dim)}
+  .mslot.empty img.art{opacity:.20;filter:grayscale(.75)}
+  .mslot.sel{border-color:var(--gold);box-shadow:0 0 0 1.5px var(--gold),inset 0 0 8px rgba(212,182,106,.25);z-index:3}
+  .mslot.g-rune{border-color:rgba(255,160,51,.38)} .mslot.g-gem{border-color:rgba(180,140,232,.38)}
+  .mslot.g-potion{border-color:rgba(216,69,69,.42)} .mslot.g-key,.mslot.g-uber,.mslot.g-organ,.mslot.g-token{border-color:rgba(212,182,106,.42)}
+  .mslot.g-essence{border-color:rgba(64,190,170,.4)} .mslot.g-shard{border-color:rgba(120,190,235,.4)}
+  .mslot.empty.g-rune,.mslot.empty.g-gem,.mslot.empty.g-potion,.mslot.empty.g-key,.mslot.empty.g-uber,.mslot.empty.g-organ,.mslot.empty.g-token,.mslot.empty.g-essence,.mslot.empty.g-shard{border-color:var(--cell-edge-dim)}
+  .matscroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:10px}
+  .matsec{margin:10px 12px 0;border:1px solid var(--panel-edge);border-radius:6px;background:linear-gradient(180deg,rgba(30,26,20,.5),rgba(14,12,9,.5));padding:9px 10px 11px}
+  .matsec h3{font-family:Georgia,serif;font-size:11px;letter-spacing:.22em;color:var(--gold);text-align:center;margin-bottom:8px;font-weight:600}
+  .mgrid{display:grid;gap:3px;grid-auto-rows:58px}
+  .gslot{position:relative;border-radius:3px;border:1px solid var(--cell-edge);background:radial-gradient(120% 120% at 30% 20%,#241d5e,var(--cell) 70%);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:inset 0 0 0 1px rgba(0,0,0,.5);min-height:0}
+  .gslot img.art{max-width:100%;max-height:100%;object-fit:contain;pointer-events:none}
+  .gslot .qty{position:absolute;right:3px;bottom:2px;font-size:11px;font-weight:700;color:#fff;text-shadow:0 1px 3px #000,0 0 4px #000}
+  .gslot .cap{position:absolute;left:0;right:0;bottom:2px;font-size:8.5px;color:var(--ink-dim);text-align:center;pointer-events:none;text-shadow:0 1px 2px #000}
+  .gslot.empty{background:rgba(10,9,20,.55);border-color:var(--cell-edge-dim)}
+  .gslot.empty img.art{opacity:.20;filter:grayscale(.75)}
+  .gslot.sel{border-color:var(--gold);box-shadow:0 0 0 1.5px var(--gold)}
+  .gslot.tall{grid-row:span 2}
+  .gemhead{display:grid;gap:3px;margin-bottom:3px}
+  .gemhead span{font-size:9.5px;color:var(--ink-faint);text-align:center}
+  .gemrow{display:grid;gap:3px;margin-bottom:3px;align-items:stretch;grid-auto-rows:58px}
+  .gemrow .glabel{display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--ink-dim);text-align:center;line-height:1.3}
+  .matdetail{
+    flex:0 0 auto;margin:8px 12px 4px;border:1px solid var(--gold-faint);border-radius:6px;
+    background:linear-gradient(180deg,rgba(38,32,20,.75),rgba(16,13,8,.75));padding:9px 11px;
+    display:flex;gap:11px;align-items:center;min-height:78px;
+  }
+  .matdetail .dic{width:46px;height:46px;flex:0 0 auto;border:1px solid var(--cell-edge);border-radius:4px;background:var(--cell);display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .matdetail .dic img{width:100%;height:100%;object-fit:contain}
+  .matdetail .dmn{font-size:14px;color:var(--gold);font-weight:600}
+  .matdetail .dmeta{font-size:11px;color:var(--ink-dim);margin-top:1px}
+  .matdetail .dlines{font-size:11px;color:#8f9fd8;line-height:1.45;margin-top:3px}
+  .matdetail .take{margin-left:auto;flex:0 0 auto;display:flex;flex-direction:column;gap:6px;align-items:stretch}
+  .matdetail .stepper{display:flex;align-items:center;gap:0;border:1px solid var(--panel-edge);border-radius:5px;overflow:hidden}
+  .matdetail .stepper button{width:30px;height:30px;background:rgba(0,0,0,.4);border:none;color:var(--gold);font-size:16px;cursor:pointer}
+  .matdetail .stepper .n{width:32px;text-align:center;font-size:13px;color:var(--ink)}
+  .matdetail .takebtn{background:linear-gradient(180deg,var(--gold),var(--gold-dim));border:1px solid var(--gold);color:#0d0b06;font-weight:700;border-radius:5px;padding:7px 10px;font-size:12.5px;cursor:pointer;white-space:nowrap}
+  .matdetail .dhint{font-size:12px;color:var(--ink-faint);line-height:1.6}
   /* toast */
   #toast{
     position:absolute;left:50%;bottom:96px;transform:translate(-50%,16px);z-index:80;opacity:0;pointer-events:none;
@@ -361,7 +418,7 @@
   <div id="ghost"></div>
   <nav class="tabs" id="tabbar"></nav>
 </div>
-<script src="data.js?v=20261023c"></script>
+<script src="data.js?v=20261024b"></script>
 <script>
 'use strict';
 /* ================= data ================= */
@@ -565,6 +622,8 @@ if (window.PROTO_DATA) (function(){
   S.cur = D.chars[0].name.toLowerCase(); S.stashChar = S.cur;
   S.goldShared = D.shared.tabs[0].gold; S.goldVault = 0;
   S.vault = D.vault.map(rv=>{ const item = RA(rv); item.props = (rv.lines||[]).filter(l=> l!==rv.b); return item; });
+  S.mat = {}; S.matSel = null; S.matLayout = 'board'; S.matTake = 1; S.matScroll = 0;
+  if (D.stackBoard) for (const s of D.stackBoard.slots) S.mat[s.code] = s.count;
   window.STASH_SIZE = {}; for (const rc of D.chars) window.STASH_SIZE[rc.name.toLowerCase()] = [14,10,25];
   window.TAB_LABELS = D.shared.tabs.map((t,i)=> t.type==='1'? '材料' : t.type==='2'? '编年史' : '页签 '+(i+1));
 })();
@@ -814,6 +873,10 @@ function buildStash(scr){
     S.activeGrid='personal';
     h += goldrowHTML(sc.name+' 的仓库金币', sc.goldBank, 'bank') + '<div style="flex:1"></div>' + gridHTML('personal') +
       '<div class="hintline" style="padding-top:8px">个人仓库跟角色走 · 金币点上方金币行取出</div>' + '<div style="flex:1"></div>';
+  } else if (isMatTab()) {
+    S.activeGrid = null;
+    h += '<div class="tabchips">'+S.shared.map((t,i)=>'<button data-stab="'+i+'" class="'+(S.sharedTab===i?'on':'')+'">'+((window.TAB_LABELS||[])[i]||('页签 '+(i+1)))+'</button>').join('')+'</div>' +
+      goldrowHTML('共享金币（全部页签共用一池）', S.goldShared, 'shared') + matsHTML();
   } else {
     S.activeGrid='shared';
     h += '<div class="tabchips">'+S.shared.map((t,i)=>'<button data-stab="'+i+'" class="'+(S.sharedTab===i?'on':'')+'">'+((window.TAB_LABELS||[])[i]||('页签 '+(i+1)))+'</button>').join('')+'</div>' +
@@ -825,7 +888,102 @@ function buildStash(scr){
   scr.querySelectorAll('[data-seg]').forEach(b=> b.onclick=()=>{ S.stashSeg=b.dataset.seg; render(); });
   scr.querySelectorAll('[data-stab]').forEach(b=> b.onclick=()=>{ S.sharedTab=+b.dataset.stab; render(); });
   scr.querySelector('[data-gold]').onclick = (e)=> openGoldSheet(e.currentTarget.dataset.gold);
-  fillGrid(S.activeGrid);
+  if (S.activeGrid) fillGrid(S.activeGrid); else wireMats(scr);
+}
+/* ================= materials (stackables board) ================= */
+const MAT_GZH = {rune:'符文',gem:'宝石',potion:'回复药水',key:'地狱火炬钥匙',uber:'召唤材料',organ:'器官',token:'赦免徽章',essence:'精华',shard:'世界石碎片'};
+function isMatTab(){
+  return !!(window.PROTO_DATA && window.PROTO_DATA.stackBoard && window.PROTO_DATA.shared.tabs[S.sharedTab] && window.PROTO_DATA.shared.tabs[S.sharedTab].type==='1');
+}
+function matSlot(code){ return window.PROTO_DATA.stackBoard.slots.find(s=>s.code===code); }
+function matCount(code){ return (S.mat||{})[code] || 0; }
+function matSlotInner(s){
+  const n = matCount(s.code);
+  return (s.art? '<img class="art" src="'+ART+s.art+'.png" alt="">' : '<div class="g" style="font-size:15px">'+esc(s.name[0])+'</div>') +
+    (n>0? '<div class="qty">'+n+'</div>' : '');
+}
+function matsHTML(){
+  const slots = window.PROTO_DATA.stackBoard.slots;
+  const kinds = slots.filter(s=>matCount(s.code)>0).length;
+  const total = slots.reduce((n,s)=> n+matCount(s.code), 0);
+  const gstat = (g)=>{ const ss = slots.filter(s=>s.group===g); return ss.filter(s=>matCount(s.code)>0).length + '/' + ss.length; };
+  let h = '<div class="matbar"><div class="matstats">已存 <b>'+kinds+'</b> / '+slots.length+' 种 · 共 <b>'+total+'</b> 件（每格上限 99）</div>' +
+    '<div class="matseg"><button data-ml="board" class="'+(S.matLayout==='board'?'on':'')+'">一板全览</button><button data-ml="group" class="'+(S.matLayout==='group'?'on':'')+'">分组大格</button></div></div>' +
+    '<div class="matlegend">' +
+    '<span><span class="dot" style="background:#ffa033"></span>符文 '+gstat('rune')+'</span>' +
+    '<span><span class="dot" style="background:#b48ce8"></span>宝石 '+gstat('gem')+'</span>' +
+    '<span><span class="dot" style="background:#d4b66a"></span>钥匙/器官 '+slots.filter(s=>['key','uber','organ','token'].includes(s.group) && matCount(s.code)>0).length+'/'+slots.filter(s=>['key','uber','organ','token'].includes(s.group)).length+'</span>' +
+    '<span><span class="dot" style="background:#40beaa"></span>精华/碎片 '+slots.filter(s=>['essence','shard'].includes(s.group) && matCount(s.code)>0).length+'/9</span></div>';
+  if (S.matLayout==='board'){
+    const MC = 36;
+    h += '<div class="matboard" style="--c:'+MC+'px;width:'+(10*MC)+'px;height:'+(10*MC)+'px"><div class="gridbg"></div>' +
+      slots.map(s=>'<div class="mslot g-'+s.group+(matCount(s.code)?'':' empty')+(S.matSel===s.code?' sel':'')+'" data-code="'+s.code+'" style="left:'+(s.x*MC+1)+'px;top:'+(s.y*MC+1)+'px;width:'+(MC-2)+'px;height:'+(s.h*MC-2)+'px">'+matSlotInner(s)+'</div>').join('') + '</div>';
+  } else {
+    const runes = slots.filter(s=>s.group==='rune');
+    const gems = slots.filter(s=>s.group==='gem');
+    const rest = slots.filter(s=>!['rune','gem'].includes(s.group));
+    const cell = (s,cap)=>'<div class="gslot'+(matCount(s.code)?'':' empty')+(S.matSel===s.code?' sel':'')+(s.h===2?' tall':'')+'" data-code="'+s.code+'">'+matSlotInner(s)+(cap? '<div class="cap">'+cap+'</div>':'')+'</div>';
+    h += '<div class="matscroll" id="matscroll">';
+    h += '<div class="matsec"><h3>符 文 · RUNES</h3><div class="mgrid" style="grid-template-columns:repeat(6,1fr)">' +
+      runes.map(s=>cell(s, s.name.replace(' Rune',''))).join('') + '</div></div>';
+    const grades = ['碎裂','裂开','普通','无瑕','完美'];
+    h += '<div class="matsec"><h3>宝 石 · GEMS</h3><div class="gemhead" style="grid-template-columns:30px repeat(5,1fr)"><span></span>' + grades.map(g=>'<span>'+g+'</span>').join('') + '</div>';
+    for (let t=0; t<7; t++){
+      const row = gems.slice(t*5, t*5+5);
+      const label = row[2].name.replace(/^(Chipped|Flawed|Flawless|Perfect) /,'');
+      h += '<div class="gemrow" style="grid-template-columns:30px repeat(5,1fr)"><div class="glabel">'+esc(label)+'</div>' + row.map(s=>cell(s)).join('') + '</div>';
+    }
+    h += '</div>';
+    h += '<div class="matsec"><h3>钥匙 · 器官 · 精华 · 其他</h3><div class="mgrid" style="grid-template-columns:repeat(5,1fr)">' +
+      rest.map(s=>cell(s, MAT_GZH[s.group])).join('') + '</div></div>';
+    h += '</div>';
+  }
+  h += matDetailHTML();
+  h += '<div class="hintline" style="padding-bottom:2px">材料由游戏自动归档入格 · 取出走托盘，再放进背包 / 仓库使用</div>';
+  return h;
+}
+function matDetailHTML(){
+  const s = S.matSel? matSlot(S.matSel) : null;
+  if (!s) return '<div class="matdetail"><div class="dhint">点任意一格查看详情。空格显示的是<b style="color:var(--ink-dim)">尚未存入</b>的种类（图标变暗）——整板同时就是一本材料图鉴。<br>有存量的格子可以取出到托盘；双击格子 = 快速取出 1 个。</div></div>';
+  const n = matCount(s.code);
+  const take = Math.min(S.matTake||1, Math.max(n,1));
+  let h = '<div class="matdetail"><div class="dic">' + (s.art? '<img src="'+ART+s.art+'.png" alt="">':'') + '</div>' +
+    '<div style="min-width:0"><div class="dmn">'+esc(s.name)+'</div>' +
+    '<div class="dmeta">'+(MAT_GZH[s.group]||s.group)+' · ' + (n>0? '存量 <b style="color:var(--gold)">×'+n+'</b> / 99' : '尚未存入') + '</div>' +
+    (s.lines.length? '<div class="dlines">'+s.lines.slice(0,3).map(esc).join('<br>')+'</div>' : '') + '</div>';
+  if (n>0){
+    h += '<div class="take"><div class="stepper"><button data-act="dec">−</button><div class="n">'+take+'</div><button data-act="inc">＋</button></div>' +
+      '<button class="takebtn" data-act="take">取出到托盘</button></div>';
+  }
+  return h + '</div>';
+}
+function matTakeOut(n){
+  const s = matSlot(S.matSel); if(!s) return;
+  const have = matCount(s.code); n = Math.min(n, have); if(n<=0) return;
+  for (let i=0;i<n;i++){
+    S.tray.push(it(s.name, { q: s.group==='rune'?'rune': s.group==='gem'?'gem':'normal', g: s.name[0], w: s.iw, h: s.ih, art: s.art, cat: '材料', type: s.group, props: s.lines.slice() }));
+  }
+  S.mat[s.code] = have - n; S.matTake = 1; flashSave(); render();
+  const hb = $('#trayhandle'); hb.classList.remove('bump'); void hb.offsetWidth; hb.classList.add('bump');
+  toast('已取出 '+n+' 个「'+esc(s.name)+'」到托盘（已落盘）');
+}
+function wireMats(scr){
+  if (!isMatTab()) return;
+  scr.querySelectorAll('[data-ml]').forEach(b=> b.onclick=()=>{ S.matLayout=b.dataset.ml; render(); });
+  scr.querySelectorAll('[data-code]').forEach(el=>{
+    el.onclick=()=>{
+      const code = el.dataset.code, now = Date.now();
+      if (S._matTap && S._matTap.code===code && now-S._matTap.t<320){ S._matTap=null; S.matSel=code; matTakeOut(1); return; }
+      S._matTap = {code, t: now};
+      S.matSel=code; S.matTake=1; render();
+    };
+  });
+  const ms = scr.querySelector('#matscroll');
+  if (ms){ ms.scrollTop = S.matScroll||0; ms.onscroll=()=>{ S.matScroll = ms.scrollTop; }; }
+  const dec = scr.querySelector('[data-act="dec"]'), inc = scr.querySelector('[data-act="inc"]'), take = scr.querySelector('[data-act="take"]');
+  if (dec) dec.onclick=()=>{ S.matTake=Math.max(1,(S.matTake||1)-1); render(); };
+  if (inc) inc.onclick=()=>{ const s=matSlot(S.matSel); S.matTake=Math.min(matCount(s.code),(S.matTake||1)+1); render(); };
+  if (take) take.onclick=()=> matTakeOut(S.matTake||1);
 }
 /* ================= vault ================= */
 const QCHIPS = [['all','全部品质'],['unique','独特'],['set','套装'],['rare','稀有'],['magic','魔法'],['rune','符文之语'],['crafted','手工']];
