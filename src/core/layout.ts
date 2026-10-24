@@ -91,9 +91,11 @@ export function gridItems(doc: D2Character | D2SharedStash, grid: GridRef, tab =
  * so nothing is ever hidden or overlapped.
  */
 export function gridDims(doc: D2Character | D2SharedStash, grid: GridRef, tab = 0): { w: number; h: number } {
-  // a stash page is the same physical grid as the character's own stash page, only parked
-  // in the sidecar — same base size, then grown to fit whatever sits outside it
-  let { w, h } = grid === 'stashpage' ? GRID_SIZE.stash : GRID_SIZE[grid];
+  // a stash page is the same physical grid as the character's current page, only parked in
+  // the sidecar: its size IS the current page's size (base + whatever the mod's items grew
+  // it to), then grown further if this page's own items stick out
+  let { w, h } =
+    grid === 'stashpage' && doc.kind === 'character' ? gridDims(doc, 'stash') : GRID_SIZE[grid === 'stashpage' ? 'stash' : grid];
   for (const it of gridItems(doc, grid, tab)) {
     const s = itemSize(it);
     w = Math.max(w, it.x + s.w);

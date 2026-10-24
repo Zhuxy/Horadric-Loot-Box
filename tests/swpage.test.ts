@@ -5,6 +5,7 @@ import {
   StorePage,
   canDrop,
   emptyStashPages,
+  gridDims,
   itemBytes,
   occupancy,
   parseCharacter,
@@ -118,6 +119,18 @@ describe('.swpage sidecar (SPEC §5.2.2)', () => {
     // removeItem finds parked items
     expect(removeItem(ch, placed)).toBe(true);
     expect(ch.stashPages?.pages[3]).toHaveLength(0);
+  });
+
+  test('layout: every page shares the current page’s dimensions', () => {
+    const ch = parseCharacter(new Uint8Array(fs.readFileSync('public/demo/Sorceress.d2s')), 'Sorceress.d2s');
+    // an item parked far out in the current page (a stash-expanding mod's footprint)
+    placeItem(ch, 'stash', 0, invItems[0], 12, 8);
+    const current = gridDims(ch, 'stash');
+    expect(current.w).toBeGreaterThanOrEqual(13);
+    // an almost-empty side page must still render at the same size
+    placeItem(ch, 'stashpage', 2, invItems[1], 0, 0);
+    expect(gridDims(ch, 'stashpage', 2)).toEqual(current);
+    expect(gridDims(ch, 'stashpage', 4)).toEqual(current);
   });
 
   test('layout: the current page and a pending state refuse drops', () => {

@@ -91,12 +91,17 @@ export function MobileApp() {
       }
       if (store.move(item, loc.docId, toStoreLoc(activeLoc))) {
         afterChange();
-        setTrayOpen(false);
+        // the drawer stays open on purpose: closing it here moves the UI out from under the
+        // finger mid-gesture, and the rest of the double-tap lands on whatever was behind the
+        // tray's first cell. Taking several items in a row is the common case anyway.
         if (activeLoc.kind === 'stack') {
           store.toast('success', '已存入材料页');
         } else {
           const label = activeLoc.kind === 'grid' ? activeLoc.area : '';
-          store.toast('success', `已放入${label === 'cube' ? '方块' : label === 'stash' ? '个人仓库' : label === 'shared' ? '共享仓库' : '背包'}`);
+          store.toast(
+            'success',
+            `已放入${label === 'cube' ? '方块' : label === 'stash' ? '个人仓库' : label === 'stashpage' ? `个人仓库第 ${activeLoc.tab + 1} 页` : label === 'shared' ? '共享仓库' : '背包'}`,
+          );
         }
       }
       return;
