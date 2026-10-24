@@ -11,7 +11,7 @@ import { useMemo } from 'react';
 import { useStore } from '../../src/ui/context';
 import { EquipDoll, MercDoll } from './doll';
 import { Grid, ItemBox } from './items';
-import { CELL, beltRows, charmStats, fmt, skillTrees, type ItemLoc } from './model';
+import { CELL, beltRows, charmStats, fmt, skillIconUrl, skillTrees, type ItemLoc } from './model';
 
 function BeltCell({ docId, ch, slot }: { docId: string; ch: D2Character; slot: number }) {
   const item = ch.items.find((i) => i.mode === ItemMode.Belt && i.x === slot);
@@ -265,17 +265,23 @@ export function AttributesScreen({ ch }: { ch: D2Character }) {
         {skills.map((tree) => (
           <div key={tree.title} className="m-skilltree">
             <h4>{tree.title}</h4>
-            {tree.rows.map((row) => (
-              <div key={row.id} className="m-skillrow">
-                <span>{row.name}</span>
-                <span className="m-pts">
-                  <b>{row.base + row.bonus}</b>{' '}
-                  <span className="m-faint">
-                    （{row.base} <span className="m-plus">+{row.bonus}</span>）
+            {tree.rows.map((row) => {
+              const icon = skillIconUrl(row.id);
+              return (
+                <div key={row.id} className="m-skillrow">
+                  <span className="m-skillrowname">
+                    {icon && <img src={icon} alt="" />}
+                    {row.name}
                   </span>
-                </span>
-              </div>
-            ))}
+                  <span className="m-pts">
+                    <b>{row.base + row.bonus}</b>{' '}
+                    <span className="m-faint">
+                      （{row.base} <span className="m-plus">+{row.bonus}</span>）
+                    </span>
+                  </span>
+                </div>
+              );
+            })}
           </div>
         ))}
         <div className="m-faint m-small">属性 / 技能修改为后续版本功能，本页只读。</div>

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { grantedSkills, skillTreeInfo, type D2Character, type SkillLevelInfo } from '../../src/core';
 import { useStore } from '../../src/ui/context';
-import { treeTitle } from './model';
+import { skillIconUrl, treeTitle } from './model';
 
 /**
  * Skill-tree page, laid out like the game's own panel: three trees, each a 6-row × 3-column
@@ -24,6 +24,7 @@ export function SkillsScreen({ ch }: { ch: D2Character }) {
   const tree = trees.find((t) => t.page === page)!;
   const byId = new Map(tree.skills.map((s) => [s.id, s]));
   const sel = selId !== null ? byId.get(selId) : undefined;
+  const selIcon = sel ? skillIconUrl(sel.id) : undefined;
 
   const cx = (s: SkillLevelInfo) => (s.col - 0.5) * 100;
   const top = (s: SkillLevelInfo) => (s.row - 1) * 100;
@@ -56,45 +57,57 @@ export function SkillsScreen({ ch }: { ch: D2Character }) {
             }),
           )}
         </svg>
-        {tree.skills.map((s) => (
-          <button
-            key={s.id}
-            className={`m-skilltile${s.total === 0 ? ' dim' : ''}${sel?.id === s.id ? ' sel' : ''}`}
-            style={{ gridRow: s.row, gridColumn: s.col }}
-            onClick={() => setSelId(s.id)}
-          >
-            <span className="m-skillname">{s.name}</span>
-            {s.total > 0 ? (
-              <span className="m-skilllvl">
-                {s.total}
-                {s.bonus > 0 && <i>+{s.bonus}</i>}
+        {tree.skills.map((s) => {
+          const icon = skillIconUrl(s.id);
+          return (
+            <button
+              key={s.id}
+              className={`m-skilltile${s.total === 0 ? ' dim' : ''}${sel?.id === s.id ? ' sel' : ''}`}
+              style={{ gridRow: s.row, gridColumn: s.col }}
+              onClick={() => setSelId(s.id)}
+            >
+              <span className="m-skillicon">
+                {icon && <img src={icon} alt="" draggable={false} />}
+                {s.total > 0 && s.bonus > 0 && <span className="m-skillbonus">+{s.bonus}</span>}
+                <span className={s.total > 0 ? 'm-skilllvl' : 'm-skillreq'}>{s.total > 0 ? s.total : `Lv ${s.reqLevel}`}</span>
               </span>
-            ) : (
-              <span className="m-skillreq">Lv {s.reqLevel}</span>
-            )}
-          </button>
-        ))}
+              <span className="m-skillname">{s.name}</span>
+            </button>
+          );
+        })}
       </div>
       <div className="m-skilldetail">
         {sel ? (
-          <>
-            <div className="m-skilldname">{sel.name}</div>
-            <div className="m-skilldline">
-              基础 {sel.base} · 装备 +{sel.bonus} · 当前等级 <b>{sel.total}</b>
+          <div className="m-skilldhead">
+            {selIcon && <img className="m-skilldicon" src={selIcon} alt="" />}
+            <div className="m-skilldbody">
+              <div className="m-skilldname">{sel.name}</div>
+              <div className="m-skilldline">
+                基础 {sel.base} · 装备 +{sel.bonus} · 当前等级 <b>{sel.total}</b>
+              </div>
+              {sel.desc && <div className="m-skillddesc">{sel.desc}</div>}
+              <div className="m-skilldline m-faint">
+                需要等级 {sel.reqLevel}
+                {sel.prereq.length > 0 && <> · 前置：{sel.prereq.map((pid) => byId.get(pid)?.name ?? pid).join('、')}</>}
+              </div>
             </div>
-            {sel.desc && <div className="m-skillddesc">{sel.desc}</div>}
-            <div className="m-skilldline m-faint">
-              需要等级 {sel.reqLevel}
-              {sel.prereq.length > 0 && <> · 前置：{sel.prereq.map((pid) => byId.get(pid)?.name ?? pid).join('、')}</>}
-            </div>
-          </>
+          </div>
         ) : (
           <div className="m-skilldline m-faint">点任意技能查看详情。等级含身上装备与背包护符的加成（+N 为装备部分）。</div>
         )}
       </div>
       {granted.length > 0 && (
         <div className="m-skillgranted">
-          装备赋予：{granted.map((g) => `${g.name} ${g.level}`).join(' · ')}
+          <span>装备赋予：</span>
+          {granted.map((g) => {
+            const icon = skillIconUrl(g.id);
+            return (
+              <span key={g.id} className="m-grantedchip">
+                {icon && <img src={icon} alt="" />}
+                {g.name} {g.level}
+              </span>
+            );
+          })}
         </div>
       )}
     </div>

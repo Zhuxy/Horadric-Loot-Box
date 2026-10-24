@@ -820,11 +820,11 @@ h4 {
   position: relative;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(6, 1fr);
+  /* fixed row height (not an aspect ratio): the tile is an icon plus its name, so rows must fit content */
+  grid-template-rows: repeat(6, 84px);
   gap: 8px 10px;
   width: min(100%, 400px);
   margin: 2px auto 0;
-  aspect-ratio: 3 / 3.9;
 }
 .m-skilllinks {
   position: absolute;
@@ -847,8 +847,9 @@ h4 {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  padding: 6px 3px 5px;
+  justify-content: center;
+  gap: 3px;
+  padding: 4px 3px;
   background: linear-gradient(180deg, rgba(38, 32, 22, 0.92), rgba(16, 13, 9, 0.92));
   border: 1px solid var(--panel-edge);
   border-radius: 6px;
@@ -863,6 +864,21 @@ h4 {
 .m-skilltile.dim {
   opacity: 0.45;
 }
+.m-skilltile.dim .m-skillicon img {
+  filter: grayscale(0.85) brightness(0.9);
+}
+.m-skillicon {
+  position: relative;
+  flex: none;
+  width: 48px;
+  height: 48px;
+}
+.m-skillicon img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 2px;
+}
 .m-skillname {
   font-size: 10.5px;
   line-height: 1.15;
@@ -871,22 +887,42 @@ h4 {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-.m-skilllvl {
-  font-size: 19px;
-  font-weight: 700;
-  color: #fff;
-  line-height: 1;
+/* points put in (gold) or required level when none are (dim), on the icon's corner like the game */
+.m-skilllvl,
+.m-skillreq {
+  position: absolute;
+  right: -6px;
+  bottom: -5px;
+  padding: 0 3px;
+  border-radius: 3px;
+  line-height: 15px;
+  white-space: nowrap;
+  background: linear-gradient(180deg, #3b2f1a, #1b150c);
+  border: 1px solid var(--gold-dim);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.65);
 }
-.m-skilllvl i {
-  font-style: normal;
-  font-size: 11px;
-  color: #7ee2a0;
-  margin-left: 2px;
-  vertical-align: super;
+.m-skilllvl {
+  min-width: 17px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffe9b0;
 }
 .m-skillreq {
-  font-size: 11px;
+  font-size: 9px;
   color: var(--ink-dim);
+  border-color: var(--panel-edge);
+}
+.m-skillbonus {
+  position: absolute;
+  left: -5px;
+  top: -5px;
+  padding: 1px 3px;
+  font-size: 9.5px;
+  font-weight: 700;
+  line-height: 1;
+  color: #0c1a10;
+  background: #7ee2a0;
+  border-radius: 2px;
 }
 .m-skilldetail {
   width: min(100%, 400px);
@@ -896,6 +932,21 @@ h4 {
   border-radius: 6px;
   padding: 8px 10px;
   background: rgba(0, 0, 0, 0.3);
+}
+.m-skilldhead {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+}
+.m-skilldicon {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 2px;
+}
+.m-skilldbody {
+  flex: 1;
+  min-width: 0;
 }
 .m-skilldname {
   font-weight: 700;
@@ -912,10 +963,24 @@ h4 {
   line-height: 1.45;
 }
 .m-skillgranted {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
   width: min(100%, 400px);
   margin: 8px auto 0;
   font-size: 12.5px;
   color: var(--ink-dim);
+}
+.m-grantedchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.m-grantedchip img {
+  width: 18px;
+  height: 18px;
+  border-radius: 2px;
 }
 .m-statgrid .m-k {
   color: var(--ink-dim);
@@ -951,6 +1016,18 @@ h4 {
   font-size: 12.5px;
   padding: 2.5px 0;
   border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
+}
+.m-skillrowname {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.m-skillrow img {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  border-radius: 2px;
 }
 .m-pts {
   font-variant-numeric: tabular-nums;

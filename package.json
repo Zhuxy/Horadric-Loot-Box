@@ -4,6 +4,7 @@
   "description": "Muling tool for Diablo II: Resurrected — Reign of the Warlock (save v105)",
   "scripts": {
     "gamedata": "node scripts/build-gamedata.mjs",
+    "icons": "node scripts/copy-skill-icons.mjs",
     "dev": "node scripts/copy-ocr.mjs && vite",
     "build": "node scripts/build-gamedata.mjs && node scripts/copy-ocr.mjs && tsc -p . && vite build",
     "preview": "vite preview",

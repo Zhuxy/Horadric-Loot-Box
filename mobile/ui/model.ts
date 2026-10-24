@@ -278,6 +278,21 @@ export function treeTitle(ch: D2Character, page: number): string {
   return TREE_TITLES[ch.className]?.[page - 1] ?? fallback;
 }
 
+/** The game's own icon for a skill, as a path under the mobile public dir (see scripts/copy-skill-icons.mjs).
+ * The sprite export names frames by `skilldesc.IconCel` inside a per-class folder. */
+export function skillIconFile(skillId: number): string | undefined {
+  const s = GD.skills[skillId];
+  const className = s && s.cls >= 0 ? GD.classes[s.cls]?.name : undefined;
+  if (!className || s.icon === undefined) return undefined;
+  return `skills/${className.toLowerCase()}/${String(s.icon).padStart(2, '0')}.png`;
+}
+
+/** Same as `skillIconFile`, ready for an `<img src>` (the mobile build uses a relative base). */
+export function skillIconUrl(skillId: number): string | undefined {
+  const file = skillIconFile(skillId);
+  return file && `${import.meta.env.BASE_URL}${file}`;
+}
+
 /** The attributes page's compact overview: only skills with points or gear bonuses, grouped by tree.
  * The numbers come from core (skillTreeInfo) so this and the skill-tree page can never disagree. */
 export function skillTrees(ch: D2Character): SkillTree[] {
