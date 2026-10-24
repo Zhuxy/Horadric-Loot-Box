@@ -48,8 +48,8 @@ describe('web trade page', () => {
   test('a trade written back in place through the file handle, with the original downloaded first', async () => {
     const out: { data?: Uint8Array } = {};
     const { s } = await store([{ name: 'ModernSharedStashSoftCoreV2.d2i', handle: handle(out) }]);
-    const backups: string[] = [];
-    s.platform.backupFiles = async (paths) => (backups.push(...paths), 'Downloads');
+    const backupCalls: [string, string][] = [];
+    s.platform.backupFolder = async (folder, kind) => (backupCalls.push([folder, kind]), { skipped: false, dir: 'Downloads', files: 1, bytes: 1 });
     const um = count(s, 'r22'), ist = count(s, 'r24');
     s.tradeSetListing({ name: 'Ist Rune', mode: 'softcore', ask: [[{ code: 'r22', qty: 3, name: 'Um Rune' }]], want: [['r24', 1]] });
     s.tradeOffer('r22', 3);
@@ -58,7 +58,7 @@ describe('web trade page', () => {
     expect(s.savesInPlace).toBe(true);
     expect(s.saveLabel()).toBe('Save file');
     await s.saveAll();
-    expect(backups).toEqual([STASH]);
+    expect(backupCalls).toEqual([['dropped/', 'save']]);
     const saved = parseStash(out.data!, 'x.d2i').tabs.find((t) => t.type === StashTabType.Advanced)!;
     expect(saved.items.find((i) => i.code === 'r24')?.advancedStackSize).toBe(ist + 1);
     expect(saved.items.find((i) => i.code === 'r22')?.advancedStackSize).toBe(um - 3);
@@ -100,7 +100,7 @@ describe('web trade page', () => {
   test('undoing every change puts the file back to Saved; after a save, undo makes it unsaved again', async () => {
     const out: { data?: Uint8Array } = {};
     const { s } = await store([{ name: 'ModernSharedStashSoftCoreV2.d2i', handle: handle(out) }]);
-    s.platform.backupFiles = async () => 'Downloads';
+    s.platform.backupFolder = async () => ({ skipped: false, dir: 'Downloads', files: 0, bytes: 0 });
     s.tradeOffer('r22', 1);
     s.tradeOffer('r22', 1);
     expect(s.dirtyDocs.length).toBe(1);
@@ -174,7 +174,7 @@ describe('web trade page', () => {
       const s = new WebStore(createDroppedPlatform());
       const messages: string[] = [];
       s.toast = (_k, t) => void messages.push(t);
-      s.platform.backupFiles = async () => 'Downloads';
+      s.platform.backupFolder = async () => ({ skipped: false, dir: 'Downloads', files: 0, bytes: 0 });
       await s.addFiles(await fromFolder(f.dir));
       expect(s.saves.map((e) => e.name)).toEqual(['ModernSharedStashSoftCoreV2.d2i', 'Warlock_v105.d2s']);
       expect(s.currentId).toBe(STASH);
@@ -203,7 +203,7 @@ describe('web trade page', () => {
     test('a trade is listed at once and kept when the files are saved', async () => {
       storage();
       const { s } = await store([{ name: 'ModernSharedStashSoftCoreV2.d2i', handle: handle({}) }]);
-      s.platform.backupFiles = async () => 'Downloads';
+      s.platform.backupFolder = async () => ({ skipped: false, dir: 'Downloads', files: 0, bytes: 0 });
       trade(s);
       expect(s.tradeLog.map((e) => [e.side, tradeLineText(e.got), tradeLineText(e.paid), e.mode, e.file, e.saved])).toEqual([['buy', 'Ist Rune', '3× Um Rune', 'softcore', 'RotW Shared Stash', false]]);
       expect(loadTradeLog()).toEqual([]); // nothing is stored until the save

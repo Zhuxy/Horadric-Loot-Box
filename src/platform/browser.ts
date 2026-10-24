@@ -32,6 +32,30 @@ async function writeIn(dir: DirHandle, name: string, input: Uint8Array | string)
   await dir.removeEntry(`${name}.hlb-tmp`);
 }
 
+async function readViaSplit(path: string): Promise<Uint8Array> {
+  const [dir, name] = split(path);
+  const f = await (await dir.getFileHandle(name)).getFile();
+  return new Uint8Array(await f.arrayBuffer());
+}
+
+/** Copies files aside into HoradricLootBox-Backups/<stamp>/ (flat, for delete flows). */
+async function copyFilesAside(paths: string[]): Promise<string> {
+  if (!paths.length) return '';
+  const [dir] = split(paths[0]);
+  const root = await dir.getDirectoryHandle('HoradricLootBox-Backups', { create: true });
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  const sub = await root.getDirectoryHandle(stamp, { create: true });
+  for (const p of paths) {
+    const [, name] = split(p);
+    const bytes = await readViaSplit(p);
+    const fh = await sub.getFileHandle(name, { create: true });
+    const w = await fh.createWritable();
+    await w.write(bytes.slice().buffer as ArrayBuffer);
+    await w.close();
+  }
+  return `HoradricLootBox-Backups/${stamp}`;
+}
+
 export const browserPlatform: Platform = {
   id: 'browser',
   label: 'Browser',
@@ -67,21 +91,39 @@ export const browserPlatform: Platform = {
     const [dir, name] = split(path);
     await writeIn(dir, name, data);
   },
-  async backupFiles(paths) {
-    if (!paths.length) return '';
-    const [dir] = split(paths[0]);
+  async backupFolder(folder, kind) {
+    const dir = folders.get(folder.replace(/\/$/, ''));
+    if (!dir) return { skipped: true, files: 0, bytes: 0 };
     const root = await dir.getDirectoryHandle('HoradricLootBox-Backups', { create: true });
     const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-    const sub = await root.getDirectoryHandle(stamp, { create: true });
-    for (const p of paths) {
-      const [, name] = split(p);
-      const bytes = await this.readFile(p);
-      const fh = await sub.getFileHandle(name, { create: true });
-      const w = await fh.createWritable();
-      await w.write(bytes.slice().buffer as ArrayBuffer);
-      await w.close();
+    const name = kind === 'import' ? `${stamp}-before-import` : stamp;
+    const sub = (await root.getDirectoryHandle(name, { create: true })) as DirHandle;
+    let files = 0;
+    let bytes = 0;
+    // No checksum dedupe on this platform (the Tauri command owns that); the snapshot is cheap.
+    const walk = async (src: DirHandle, dest: DirHandle): Promise<void> => {
+      for await (const h of src.values()) {
+        if (h.name === 'HoradricLootBox-Backups' || h.name.endsWith('.hlb-tmp')) continue;
+        if (h.kind === 'file') {
+          const f = await (h as FileSystemFileHandle).getFile();
+          const buf = await f.arrayBuffer();
+          const fh = await dest.getFileHandle(h.name, { create: true });
+          const w = await fh.createWritable();
+          await w.write(buf);
+          await w.close();
+          files++;
+          bytes += buf.byteLength;
+        } else if (h.kind === 'directory') {
+          await walk(h as DirHandle, (await dest.getDirectoryHandle(h.name, { create: true })) as DirHandle);
+        }
+      }
+    };
+    await walk(dir, sub);
+    if (!files) {
+      await root.removeEntry(name, { recursive: true }).catch(() => undefined);
+      return { skipped: true, files: 0, bytes: 0 };
     }
-    return `HoradricLootBox-Backups/${stamp}`;
+    return { skipped: false, dir: `HoradricLootBox-Backups/${name}`, files, bytes };
   },
   async listVaults() {
     if (!vaultDir) {
@@ -117,7 +159,7 @@ export const browserPlatform: Platform = {
     await this.listVaults('');
     if (!vaultDir) throw new Error('Vault folder not available');
     const name = path.split('/').pop()!;
-    const kept = await this.backupFiles([path]);
+    const kept = await copyFilesAside([path]);
     await vaultDir.removeEntry(name);
     return kept;
   },
@@ -130,7 +172,7 @@ export const browserPlatform: Platform = {
       const m = h.kind === 'file' && h.name.match(/^(.*)\.([^.]+)$/);
       if (m && m[1] === stem && exts.includes(m[2].toLowerCase())) doomed.push(h.name);
     }
-    const kept = await this.backupFiles(doomed.map((n) => `${path.slice(0, path.indexOf('/'))}/${n}`));
+    const kept = await copyFilesAside(doomed.map((n) => `${path.slice(0, path.indexOf('/'))}/${n}`));
     for (const n of doomed) await dir.removeEntry(n);
     return kept;
   },

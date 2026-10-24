@@ -89,10 +89,6 @@ export interface LoadedDoc {
   doc?: AnyDoc;
   error?: string;
   dirty: boolean;
-  /** Set once this session has backed up the original file. */
-  backedUp: boolean;
-  /** Same, for the character's .swpage sidecar (D2R Mobile extra stash pages). */
-  swpageBackedUp?: boolean;
   /** How many times it has been saved this session (so undo knows whether "unchanged" still means "saved"). */
   saves?: number;
   /** Bumped on every content mutation (via snapshot, undo, rename). saveAll snapshots it next to the
@@ -281,6 +277,8 @@ export class Store {
   busy = false;
   gameRunning = false;
   lastBackup?: string;
+  /** Set once this session has written a folder snapshot (a skipped attempt does not count). */
+  folderBackedUp = false;
   rev = 0;
   private listeners = new Set<() => void>();
   private toastSeq = 0;
@@ -466,6 +464,7 @@ export class Store {
     this.emit();
     try {
       this.folder = folder;
+      this.folderBackedUp = false;
       this.files = await this.platform.listSaves(folder);
       if (this.platform.id === 'tauri' && this.settings.lastFolder !== folder) this.setSettings({ lastFolder: folder });
       this.docs.clear();
@@ -557,7 +556,7 @@ export class Store {
   }
 
   private async loadFile(f: SaveFileEntry): Promise<LoadedDoc | undefined> {
-    const entry: LoadedDoc = { id: f.path, path: f.path, name: f.name, dirty: false, backedUp: false };
+    const entry: LoadedDoc = { id: f.path, path: f.path, name: f.name, dirty: false };
     try {
       const data = await this.platform.readFile(f.path);
       if (isCharacterFile(data) && f.name.toLowerCase().endsWith('.d2s')) entry.doc = parseCharacter(data, f.name);
@@ -595,7 +594,7 @@ export class Store {
   }
 
   private async loadVault(f: SaveFileEntry): Promise<LoadedDoc> {
-    const entry: LoadedDoc = { id: f.path, path: f.path, name: f.name, dirty: false, backedUp: true };
+    const entry: LoadedDoc = { id: f.path, path: f.path, name: f.name, dirty: false };
     try {
       entry.doc = parseVault(await this.platform.readText(f.path), f.name);
     } catch (e) {
@@ -613,7 +612,7 @@ export class Store {
     const problem = vaultNameProblem(name, this.vaultNames());
     if (problem) throw new Error(problem);
     const id = `new-vault:${newUid()}`;
-    this.docs.set(id, { id, path: '', name, doc: createVault(name), dirty, backedUp: true });
+    this.docs.set(id, { id, path: '', name, doc: createVault(name), dirty });
     if (open) this.panes[0] = { docId: id, tab: 0 };
     this.emit();
     return id;
@@ -1190,14 +1189,14 @@ export class Store {
   }
 
   /** Runes, gems and uber items offered as payment, taken out of their file until the trade is accepted or cleared. */
-  tradeOfferBox: LoadedDoc = { id: TRADE_OFFER_ID, path: '', name: 'Offer', dirty: false, backedUp: true, doc: { ...createVault('Offer'), entries: [] } };
+  tradeOfferBox: LoadedDoc = { id: TRADE_OFFER_ID, path: '', name: 'Offer', dirty: false, doc: { ...createVault('Offer'), entries: [] } };
 
   get tradeOffered(): D2Item[] {
     return (this.tradeOfferBox.doc as Vault).entries.map((e) => e.item);
   }
 
   /** Traded items waiting to be dragged into a character, stash or vault (never saved). */
-  tradeInbox: LoadedDoc = { id: TRADE_ID, path: '', name: 'Trade', dirty: false, backedUp: true, doc: { ...createVault('Received'), entries: [] } };
+  tradeInbox: LoadedDoc = { id: TRADE_ID, path: '', name: 'Trade', dirty: false, doc: { ...createVault('Received'), entries: [] } };
 
   get tradeReceived(): D2Item[] {
     return (this.tradeInbox.doc as Vault).entries.map((e) => e.item);
@@ -1793,18 +1792,17 @@ export class Store {
           outputs.push(out);
         }
       }
-      // 2) back up originals (once per session)
-      const toBackup = outputs.filter((o) => o.bytes && !o.doc.backedUp).map((o) => o.doc.path);
-      const toBackup2 = outputs
-        .filter((o) => o.bytes2 && o.path2 && !o.doc.swpageBackedUp && (o.doc.doc as D2Character).stashPages?.existed)
-        .map((o) => o.path2!);
-      if (toBackup.length || toBackup2.length) {
-        this.lastBackup = await this.platform.backupFiles([...toBackup, ...toBackup2]);
-        outputs.forEach((o) => (o.doc.backedUp = true));
+      // 2) snapshot the whole folder (once per session: a skipped attempt — empty folder, or
+      // content identical to the newest snapshot — does not count, so the next save retries).
+      let snapshotTaken = false;
+      if (!this.folderBackedUp && this.folder && outputs.length) {
+        const r = await this.platform.backupFolder(this.folder, 'save');
+        if (!r.skipped) {
+          this.folderBackedUp = true;
+          this.lastBackup = r.dir;
+          snapshotTaken = true;
+        }
       }
-      outputs.forEach((o) => {
-        if (o.bytes2) o.doc.swpageBackedUp = true;
-      });
       // 3) write
       for (const o of outputs) {
         if (o.bytes) {
@@ -1835,7 +1833,7 @@ export class Store {
       }
       this.tradeLogKeep();
       const shortBackup = this.lastBackup?.split(/[\\/]/).slice(-2).join('/');
-      this.toast('success', `Saved ${outputs.length} file${outputs.length > 1 ? 's' : ''}${shortBackup && toBackup.length ? ` · originals backed up to …/${shortBackup}` : ''}.`);
+      this.toast('success', `Saved ${outputs.length} file${outputs.length > 1 ? 's' : ''}${shortBackup && snapshotTaken ? ` · originals backed up to …/${shortBackup}` : ''}.`);
     } catch (e) {
       // platform rejections are often plain strings (Tauri), not Error objects
       this.toast('error', `Save failed: ${e instanceof Error ? e.message : String(e)}`);

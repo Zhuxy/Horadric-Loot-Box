@@ -28,7 +28,7 @@ describe('RotW shared stash gold is one pool over the pages', () => {
     const platform = {
       id: 'demo', label: 't', canWrite: true, detectSaveFolders: async () => [], pickFolder: async () => 't/',
       listSaves: async () => [...files].map(([path, d]) => ({ name: path.slice(2), path, size: d.length })),
-      readFile: async (p: string) => files.get(p)!.slice(), writeFileAtomic: async () => {}, backupFiles: async () => '',
+      readFile: async (p: string) => files.get(p)!.slice(), writeFileAtomic: async () => {}, backupFolder: async () => ({ skipped: true, files: 0, bytes: 0 }),
       listVaults: async () => [], readText: async () => '', writeVault: async () => '', isGameRunning: async () => false,
     } as unknown as Platform;
     const store = new Store(platform);

@@ -22,7 +22,7 @@ function fakePlatform(): Platform {
     listSaves: async () => [...files.entries()].map(([path, d]) => ({ name: path.slice(2), path, size: d.length })),
     readFile: async (p) => files.get(p)!.slice(),
     writeFileAtomic: async (p, d) => void files.set(p, d.slice()),
-    backupFiles: async () => 'none',
+    backupFolder: async () => ({ skipped: true, files: 0, bytes: 0 }),
     listVaults: async () => [],
     readText: async (p) => vaults.get(p)!,
     writeVault: async (_f, n, t, e) => {

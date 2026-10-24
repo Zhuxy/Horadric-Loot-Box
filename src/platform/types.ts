@@ -7,6 +7,14 @@ export interface SaveFileEntry {
   modified?: number;
 }
 
+/** Result of a folder-snapshot backup (see `Platform.backupFolder`). */
+export interface BackupResult {
+  skipped: boolean;
+  dir?: string;
+  files: number;
+  bytes: number;
+}
+
 /**
  * Everything the UI needs from the host. Implemented for the Tauri desktop app, for Chromium browsers
  * (File System Access API) and for an in-memory demo.
@@ -23,8 +31,12 @@ export interface Platform {
   readFile(path: string): Promise<Uint8Array>;
   /** Writes via a temporary file + rename so a crash never leaves a half-written save. */
   writeFileAtomic(path: string, data: Uint8Array): Promise<void>;
-  /** Copies the given files into a timestamped backup folder; returns the folder path. */
-  backupFiles(paths: string[]): Promise<string>;
+  /**
+   * Snapshots the whole save folder into a timestamped backup directory, preserving the tree.
+   * `skipped` means nothing new was written (empty folder, or content identical to the newest
+   * surviving snapshot). `kind` marks import snapshots so the pre-import state is easy to find.
+   */
+  backupFolder(folder: string, kind: 'save' | 'import'): Promise<BackupResult>;
   /** Vault storage (Horadric Loot Box's own unlimited stash files), kept in a folder inside the save folder. */
   listVaults(folder: string): Promise<SaveFileEntry[]>;
   readText(path: string): Promise<string>;

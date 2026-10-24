@@ -79,12 +79,6 @@ export class MobileStore extends Store {
     super.toast(kind, mobile);
   }
 
-  /** Mobile saves after every change, so take a fresh backup before each write (the app keeps the newest ten). */
-  override async saveAll() {
-    for (const e of this.docs.values()) if (e.doc) e.backedUp = false;
-    await super.saveAll();
-  }
-
   async openFolder(folder: string) {
     await super.openFolder(folder);
     // The tray is an app-private vault document, always present, saved with its items.

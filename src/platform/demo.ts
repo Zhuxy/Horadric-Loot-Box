@@ -74,8 +74,8 @@ export function createDemoPlatform(): Platform {
     async writeFileAtomic(path, data) {
       files.set(path, data.slice());
     },
-    async backupFiles() {
-      return '(demo: no backups needed)';
+    async backupFolder() {
+      return { skipped: true, files: 0, bytes: 0 };
     },
     async listVaults() {
       return [...vaults.entries()].map(([path, t]) => ({ name: path.split('/').pop()!, path, size: t.length }));

@@ -132,12 +132,18 @@ export function createDroppedPlatform(): DroppedPlatform {
       } else download(f.name, data);
       f.data = data.slice();
     },
-    async backupFiles(paths) {
-      for (const p of paths) {
-        const f = get(p);
+    async backupFolder(folder, _kind) {
+      // Nothing durable to snapshot here, but the platform's safety net stays: before the first
+      // save of a session, the original bytes of every file in the folder are downloaded, so an
+      // overwrite can always be undone by hand.
+      const originals = [...files.entries()].filter(([p]) => p.startsWith(folder)).map(([, f]) => f);
+      if (!originals.length) return { skipped: true, files: 0, bytes: 0 };
+      let bytes = 0;
+      for (const f of originals) {
         download(backupName(f.name), f.original);
+        bytes += f.original.length;
       }
-      return 'Downloads';
+      return { skipped: false, dir: 'Downloads', files: originals.length, bytes };
     },
     // vaults belong to the desktop app
     async listVaults() {

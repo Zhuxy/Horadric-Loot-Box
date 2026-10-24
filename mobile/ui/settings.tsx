@@ -37,6 +37,9 @@ export function SettingsScreen({ afterChange }: { afterChange: () => void }) {
     try {
       await flushOrThrow();
       if (store.files.length && !window.confirm('导入会替换本 App 当前的 save 文件夹（旧文件会先备份在 App 内），继续吗？')) return;
+      // Snapshot the outgoing folder before the native sync replaces it; a backup failure
+      // aborts the import rather than destroying the only copy.
+      if (store.folder) await store.platform.backupFolder(store.folder, 'import');
       const count = await invoke<string | null>('ios_import_saves');
       if (count !== null) {
         await store.reload();
@@ -143,7 +146,7 @@ export function SettingsScreen({ afterChange }: { afterChange: () => void }) {
             打开备份文件夹
           </button>
         )}
-        {!store.platform.revealBackups && <div className="m-sethint">备份保存在 App 内；查看 / 恢复入口在后续版本补齐。</div>}
+        {!store.platform.revealBackups && <div className="m-sethint">备份在文件 App 的 HLB Backups 文件夹里；应用内查看 / 恢复入口在后续版本补齐。</div>}
       </SettingsBlock>
 
       <SettingsBlock icon="ℹ️" title="关于" note="Horadric Loot Box 移动版 · 随身仓库管理" tag={{ text: `v${__APP_VERSION__}` }}>

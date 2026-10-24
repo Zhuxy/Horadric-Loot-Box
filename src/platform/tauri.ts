@@ -3,7 +3,7 @@ import type { ArtInfo } from '../art';
 import { open } from '@tauri-apps/plugin-dialog';
 import { check, type Update } from '@tauri-apps/plugin-updater';
 import { relaunch } from '@tauri-apps/plugin-process';
-import type { Platform, SaveFileEntry } from './types';
+import type { BackupResult, Platform, SaveFileEntry } from './types';
 
 let pending: Update | null = null;
 
@@ -19,7 +19,7 @@ export const tauriPlatform: Platform = {
   listSaves: (folder) => invoke<SaveFileEntry[]>('list_saves', { folder }),
   readFile: async (path) => new Uint8Array(await invoke<number[]>('read_file', { path })),
   writeFileAtomic: (path, data) => invoke('write_file_atomic', { path, data: Array.from(data) }),
-  backupFiles: (paths) => invoke<string>('backup_files', { paths }),
+  backupFolder: (folder, kind) => invoke<BackupResult>('backup_folder', { folder, kind }),
   listVaults: (folder) => invoke<SaveFileEntry[]>('list_vaults', { folder }),
   readText: (path) => invoke<string>('read_text', { path }),
   writeVault: (folder, name, text, existingPath) => invoke<string>('write_vault', { folder, name, text, existingPath: existingPath ?? null }),

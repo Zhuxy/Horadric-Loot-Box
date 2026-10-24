@@ -29,7 +29,7 @@ function gatedPlatform() {
       await gate;
       files.set(p, d.slice());
     },
-    backupFiles: async () => 'none',
+    backupFolder: async () => ({ skipped: true, files: 0, bytes: 0 }),
     listVaults: async () => [],
     readText: async (p) => vaults.get(p)!,
     writeVault: async (_f, n, t, e) => {

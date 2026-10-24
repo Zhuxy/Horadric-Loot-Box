@@ -31,7 +31,7 @@ function fabricatedSwpage(pending = false): { bytes: Uint8Array; parked: D2Item[
 function memPlatform(withPages?: { bytes: Uint8Array }) {
   const files = new Map<string, Uint8Array>([[CHAR_PATH, charBytes()]]);
   if (withPages) files.set(PAGE_PATH, withPages.bytes.slice());
-  const backedUp: string[] = [];
+  const backupCalls: [string, string][] = [];
   const platform: Platform = {
     id: 'demo',
     label: 'test',
@@ -47,9 +47,9 @@ function memPlatform(withPages?: { bytes: Uint8Array }) {
     writeFileAtomic: async (p, d) => {
       files.set(p, d.slice());
     },
-    backupFiles: async (paths) => {
-      backedUp.push(...paths);
-      return 'backups/test';
+    backupFolder: async (folder, kind) => {
+      backupCalls.push([folder, kind]);
+      return { skipped: false, dir: 'backups/test', files: 1, bytes: 1 };
     },
     listVaults: async () => [],
     readText: async () => '',
@@ -60,7 +60,7 @@ function memPlatform(withPages?: { bytes: Uint8Array }) {
       return 'backups/test';
     },
   } as Platform;
-  return { platform, files, backedUp };
+  return { platform, files, backupCalls };
 }
 
 async function openStore(withPages?: { bytes: Uint8Array; parked: D2Item[] }) {
@@ -77,7 +77,7 @@ const invItem = (ch: D2Character) => ch.items.find((i) => i.mode === ItemMode.St
 describe('personal stash pages in the store (SPEC §5.2.2)', () => {
   test('the sidecar attaches on load; a move into a page saves as a pair', async () => {
     const fab = fabricatedSwpage();
-    const { store, ch, files, backedUp } = await openStore(fab);
+    const { store, ch, files, backupCalls } = await openStore(fab);
     expect(ch().stashPages?.current).toBe(0);
     expect(ch().stashPages?.pages[2].map((i) => i.code)).toEqual(fab.parked.map((i) => i.code));
 
@@ -88,7 +88,7 @@ describe('personal stash pages in the store (SPEC §5.2.2)', () => {
 
     await store.saveAll();
     expect(store.docs.get(CHAR_PATH)!.dirty).toBe(false);
-    expect(backedUp).toContain(PAGE_PATH);
+    expect(backupCalls).toEqual([['t/', 'save']]);
     const onDisk = parseSwpage(files.get(PAGE_PATH)!, ch().version);
     expect(onDisk.current).toBe(0);
     expect(onDisk.pages[2]).toHaveLength(2);
