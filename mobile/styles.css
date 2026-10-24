@@ -1939,13 +1939,18 @@ h4 {
 .m-mat-empty.g-shard {
   border-color: rgba(120, 190, 235, 0.3);
 }
-.m-mat-dim {
-  opacity: 0.22;
-  filter: grayscale(0.75);
+.m-mat-ghost {
+  object-fit: contain;
+  opacity: 0.18;
+  filter: grayscale(1);
   pointer-events: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+}
+.m-mat-ghosttxt {
+  font-size: 9px;
+  color: #55504a;
+  text-align: center;
+  line-height: 1.1;
+  padding: 0 2px;
 }
 .m-matsec {
   margin: 10px 0 0;

@@ -17,7 +17,6 @@ import {
 } from '../../src/core';
 import { desc } from '../../src/state/store';
 import { useStore } from '../../src/ui/context';
-import { ItemFace } from '../../src/ui/ItemArt';
 import { ItemBox, ItemProperties } from './items';
 import { ItemIcon, Sheet } from './parts';
 import type { ItemLoc } from './model';
@@ -35,6 +34,32 @@ export const MAT_GROUP_ZH: Record<StackSlot['group'], string> = {
 };
 
 const LARGE_KEY = 'hlb.matLarge';
+
+/** "Perfect Amethyst" -> "P. Amethyst", "El Rune" -> "El", for text-only slots (same rule as the desktop board). */
+function shortName(name: string): string {
+  return name
+    .replace(/ Rune$/, '')
+    .replace(/^(Chipped|Flawed|Flawless|Perfect) /, (m) => m[0] + '. ')
+    .replace(/ Worldstone Shard$/, ' Shard')
+    .replace(/^Key of /, 'Key: ')
+    .replace(/Essen[cs]e of /, 'Ess. ');
+}
+
+/**
+ * The ghost "sample" an empty slot shows: the item's own art by code, dimmed and grayscaled
+ * (the desktop board's approach — a fabricated item does not resolve through ItemFace).
+ * Falls back to the short name when there is no art pack or the image fails.
+ */
+function GhostArt({ code, w, h }: { code: string; w: number; h: number }) {
+  const store = useStore();
+  const [failed, setFailed] = useState(false);
+  const src = !failed ? store.art?.srcForCode(code) : undefined;
+  if (src)
+    return (
+      <img src={src} alt="" draggable={false} className="m-mat-ghost" style={{ width: w, height: h }} onError={() => setFailed(true)} />
+    );
+  return <span className="m-mat-ghosttxt">{shortName(GD.items[code]?.name ?? code)}</span>;
+}
 
 /**
  * A stand-in item for a slot that holds nothing, so the board can show its icon, name and (for
@@ -90,7 +115,6 @@ export function repItem(code: string, version: number): D2Item {
  * slots open a read-only info sheet.
  */
 export function StackBoard({ docId, stash, tab }: { docId: string; stash: D2SharedStash; tab: number }) {
-  const store = useStore();
   const t = stash.tabs[tab];
   const version = t?.version ?? 105;
   const { bySlot, extra } = useMemo(() => arrangeStackables(t?.items ?? []), [t]);
@@ -141,17 +165,7 @@ export function StackBoard({ docId, stash, tab }: { docId: string; stash: D2Shar
       aria-label={`${slot.code} 尚未存入`}
       onClick={() => setInfo(slot)}
     >
-      <div className="m-mat-dim">
-        <ItemFace
-          item={repItem(slot.code, version)}
-          width={w}
-          height={h}
-          cell={w + 2}
-          view={store.art ? 'art' : 'tiles'}
-          art={store.art}
-          labels="runes"
-        />
-      </div>
+      <GhostArt code={slot.code} w={w - 4} h={h - 4} />
     </div>
   );
   /** One slot at pixel size w×h; board mode positions it absolutely, grouped mode wraps it. */
