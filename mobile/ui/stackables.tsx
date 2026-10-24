@@ -1,0 +1,314 @@
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import {
+  GD,
+  ItemMode,
+  Quality,
+  STACKABLE_SLOTS,
+  STACKABLES_COLS,
+  STACKABLES_ROWS,
+  StorePage,
+  arrangeStackables,
+  createCompactItem,
+  createUberItem,
+  isUberCode,
+  type D2Item,
+  type D2SharedStash,
+  type StackSlot,
+} from '../../src/core';
+import { desc } from '../../src/state/store';
+import { useStore } from '../../src/ui/context';
+import { ItemFace } from '../../src/ui/ItemArt';
+import { ItemBox, ItemProperties } from './items';
+import { ItemIcon, Sheet } from './parts';
+import type { ItemLoc } from './model';
+
+export const MAT_GROUP_ZH: Record<StackSlot['group'], string> = {
+  rune: '符文',
+  gem: '宝石',
+  potion: '回复药水',
+  key: '地狱火炬钥匙',
+  uber: '召唤材料',
+  organ: '器官',
+  token: '赦免徽章',
+  essence: '精华',
+  shard: '世界石碎片',
+};
+
+const LARGE_KEY = 'hlb.matLarge';
+
+/**
+ * A stand-in item for a slot that holds nothing, so the board can show its icon, name and (for
+ * runes and gems) socket effects. Potions have no core fabricator, so they get a hand-built
+ * minimal item — describeItem only reads the fields set here (verified against the core).
+ */
+export function repItem(code: string, version: number): D2Item {
+  try {
+    return createCompactItem(code, version);
+  } catch {
+    /* not a rune or gem */
+  }
+  if (isUberCode(code)) {
+    try {
+      return createUberItem(code);
+    } catch {
+      /* fall through to the minimal item */
+    }
+  }
+  return {
+    code,
+    def: GD.items[code],
+    quality: Quality.Normal,
+    sockets: [],
+    stats: [],
+    runewordStats: [],
+    setBonusStats: [],
+    prefixes: [],
+    suffixes: [],
+    mode: ItemMode.Stored,
+    page: StorePage.Stash,
+    x: 0,
+    y: 0,
+    bodyLoc: 0,
+    saveVersion: version,
+    raw: new Uint8Array(0),
+    flags: 0,
+    formatVersion: 3,
+    compact: true,
+    identified: true,
+    ethereal: false,
+    socketed: false,
+    runeword: false,
+    itemLevel: 1,
+  } as unknown as D2Item;
+}
+
+/**
+ * The materials page (SPEC §5.2.1): a shared stash's Advanced tab on the core's fixed board.
+ * Default is the whole 10×10 board on one screen; the large mode groups the same slots into
+ * rune / gem-matrix / other sections with bigger cells. Filled slots are ordinary item boxes
+ * (tap opens the item sheet, double-tap takes one to the tray, drag takes one out); empty
+ * slots open a read-only info sheet.
+ */
+export function StackBoard({ docId, stash, tab }: { docId: string; stash: D2SharedStash; tab: number }) {
+  const store = useStore();
+  const t = stash.tabs[tab];
+  const version = t?.version ?? 105;
+  const { bySlot, extra } = useMemo(() => arrangeStackables(t?.items ?? []), [t]);
+  const [large, setLarge] = useState(() => {
+    try {
+      return localStorage.getItem(LARGE_KEY) === '1';
+    } catch {
+      return false;
+    }
+  });
+  const [info, setInfo] = useState<StackSlot | null>(null);
+  const host = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState(0);
+  useLayoutEffect(() => {
+    const el = host.current;
+    if (!el) return;
+    const measure = () => setWidth(el.clientWidth);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const kinds = STACKABLE_SLOTS.filter((s) => bySlot.has(s.code)).length;
+  const total = STACKABLE_SLOTS.reduce((n, s) => n + (bySlot.get(s.code)?.count ?? 0), 0);
+  const toggle = (v: boolean) => {
+    setLarge(v);
+    try {
+      localStorage.setItem(LARGE_KEY, v ? '1' : '0');
+    } catch {
+      /* private mode: keep it session-only */
+    }
+  };
+
+  const filledBox = (slot: StackSlot, w: number, h: number, style?: React.CSSProperties) => {
+    const e = bySlot.get(slot.code);
+    if (!e) return null;
+    const loc: ItemLoc = { docId, kind: 'stack', tab };
+    return (
+      <ItemBox item={e.items[0]} loc={loc} width={w} height={h} cell={w + 2} style={style} className={`g-${slot.group}`} />
+    );
+  };
+  const emptyFace = (slot: StackSlot, w: number, h: number, style?: React.CSSProperties) => (
+    <div
+      className={`m-mat-empty g-${slot.group}`}
+      style={{ width: w, height: h, ...style }}
+      role="button"
+      aria-label={`${slot.code} 尚未存入`}
+      onClick={() => setInfo(slot)}
+    >
+      <div className="m-mat-dim">
+        <ItemFace
+          item={repItem(slot.code, version)}
+          width={w}
+          height={h}
+          cell={w + 2}
+          view={store.art ? 'art' : 'tiles'}
+          art={store.art}
+          labels="runes"
+        />
+      </div>
+    </div>
+  );
+  /** One slot at pixel size w×h; board mode positions it absolutely, grouped mode wraps it. */
+  const slotAt = (slot: StackSlot, w: number, h: number, style?: React.CSSProperties) =>
+    bySlot.has(slot.code) ? filledBox(slot, w, h, style) : emptyFace(slot, w, h, style);
+
+  const boardCell = width ? Math.floor(width / STACKABLES_COLS) : 36;
+  // grouped geometry: sections live inside .m-matsec (12px page margin + 10px padding each side)
+  const inner = Math.max(width - 44, 280);
+  const runeCell = Math.floor((inner - 5 * 3) / 6);
+  const gemCell = Math.floor((inner - 30 - 5 * 3) / 5);
+  const restCell = Math.floor((inner - 4 * 3) / 5);
+
+  const runes = STACKABLE_SLOTS.filter((s) => s.group === 'rune');
+  const gems = STACKABLE_SLOTS.filter((s) => s.group === 'gem');
+  const rest = STACKABLE_SLOTS.filter((s) => s.group !== 'rune' && s.group !== 'gem');
+  const grades = ['碎裂', '裂开', '普通', '无瑕', '完美'];
+
+  const infoRep = info ? repItem(info.code, version) : undefined;
+  const infoDesc = infoRep ? desc(infoRep) : undefined;
+
+  return (
+    <div>
+      <div className="m-mathead">
+        <div className="m-matstats">
+          已存 <b>{kinds}</b> / {STACKABLE_SLOTS.length} 种 · 共 <b>{total}</b> 件（每格上限 99）
+        </div>
+        <div className="m-mattoggle">
+          <button className={!large ? 'on' : ''} onClick={() => toggle(false)}>
+            一板
+          </button>
+          <button className={large ? 'on' : ''} onClick={() => toggle(true)}>
+            大字
+          </button>
+        </div>
+      </div>
+
+      <div className="m-gridhost" ref={host}>
+        {!large ? (
+          <div
+            className="m-gridwrap"
+            style={{ width: STACKABLES_COLS * boardCell, height: STACKABLES_ROWS * boardCell, margin: '0 auto' }}
+          >
+            <div className="m-gridbg" style={{ ['--c' as string]: `${boardCell}px` }} />
+            {STACKABLE_SLOTS.map((s) => (
+              <div key={s.code}>
+                {slotAt(s, boardCell - 2, s.h * boardCell - 2, {
+                  position: 'absolute',
+                  left: s.x * boardCell + 1,
+                  top: s.y * boardCell + 1,
+                })}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div>
+            <div className="m-matsec">
+              <h3>符 文</h3>
+              <div className="m-matgrid" style={{ gridTemplateColumns: `repeat(6, ${runeCell}px)`, gridAutoRows: `${runeCell}px` }}>
+                {runes.map((s) => (
+                  <div className="m-matcell" key={s.code}>
+                    {slotAt(s, runeCell - 2, runeCell - 2, { position: 'absolute', left: 1, top: 1 })}
+                    <span className="m-matcap">{desc(repItem(s.code, version)).short}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="m-matsec">
+              <h3>宝 石</h3>
+              <div className="m-matgemhead" style={{ gridTemplateColumns: `30px repeat(5, ${gemCell}px)` }}>
+                <span />
+                {grades.map((g) => (
+                  <span key={g}>{g}</span>
+                ))}
+              </div>
+              {Array.from({ length: 7 }, (_, ti) => {
+                const row = gems.slice(ti * 5, ti * 5 + 5);
+                return (
+                  <div className="m-matgemrow" key={ti} style={{ gridTemplateColumns: `30px repeat(5, ${gemCell}px)` }}>
+                    <div className="m-matgemlab">{desc(repItem(row[2].code, version)).name}</div>
+                    {row.map((s) => (
+                      <div className="m-matcell" key={s.code} style={{ height: gemCell }}>
+                        {slotAt(s, gemCell - 2, gemCell - 2, { position: 'absolute', left: 1, top: 1 })}
+                      </div>
+                    ))}
+                  </div>
+                );
+              })}
+            </div>
+            <div className="m-matsec">
+              <h3>钥匙 · 器官 · 精华 · 其他</h3>
+              <div className="m-matgrid" style={{ gridTemplateColumns: `repeat(5, ${restCell}px)`, gridAutoRows: `${restCell}px` }}>
+                {rest.map((s) => (
+                  <div className="m-matcell" key={s.code} style={s.h === 2 ? { gridRow: 'span 2' } : undefined}>
+                    {slotAt(s, restCell - 2, (s.h === 2 ? restCell * 2 + 3 : restCell) - 2, {
+                      position: 'absolute',
+                      left: 1,
+                      top: 1,
+                    })}
+                    <span className="m-matcap">{MAT_GROUP_ZH[s.group]}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {extra.length > 0 && (
+        <>
+          <div className="m-hintline" style={{ marginTop: 10 }}>
+            板外材料（新版本新增，暂无固定格）
+          </div>
+          <div className="m-mat-extra">
+            {extra.map((item) => (
+              <div className="m-matcell" key={item.code} style={{ width: 52, height: 52 }}>
+                <ItemBox
+                  item={item}
+                  loc={{ docId, kind: 'stack', tab }}
+                  width={50}
+                  height={50}
+                  cell={52}
+                  style={{ position: 'absolute', left: 1, top: 1 }}
+                />
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      <Sheet open={!!info} onClose={() => setInfo(null)}>
+        {info && infoRep && infoDesc && (
+          <>
+            <div className="m-sheethead">
+              <div>
+                <h3>{infoDesc.name}</h3>
+                <div className="m-sheet-base">{MAT_GROUP_ZH[info.group]} · 尚未存入</div>
+              </div>
+              <button className="m-sheetclose" aria-label="关闭" onClick={() => setInfo(null)}>
+                ×
+              </button>
+            </div>
+            <div className="m-sheetitem">
+              <ItemIcon item={infoRep} size={46} />
+              <div>
+                <div className="m-ity">{MAT_GROUP_ZH[info.group]} · 材料页固定格</div>
+                <div className="m-sheet-base">这一格还空着</div>
+              </div>
+            </div>
+            <ItemProperties description={infoDesc} />
+            <div className="m-hintline" style={{ textAlign: 'left', padding: '8px 2px 2px' }}>
+              在游戏里获得这类材料时会自动归档到这一格；在 HLB 里，把背包 / 托盘里的同类物品用「移动到… →
+              材料页」即可存入。
+            </div>
+          </>
+        )}
+      </Sheet>
+    </div>
+  );
+}

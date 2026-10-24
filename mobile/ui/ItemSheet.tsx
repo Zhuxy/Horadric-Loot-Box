@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
-import { StashTabType, itemBytes, itemName, slotCodes, type D2Item } from '../../src/core';
+import { StashTabType, canStack, itemBytes, itemName, slotCodes, stackCount, type D2Item } from '../../src/core';
 import { desc, docLabel } from '../../src/state/store';
 import { useStore } from '../../src/ui/context';
 import { isTauri } from '../../src/platform/tauri';
@@ -49,10 +49,12 @@ export function ItemSheet({
   const [moving, setMoving] = useState(false);
   const [confirmDel, setConfirmDel] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [takeN, setTakeN] = useState(1);
 
   const close = () => {
     setMoving(false);
     setConfirmDel(false);
+    setTakeN(1);
     onClose();
   };
 
@@ -75,6 +77,10 @@ export function ItemSheet({
     }
     for (const { id, stash } of stashDocs(store)) {
       stash.tabs.forEach((t, i) => {
+        if (t.type === StashTabType.Advanced) {
+          if (canStack(stash, i, item).ok) add(`${docLabel(stash, id)} · 材料页`, { docId: id, kind: 'stack', tab: i });
+          return;
+        }
         if (t.type !== StashTabType.Normal) return;
         add(`${docLabel(stash, id)} · ${tabLabel(i)}`, { docId: id, kind: 'grid', area: 'shared', tab: i });
       });
@@ -87,6 +93,12 @@ export function ItemSheet({
 
   const tray = trayDoc(store);
   const inTray = isTrayDoc(store, loc?.docId);
+  const isStack = loc?.kind === 'stack';
+  const stackN = item && isStack ? stackCount(item) : 0;
+  /** The first materials page this item may be stacked into, and how many loose copies of it the tray holds. */
+  const stackTarget = targets.find((t) => t.loc.kind === 'stack');
+  const trayCopies =
+    inTray && tray && item ? tray.vault.entries.filter((e) => e.item.code === item.code && !e.item.sockets.length).length : 0;
 
   // Hooks run on every render — the sheet is mounted while closed (selected === null) too, so this
   // memo must stay above the early return or React aborts the whole tree (black screen on first tap).
@@ -112,6 +124,33 @@ export function ItemSheet({
     setBusy(true);
     try {
       if (store.move(item, loc.docId, { docId: tray.id, area: 'vault' })) afterChange();
+    } finally {
+      setBusy(false);
+      close();
+    }
+  };
+
+  /** Takes n singles off a materials-page stack into the tray, as one undo step. */
+  const takeToTray = (n: number) => {
+    if (!tray) {
+      store.toast('error', '托盘尚未准备好');
+      return;
+    }
+    setBusy(true);
+    try {
+      if (store.moveStackable(item, loc.docId, { docId: tray.id, area: 'vault' }, n)) afterChange();
+    } finally {
+      setBusy(false);
+      close();
+    }
+  };
+
+  /** Deposits every loose copy of this item the tray holds into its materials-page stack. */
+  const depositAll = () => {
+    if (!stackTarget) return;
+    setBusy(true);
+    try {
+      if (store.moveStackable(item, loc.docId, toStoreLoc(stackTarget.loc), trayCopies)) afterChange();
     } finally {
       setBusy(false);
       close();
@@ -226,15 +265,42 @@ export function ItemSheet({
             返回
           </button>
         </div>
+      ) : isStack ? (
+        <div className="m-sheet-btns">
+          {stackN > 1 && (
+            <div className="m-stepper">
+              <button disabled={busy || takeN <= 1} onClick={() => setTakeN(Math.max(1, takeN - 1))}>
+                −
+              </button>
+              <div className="m-stepper-n">
+                取出 {Math.min(takeN, stackN)} / {stackN}
+              </div>
+              <button disabled={busy || takeN >= stackN} onClick={() => setTakeN(Math.min(stackN, takeN + 1))}>
+                ＋
+              </button>
+            </div>
+          )}
+          <button className="m-primary m-wide" disabled={busy} onClick={() => takeToTray(Math.min(takeN, stackN))}>
+            {stackN > 1 ? `取出 ${Math.min(takeN, stackN)} 个到托盘` : '取出到托盘'}
+          </button>
+          <button className="m-wide" disabled={busy} onClick={() => setMoving(true)}>
+            移动到…（取 1 个）
+          </button>
+        </div>
       ) : (
         <div className="m-sheet-btns">
           {inTray ? (
             <button className="m-primary m-wide" disabled={busy} onClick={backToGrid}>
-              放回当前网格
+              {activeLoc?.kind === 'stack' ? '存入材料页' : '放回当前网格'}
             </button>
           ) : (
             <button className="m-primary m-wide" disabled={busy} onClick={toTray}>
               放入托盘
+            </button>
+          )}
+          {inTray && stackTarget && trayCopies > 1 && (
+            <button className="m-wide" disabled={busy} onClick={depositAll}>
+              存入材料页（全部 {trayCopies} 个）
             </button>
           )}
           {!inTray && loc.kind !== 'equip' && loc.kind !== 'merc' && couldEquip && (

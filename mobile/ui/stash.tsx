@@ -3,6 +3,7 @@ import { docLabel, type GoldRef } from '../../src/state/store';
 import { useStore } from '../../src/ui/context';
 import { Grid } from './items';
 import { GoldRow } from './gold';
+import { StackBoard } from './stackables';
 import { characterDocs, isEditableTab, stashDocs, tabLabel } from './model';
 
 /** Stash tab: current character chips, personal/shared segments, grid sized to the save (SPEC §10), one shared gold pool. */
@@ -33,7 +34,9 @@ export function StashScreen({
   const current = charId ? (store.docs.get(charId)?.doc as D2Character | undefined) : undefined;
   const stash = sharedId ? (store.docs.get(sharedId)?.doc as D2SharedStash | undefined) : stashes[0]?.stash;
   const stashDocId = sharedId ?? stashes[0]?.id;
-  const tabs = stash ? stash.tabs.map((t, i) => ({ t, i })).filter(({ t }) => t.type === StashTabType.Normal) : [];
+  const tabs = stash
+    ? stash.tabs.map((t, i) => ({ t, i })).filter(({ t }) => t.type === StashTabType.Normal || t.type === StashTabType.Advanced)
+    : [];
   const activeTab = tabs.some(({ i }) => i === sharedTab) ? sharedTab : tabs[0]?.i ?? 0;
   const sharedRef = stashDocId ? store.sharedGoldRef(stashDocId, stash?.modern ? undefined : activeTab) : undefined;
 
@@ -84,9 +87,9 @@ export function StashScreen({
             </div>
           )}
           <div className="m-tabchips">
-            {tabs.map(({ i }) => (
+            {tabs.map(({ t, i }) => (
               <button key={i} className={i === activeTab ? 'on' : ''} onClick={() => onSharedTab(i)}>
-                {tabLabel(i)}
+                {t.type === StashTabType.Advanced ? '材料' : tabLabel(i)}
               </button>
             ))}
           </div>
@@ -99,7 +102,9 @@ export function StashScreen({
             />
           )}
           <div className="m-spacer" />
-          {isEditableTab(stash, activeTab) ? (
+          {stash.tabs[activeTab]?.type === StashTabType.Advanced ? (
+            <StackBoard docId={stashDocId} stash={stash} tab={activeTab} />
+          ) : isEditableTab(stash, activeTab) ? (
             <Grid docId={stashDocId} doc={stash} area="shared" tab={activeTab} maxHeight={300} />
           ) : (
             <div className="m-empty">这一页不是物品页。</div>

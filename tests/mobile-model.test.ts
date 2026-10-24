@@ -1,11 +1,49 @@
 import { describe, expect, test } from 'vitest';
 import fs from 'node:fs';
 import { ItemMode, StorePage, parseCharacter, type D2Item, type VaultEntry } from '../src/core';
-import { categoryOf, filterVault, packTray, skillTrees, tabLabel, type VaultFilter } from '../mobile/ui/model';
+import {
+  activeGridLoc,
+  categoryOf,
+  filterVault,
+  locKey,
+  packTray,
+  skillTrees,
+  tabLabel,
+  toStoreLoc,
+  type VaultFilter,
+} from '../mobile/ui/model';
 
 const sorc = parseCharacter(new Uint8Array(fs.readFileSync('public/demo/Sorceress.d2s')), 'Sorceress.d2s');
 const vaultEntry = (item: D2Item, uid: string): VaultEntry => ({ uid, item, addedAt: '2025-01-01T00:00:00.000Z' });
 const filter = (over: Partial<VaultFilter> = {}): VaultFilter => ({ text: '', quality: 'all', category: 'all', lvlMin: '', lvlMax: '', eth: false, sock: false, ...over });
+
+describe('materials page locations (SPEC §5.2.1)', () => {
+  test('a stack loc maps to the store stackables area and keys distinctly', () => {
+    const loc = { docId: 'stash1', kind: 'stack', tab: 5 } as const;
+    expect(toStoreLoc(loc)).toEqual({ docId: 'stash1', area: 'stackables', tab: 5 });
+    expect(locKey(loc)).toBe('stash1:stack:5');
+  });
+
+  test('on an Advanced shared tab the tray current-area is the stack, never the tab grid', () => {
+    expect(activeGridLoc(1, 'equip', 'inv', 'shared', 5, 'char1', 'stash1', true)).toEqual({
+      docId: 'stash1',
+      kind: 'stack',
+      tab: 5,
+    });
+    expect(activeGridLoc(1, 'equip', 'inv', 'shared', 5, 'char1', 'stash1', false)).toEqual({
+      docId: 'stash1',
+      kind: 'grid',
+      area: 'shared',
+      tab: 5,
+    });
+    expect(activeGridLoc(1, 'equip', 'inv', 'shared', 0, 'char1', 'stash1')).toEqual({
+      docId: 'stash1',
+      kind: 'grid',
+      area: 'shared',
+      tab: 0,
+    });
+  });
+});
 
 describe('mobile model helpers', () => {
   test('reads the save skill section and groups it by class tab', () => {

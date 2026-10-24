@@ -14,7 +14,7 @@ export function TrayHandle({ onOpen }: { onOpen: () => void }) {
 }
 
 /** Slide-out tray drawer (SPEC §7): a vault-format loading area, always written with its items. */
-export function TrayDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function TrayDrawer({ open, onClose, stackMode }: { open: boolean; onClose: () => void; stackMode?: boolean }) {
   const store = useStore();
   const tray = trayDoc(store);
   const entries = tray?.vault.entries ?? [];
@@ -33,7 +33,13 @@ export function TrayDrawer({ open, onClose }: { open: boolean; onClose: () => vo
         <div className="m-traysub">
           临时中转区 · <b>实时落盘</b>，放进来就可以直接退应用。
           <br />
-          双击托盘物品 → 放回当前屏幕的网格区（背包 / 仓库 / 方块）。
+          {stackMode ? (
+            <>
+              双击托盘物品 → <b>存入材料页</b>对应的堆（非材料类物品请切到背包 / 仓库页再放回）。
+            </>
+          ) : (
+            <>双击托盘物品 → 放回当前屏幕的网格区（背包 / 仓库 / 方块）。</>
+          )}
         </div>
         <div className="m-traybody">
           {entries.length === 0 ? (

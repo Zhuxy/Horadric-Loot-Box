@@ -32,6 +32,7 @@ export type ItemLoc =
   | { docId: string; kind: 'merc'; bodyLoc: number }
   | { docId: string; kind: 'belt'; slot: number }
   | { docId: string; kind: 'grid'; area: GridArea; tab: number }
+  | { docId: string; kind: 'stack'; tab: number }
   | { docId: string; kind: 'vault' };
 
 export const locKey = (loc: ItemLoc) =>
@@ -41,7 +42,9 @@ export const locKey = (loc: ItemLoc) =>
       ? `${loc.docId}:belt:${loc.slot}`
       : loc.kind === 'grid'
         ? `${loc.docId}:grid:${loc.area}:${loc.tab}`
-        : `${loc.docId}:vault`;
+        : loc.kind === 'stack'
+          ? `${loc.docId}:stack:${loc.tab}`
+          : `${loc.docId}:vault`;
 
 export function toStoreLoc(loc: ItemLoc): Loc {
   switch (loc.kind) {
@@ -53,6 +56,8 @@ export function toStoreLoc(loc: ItemLoc): Loc {
       return { docId: loc.docId, area: 'belt', x: loc.slot };
     case 'vault':
       return { docId: loc.docId, area: 'vault' };
+    case 'stack':
+      return { docId: loc.docId, area: 'stackables', tab: loc.tab };
     case 'grid':
       return loc.area === 'shared'
         ? { docId: loc.docId, area: 'shared', tab: loc.tab }
@@ -119,13 +124,17 @@ export function activeGridLoc(
   sharedTab: number,
   charId: string | undefined,
   sharedId: string | undefined,
+  sharedTabIsStack = false,
 ): ItemLoc | undefined {
   if (tab === 0 && charId && (sub === 'equip' || sub === 'merc')) {
     return { docId: charId, kind: 'grid', area: sub === 'merc' ? 'inventory' : gridView === 'cube' ? 'cube' : 'inventory', tab: 0 };
   }
   if (tab === 1) {
     if (stashSeg === 'personal' && charId) return { docId: charId, kind: 'grid', area: 'stash', tab: 0 };
-    if (stashSeg === 'shared' && sharedId) return { docId: sharedId, kind: 'grid', area: 'shared', tab: sharedTab };
+    if (stashSeg === 'shared' && sharedId)
+      return sharedTabIsStack
+        ? { docId: sharedId, kind: 'stack', tab: sharedTab }
+        : { docId: sharedId, kind: 'grid', area: 'shared', tab: sharedTab };
   }
   return undefined;
 }
@@ -141,6 +150,7 @@ export function areaLabel(store: Store, loc: ItemLoc): string {
   if (loc.kind === 'merc') return '佣兵';
   if (loc.kind === 'belt') return '腰带';
   if (loc.kind === 'vault') return isTrayDoc(store, loc.docId) ? '托盘' : '宝库';
+  if (loc.kind === 'stack') return '材料页';
   if (loc.kind === 'grid') {
     if (loc.area === 'inventory') return '背包';
     if (loc.area === 'cube') return '赫拉迪克方块';

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { D2Item } from '../../src/core';
+import { StashTabType, type D2Item, type D2SharedStash } from '../../src/core';
 import type { GoldRef } from '../../src/state/store';
 import { useStore } from '../../src/ui/context';
 import { CharacterList, SubTabs, type SubPage } from './characters';
@@ -68,9 +68,11 @@ export function MobileApp() {
   const tray = trayDoc(store);
   const trayId = tray?.id;
 
+  const sharedStash = sharedDocId ? (store.docs.get(sharedDocId)?.doc as D2SharedStash | undefined) : undefined;
+  const sharedTabIsStack = sharedStash?.tabs[sharedTab]?.type === StashTabType.Advanced;
   const activeLoc = useMemo(
-    () => activeGridLoc(tab, sub, gridView, stashSeg, sharedTab, currentId, sharedDocId),
-    [tab, sub, gridView, stashSeg, sharedTab, currentId, sharedDocId],
+    () => activeGridLoc(tab, sub, gridView, stashSeg, sharedTab, currentId, sharedDocId, sharedTabIsStack),
+    [tab, sub, gridView, stashSeg, sharedTab, currentId, sharedDocId, sharedTabIsStack],
   );
 
   const afterChange = () => scheduleSave(store);
@@ -86,8 +88,12 @@ export function MobileApp() {
       if (store.move(item, loc.docId, toStoreLoc(activeLoc))) {
         afterChange();
         setTrayOpen(false);
-        const label = activeLoc.kind === 'grid' ? activeLoc.area : '';
-        store.toast('success', `已放入${label === 'cube' ? '方块' : label === 'stash' ? '个人仓库' : label === 'shared' ? '共享仓库' : '背包'}`);
+        if (activeLoc.kind === 'stack') {
+          store.toast('success', '已存入材料页');
+        } else {
+          const label = activeLoc.kind === 'grid' ? activeLoc.area : '';
+          store.toast('success', `已放入${label === 'cube' ? '方块' : label === 'stash' ? '个人仓库' : label === 'shared' ? '共享仓库' : '背包'}`);
+        }
       }
       return;
     }
@@ -284,7 +290,7 @@ export function MobileApp() {
           ))}
         </nav>
 
-        <TrayDrawer open={trayOpen} onClose={() => setTrayOpen(false)} />
+        <TrayDrawer open={trayOpen} onClose={() => setTrayOpen(false)} stackMode={activeLoc?.kind === 'stack'} />
         <ItemSheet selected={itemRef} activeLoc={activeLoc} charId={currentId} onClose={() => setItemRef(null)} afterChange={afterChange} />
         {filterOpen && <FilterSheet filter={filter} onApply={setFilter} onClose={() => setFilterOpen(false)} />}
         {goldFrom && <GoldSheet from={goldFrom} charId={currentId} onClose={() => setGoldFrom(null)} afterChange={afterChange} />}

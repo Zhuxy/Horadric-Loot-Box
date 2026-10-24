@@ -1868,3 +1868,179 @@ h4 {
     font-size: 10px;
   }
 }
+
+/* ---------- materials page (SPEC §5.2.1) ---------- */
+.m-mathead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 2px 8px;
+}
+.m-matstats {
+  flex: 1;
+  font-size: 12px;
+  color: var(--ink-dim);
+  line-height: 1.5;
+}
+.m-matstats b {
+  color: var(--gold);
+  font-weight: 600;
+}
+.m-mattoggle {
+  display: flex;
+  gap: 5px;
+  flex: 0 0 auto;
+}
+.m-mattoggle button {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--panel-edge);
+  color: var(--ink-dim);
+  border-radius: 4px;
+  padding: 5px 11px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.m-mattoggle button.on {
+  color: #0d0b06;
+  background: linear-gradient(180deg, var(--gold), var(--gold-dim));
+  border-color: var(--gold);
+  font-weight: 700;
+}
+.m-mat-empty {
+  position: absolute;
+  border-radius: 3px;
+  border: 1px solid var(--cell-edge-dim);
+  background: rgba(10, 9, 20, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+  overflow: hidden;
+}
+.m-mat-empty.g-rune {
+  border-color: rgba(255, 160, 51, 0.3);
+}
+.m-mat-empty.g-gem {
+  border-color: rgba(180, 140, 232, 0.3);
+}
+.m-mat-empty.g-potion {
+  border-color: rgba(216, 69, 69, 0.32);
+}
+.m-mat-empty.g-key,
+.m-mat-empty.g-uber,
+.m-mat-empty.g-organ,
+.m-mat-empty.g-token {
+  border-color: rgba(212, 182, 106, 0.32);
+}
+.m-mat-empty.g-essence {
+  border-color: rgba(64, 190, 170, 0.3);
+}
+.m-mat-empty.g-shard {
+  border-color: rgba(120, 190, 235, 0.3);
+}
+.m-mat-dim {
+  opacity: 0.22;
+  filter: grayscale(0.75);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.m-matsec {
+  margin: 10px 0 0;
+  border: 1px solid var(--panel-edge);
+  border-radius: 6px;
+  background: linear-gradient(180deg, rgba(30, 26, 20, 0.5), rgba(14, 12, 9, 0.5));
+  padding: 9px 10px 11px;
+}
+.m-matsec h3 {
+  font-family: Georgia, serif;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  color: var(--gold);
+  text-align: center;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+.m-matgrid {
+  display: grid;
+  gap: 3px;
+  justify-content: center;
+}
+.m-matcell {
+  position: relative;
+  min-height: 0;
+}
+.m-matcap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 2px;
+  font-size: 8.5px;
+  color: var(--ink-dim);
+  text-align: center;
+  pointer-events: none;
+  text-shadow: 0 1px 2px #000;
+  z-index: 3;
+}
+.m-matgemhead {
+  display: grid;
+  gap: 3px;
+  margin-bottom: 3px;
+  justify-content: center;
+}
+.m-matgemhead span {
+  font-size: 9.5px;
+  color: var(--ink-faint);
+  text-align: center;
+}
+.m-matgemrow {
+  display: grid;
+  gap: 3px;
+  margin-bottom: 3px;
+  justify-content: center;
+}
+.m-matgemlab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: var(--ink-dim);
+  text-align: center;
+  line-height: 1.3;
+}
+.m-mat-extra {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  justify-content: center;
+  margin-top: 6px;
+}
+.m-stepper {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--panel-edge);
+  border-radius: 5px;
+  overflow: hidden;
+  grid-column: 1 / -1;
+  justify-self: center;
+}
+.m-stepper button {
+  width: 44px;
+  height: 38px;
+  background: rgba(0, 0, 0, 0.4);
+  border: none;
+  color: var(--gold);
+  font-size: 18px;
+  cursor: pointer;
+}
+.m-stepper button:disabled {
+  color: var(--ink-faint);
+}
+.m-stepper-n {
+  min-width: 96px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--ink);
+}
