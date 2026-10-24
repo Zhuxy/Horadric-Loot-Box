@@ -761,9 +761,10 @@ fn migrate_from_old_name() {
 pub fn run() {
     // before the webview starts, so its storage (settings) is carried over too
     migrate_from_old_name();
-    tauri::Builder::default()
-        .plugin(tauri_plugin_dialog::init())
-        .plugin(tauri_plugin_updater::Builder::new().build())
+    let builder = tauri::Builder::default().plugin(tauri_plugin_dialog::init());
+    #[cfg(not(target_os = "ios"))]
+    let builder = builder.plugin(tauri_plugin_updater::Builder::new().build());
+    builder
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_opener::init())
         .manage(art::ArtState::default())

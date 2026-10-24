@@ -17,6 +17,8 @@ export default defineConfig(({ mode }) => ({
   // mobile ships only its icon: the OCR engine (6.7 MB) and demo saves in public/ are desktop/web-only
   ...(altRoot(mode) ? { root: altRoot(mode), publicDir: mode === 'mobile' ? '../public-mobile' : '../public' } : {}),
   server: {
+    // Tauri uses the Mac's LAN address when a booted simulator is detected as a device.
+    host: mode === 'mobile' ? process.env.TAURI_DEV_HOST || 'localhost' : undefined,
     port: altPort(mode),
     strictPort: true,
     // Don't watch Rust build output: on Windows, cargo locks DLLs in target/ and the watcher crashes with EBUSY.

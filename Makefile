@@ -6,6 +6,7 @@
 #   make dmg        build the .dmg installer too
 #   make run        install, then launch the app
 #   make ios        build the iOS app and install it on the plugged-in iPhone
+#   make ios-sim    build and launch the iOS app in the local simulator / Device Hub
 #   make clean      remove build output
 #   make help       list every target
 #
@@ -30,7 +31,7 @@ OPEN            ?= open
 
 .DEFAULT_GOAL   := install
 
-.PHONY: help all desktop install app build dmg run ios dev test typecheck check-tauri deps clean distclean uninstall
+.PHONY: help all desktop install app build dmg run ios ios-sim dev test typecheck check-tauri deps clean distclean uninstall
 
 help: ## Show this help
 	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
@@ -151,6 +152,12 @@ ios: node_modules/.package-lock.json ## Build the iOS app and install it on the 
 	echo "    $$IPA -> $$DEVICE"; \
 	xcrun devicectl device install app --device "$$DEVICE" "$$IPA" && \
 	echo "==> Done. On the iPhone: Settings > General > VPN & Device Management > trust your Apple ID, then open the app."
+
+# Explicit simulator builds avoid the Tauri CLI's Xcode 27 device detection and
+# legacy Simulator.app launcher. No signing or connected iPhone is needed.
+SIMULATOR ?= iPhone 18 Pro
+ios-sim: node_modules/.package-lock.json ## Build and launch the iOS app in Device Hub (SIMULATOR="iPhone 18 Pro")
+	python3 scripts/ios/run_simulator.py --device "$(SIMULATOR)" --npm "$(NPM)" --open "$(OPEN)"
 
 dev: node_modules/.package-lock.json ## Run the desktop app in development mode
 	$(NPM) run desktop:dev

@@ -81,12 +81,29 @@ make            # build the .app and install it into /Applications
 make install    # same as above
 make dmg        # also build the .dmg installer
 make run        # install, then launch
+make ios-sim    # build and launch the iOS app in the local simulator / Device Hub
 make test       # run the test suite
 make clean      # remove build output
 make distclean  # also wipe the Rust cache (after moving the repo)
 ```
 
 Install somewhere else with `make install INSTALL_DIR=~/Applications`.
+
+For iOS, install Xcode, an iOS simulator runtime, Rust, and XcodeGen (`brew install xcodegen`).
+Then run `make ios-sim`. It opens Device Hub on Xcode 27 (Simulator on older Xcode),
+boots **iPhone 18 Pro**, builds the mobile frontend and Rust app, installs it, and launches it.
+The simulator app needs no Apple Developer signing or running Vite server. Rerun the target after code changes.
+
+Choose another installed simulator by name or UUID:
+
+```bash
+xcrun simctl list devices available
+make ios-sim SIMULATOR="iPhone 17"
+```
+
+`make ios` builds for a connected physical iPhone. Both targets can be used in turn;
+`ios-sim` restores the generated Rust build phase when needed. On first launch, import
+your save folder from the app's Settings, or copy saves into the simulator app's `Documents/save`.
 
 ## Credits
 
