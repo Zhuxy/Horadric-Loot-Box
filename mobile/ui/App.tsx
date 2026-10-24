@@ -97,11 +97,19 @@ export function MobileApp() {
         if (activeLoc.kind === 'stack') {
           store.toast('success', '已存入材料页');
         } else {
-          const label = activeLoc.kind === 'grid' ? activeLoc.area : '';
-          store.toast(
-            'success',
-            `已放入${label === 'cube' ? '方块' : label === 'stash' ? '个人仓库' : label === 'stashpage' ? `个人仓库第 ${activeLoc.tab + 1} 页` : label === 'shared' ? '共享仓库' : '背包'}`,
-          );
+          const destName =
+            activeLoc.kind !== 'grid'
+              ? '背包'
+              : activeLoc.area === 'cube'
+                ? '方块'
+                : activeLoc.area === 'stash'
+                  ? '个人仓库'
+                  : activeLoc.area === 'stashpage'
+                    ? `个人仓库第 ${activeLoc.tab + 1} 页`
+                    : activeLoc.area === 'shared'
+                      ? '共享仓库'
+                      : '背包';
+          store.toast('success', `已放入${destName}`);
         }
       }
       return;

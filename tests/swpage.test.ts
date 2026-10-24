@@ -14,6 +14,7 @@ import {
   removeItem,
   serializeSwpage,
   serializeVerified,
+  withPlacement,
   type D2Item,
 } from '../src/core';
 
@@ -123,8 +124,9 @@ describe('.swpage sidecar (SPEC §5.2.2)', () => {
 
   test('layout: every page shares the current page’s dimensions', () => {
     const ch = parseCharacter(new Uint8Array(fs.readFileSync('public/demo/Sorceress.d2s')), 'Sorceress.d2s');
-    // an item parked far out in the current page (a stash-expanding mod's footprint)
-    placeItem(ch, 'stash', 0, invItems[0], 12, 8);
+    // a stash-expanding mod's footprint arrives already inside the save (parsed, never
+    // placed through canDrop), so fabricate it the same way: a placed copy in the item list
+    ch.items.push(withPlacement(invItems[0], { mode: ItemMode.Stored, page: StorePage.Stash, x: 12, y: 8 }));
     const current = gridDims(ch, 'stash');
     expect(current.w).toBeGreaterThanOrEqual(13);
     // an almost-empty side page must still render at the same size
