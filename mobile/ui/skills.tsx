@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { grantedSkills, skillTreeInfo, type D2Character, type SkillLevelInfo } from '../../src/core';
 import { useStore } from '../../src/ui/context';
 import { skillIconUrl, treeTitle } from './model';
+import { Sheet } from './parts';
 
 /**
  * Skill-tree page, laid out like the game's own panel: three trees, each a 6-row × 3-column
@@ -76,8 +77,11 @@ export function SkillsScreen({ ch }: { ch: D2Character }) {
           );
         })}
       </div>
-      <div className="m-skilldetail">
-        {sel ? (
+      <div className="m-hintline">点任意技能查看详情。等级含身上装备与背包护符的加成（+N 为装备部分）。</div>
+      {/* the detail used to sit under the 6-row grid, below the fold; it now floats like the
+          item sheet so tapping a tile shows it immediately, whatever the icon size */}
+      <Sheet open={!!sel} onClose={() => setSelId(null)}>
+        {sel && (
           <div className="m-skilldhead">
             {selIcon && <img className="m-skilldicon" src={selIcon} alt="" />}
             <div className="m-skilldbody">
@@ -91,11 +95,12 @@ export function SkillsScreen({ ch }: { ch: D2Character }) {
                 {sel.prereq.length > 0 && <> · 前置：{sel.prereq.map((pid) => byId.get(pid)?.name ?? pid).join('、')}</>}
               </div>
             </div>
+            <button className="m-sheetclose" aria-label="关闭" onClick={() => setSelId(null)}>
+              ×
+            </button>
           </div>
-        ) : (
-          <div className="m-skilldline m-faint">点任意技能查看详情。等级含身上装备与背包护符的加成（+N 为装备部分）。</div>
         )}
-      </div>
+      </Sheet>
       {granted.length > 0 && (
         <div className="m-skillgranted">
           <span>装备赋予：</span>

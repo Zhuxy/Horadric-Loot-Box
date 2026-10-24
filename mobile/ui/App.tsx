@@ -280,7 +280,8 @@ export function MobileApp() {
             </button>
           )}
           <div className="m-ttl">
-            Horadric <b>· {crumb}</b>
+            <span className="m-ttlapp">Horadric</span>
+            <span className="m-ttlcrumb">{crumb}</span>
           </div>
           <div className="m-headright">
             <button className={`m-hbtn${store.history.length ? '' : ' off'}`} onClick={undo} disabled={!store.history.length} title="撤销上一步">
