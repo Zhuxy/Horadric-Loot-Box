@@ -48,6 +48,8 @@ export function MobileApp() {
   const [gridView, setGridView] = useState<'inv' | 'cube'>('inv');
   const [beltOpen, setBeltOpen] = useState(false);
   const [stashSeg, setStashSeg] = useState<'personal' | 'shared'>('personal');
+  /** Which personal-stash page is being looked at; undefined = the character's current page. */
+  const [personalPage, setPersonalPage] = useState<number | undefined>();
   const [sharedTab, setSharedTab] = useState(0);
   const [sharedId, setSharedId] = useState<string | undefined>();
   const [vaultId, setVaultId] = useState<string | undefined>();
@@ -70,9 +72,11 @@ export function MobileApp() {
 
   const sharedStash = sharedDocId ? (store.docs.get(sharedDocId)?.doc as D2SharedStash | undefined) : undefined;
   const sharedTabIsStack = sharedStash?.tabs[sharedTab]?.type === StashTabType.Advanced;
+  const personalCurrent = ch?.stashPages?.current ?? 0;
+  const effPersonalPage = personalPage !== undefined && personalPage >= 0 && personalPage < 5 ? personalPage : personalCurrent;
   const activeLoc = useMemo(
-    () => activeGridLoc(tab, sub, gridView, stashSeg, sharedTab, currentId, sharedDocId, sharedTabIsStack),
-    [tab, sub, gridView, stashSeg, sharedTab, currentId, sharedDocId, sharedTabIsStack],
+    () => activeGridLoc(tab, sub, gridView, stashSeg, sharedTab, currentId, sharedDocId, sharedTabIsStack, effPersonalPage, personalCurrent),
+    [tab, sub, gridView, stashSeg, sharedTab, currentId, sharedDocId, sharedTabIsStack, effPersonalPage, personalCurrent],
   );
 
   const afterChange = () => scheduleSave(store);
@@ -151,7 +155,7 @@ export function MobileApp() {
     if (next === 0) setCharView('list');
   };
 
-  const importEntry = (): { docId: string; area?: 'inventory' | 'stash' | 'cube' | 'shared'; tab?: number } | undefined => {
+  const importEntry = (): { docId: string; area?: 'inventory' | 'stash' | 'cube' | 'shared' | 'stashpage'; tab?: number } | undefined => {
     if (tab === 0 && charView === 'detail' && currentId) {
       return { docId: currentId, area: sub === 'equip' && gridView === 'cube' ? 'cube' : 'inventory' };
     }
@@ -217,9 +221,14 @@ export function MobileApp() {
     content = (
       <StashScreen
         charId={currentId}
-        onChar={setCharId}
+        onChar={(id) => {
+          setCharId(id);
+          setPersonalPage(undefined);
+        }}
         segment={stashSeg}
         onSegment={setStashSeg}
+        personalPage={effPersonalPage}
+        onPersonalPage={setPersonalPage}
         sharedId={sharedDocId}
         onShared={(id) => {
           setSharedId(id);

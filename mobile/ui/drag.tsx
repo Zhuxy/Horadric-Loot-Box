@@ -172,7 +172,9 @@ export function useDragController(opts: Options): DragApi {
       const targetAt = (gx: number, gy: number) =>
         area === 'shared'
           ? ({ docId, area: 'shared', tab, x: gx, y: gy } as const)
-          : ({ docId, area: area as 'inventory' | 'stash' | 'cube', x: gx, y: gy } as const);
+          : area === 'stashpage'
+            ? ({ docId, area: 'stashpage', page: tab, x: gx, y: gy } as const)
+            : ({ docId, area: area as 'inventory' | 'stash' | 'cube', x: gx, y: gy } as const);
       // first legal candidate wins; if none is legal the nearest one is shown red (with its reason on release)
       let pick: { gx: number; gy: number; ok: boolean; reason?: string } | undefined;
       let nearestBad: typeof pick;
@@ -250,12 +252,14 @@ export function useDragController(opts: Options): DragApi {
           ok =
             drop.area === 'shared'
               ? store.move(p.item, p.loc.docId, { docId: drop.docId, area: 'shared', tab: drop.tab, x: drop.x, y: drop.y })
-              : store.move(p.item, p.loc.docId, {
-                  docId: drop.docId,
-                  area: drop.area as 'inventory' | 'stash' | 'cube',
-                  x: drop.x,
-                  y: drop.y,
-                });
+              : drop.area === 'stashpage'
+                ? store.move(p.item, p.loc.docId, { docId: drop.docId, area: 'stashpage', page: drop.tab, x: drop.x, y: drop.y })
+                : store.move(p.item, p.loc.docId, {
+                    docId: drop.docId,
+                    area: drop.area as 'inventory' | 'stash' | 'cube',
+                    x: drop.x,
+                    y: drop.y,
+                  });
         }
         if (ok) afterChange();
       } else if (drop && 'reason' in drop && drop.reason) {

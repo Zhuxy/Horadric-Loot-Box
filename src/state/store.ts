@@ -45,8 +45,11 @@ import {
   isUberCode,
   withNewId,
   occupancy,
+  emptyStashPages,
   parseCharacter,
   parseStash,
+  parseSwpage,
+  serializeSwpage,
   parseVault,
   placeItem,
   removeItem,
@@ -60,6 +63,8 @@ import {
   type D2Item,
   type D2SharedStash,
   type GridKind,
+  type GridRef,
+  type StashPagesState,
   type ItemDescription,
   type Vault,
   type WantEntry,
@@ -68,6 +73,11 @@ import type { Platform, SaveFileEntry, UpdateInfo } from '../platform';
 import { ArtIndex } from '../art';
 import type { Held } from '../core';
 import { loadTradeLog, storeTradeLog, tradeLines, type TradeLogEntry } from './tradeLog';
+
+/** A character file's .swpage sidecar path (same folder, same stem), or undefined when the path is not a .d2s. */
+export function swpagePathFor(charPath: string): string | undefined {
+  return /\.d2s$/i.test(charPath) ? charPath.replace(/\.d2s$/i, '.swpage') : undefined;
+}
 import { askText } from '../trade/listing';
 
 export type AnyDoc = D2Character | D2SharedStash | Vault;
@@ -81,6 +91,8 @@ export interface LoadedDoc {
   dirty: boolean;
   /** Set once this session has backed up the original file. */
   backedUp: boolean;
+  /** Same, for the character's .swpage sidecar (D2R Mobile extra stash pages). */
+  swpageBackedUp?: boolean;
   /** How many times it has been saved this session (so undo knows whether "unchanged" still means "saved"). */
   saves?: number;
   /** Bumped on every content mutation (via snapshot, undo, rename). saveAll snapshots it next to the
@@ -100,7 +112,10 @@ export type Loc =
   /** Potion belt slot 0–15 (bottom row first); omitted = first free. */
   | { docId: string; area: 'belt'; x?: number }
   /** A shared stash's RotW Stackables tab: the item joins its stack. */
-  | { docId: string; area: 'stackables'; tab: number };
+  | { docId: string; area: 'stackables'; tab: number }
+  /** One of a character's D2R Mobile extra personal-stash pages (absolute page 0–4; the page
+   * whose items live in the .d2s is addressed as plain 'stash', never through here). */
+  | { docId: string; area: 'stashpage'; page: number; x?: number; y?: number };
 
 /** Anywhere gold can be kept. */
 export type GoldRef =
@@ -551,8 +566,32 @@ export class Store {
     } catch (e) {
       entry.error = (e as Error).message;
     }
+    if (entry.doc?.kind === 'character') entry.doc.stashPages = await this.loadStashPages(f.path, entry.doc.version);
     if (!this.accepts(entry.doc, f)) return undefined;
     return entry;
+  }
+
+  /**
+   * The character's .swpage sidecar (D2R Mobile extra personal-stash pages), which sits next to
+   * the .d2s. Absent file → undefined (the pages exist only virtually until something is parked).
+   * A file that fails to parse degrades to a read-only empty state flagged pending — the character
+   * still loads, and the sidecar is never overwritten.
+   */
+  private async loadStashPages(charPath: string, version: number): Promise<StashPagesState | undefined> {
+    const path = swpagePathFor(charPath);
+    if (!path) return undefined;
+    let bytes: Uint8Array;
+    try {
+      bytes = await this.platform.readFile(path);
+    } catch {
+      return undefined;
+    }
+    if (!bytes?.length) return undefined;
+    try {
+      return parseSwpage(bytes, version);
+    } catch {
+      return { ...emptyStashPages(0, true), pending: true };
+    }
   }
 
   private async loadVault(f: SaveFileEntry): Promise<LoadedDoc> {
@@ -647,7 +686,8 @@ export class Store {
       let restore: () => void;
       if (d.kind === 'character') {
         const [items, merc, head, stats, statList, statsAt] = [[...d.items], [...d.mercItems], d.head, { ...d.stats }, [...d.statList], { ...d.statsAt }];
-        restore = () => Object.assign(d, { items, mercItems: merc, head, stats, statList, statsAt });
+        const pages = d.stashPages ? { ...d.stashPages, pages: d.stashPages.pages.map((p) => [...p]) } : undefined;
+        restore = () => Object.assign(d, { items, mercItems: merc, head, stats, statList, statsAt, stashPages: pages });
       } else if (d.kind === 'stash') {
         const tabs = d.tabs.map((t) => ({ items: [...t.items], header: t.header, gold: t.gold }));
         restore = () => d.tabs.forEach((t, i) => Object.assign(t, tabs[i]));
@@ -722,6 +762,10 @@ export class Store {
     const source = this.entryOf(fromDocId)?.doc;
     if (!target) return { ok: false, reason: 'Target file is not loaded' };
     if (!source) return { ok: false, reason: 'Source is not loaded' };
+    // an item parked in an extra page of a character whose page turn the game has not settled
+    // stays where it is — moving it out from under the game's journal could duplicate or lose it
+    if (source.kind === 'character' && source.stashPages?.pending && source.stashPages.pages.some((p) => p.includes(item)))
+      return { ok: false, reason: 'The game has an unfinished page turn for this character; items in its extra pages are read-only until the game settles it.' };
     const same = fromDocId === to.docId;
     if (to.docId === TRADE_OFFER_ID) {
       if (!tradeGood(item) && !this.tradeAsksItems) return { ok: false, reason: 'Only runes, gems, keys and uber parts can be offered (this trade doesn\u2019t ask for items).' };
@@ -774,7 +818,7 @@ export class Store {
       return canEquip(target, moving, to.bodyLoc, { merc: to.area === 'merc', ignore: same ? item : undefined });
     }
 
-    const tab = to.area === 'shared' ? to.tab : 0;
+    const tab = to.area === 'shared' ? to.tab : to.area === 'stashpage' ? to.page : 0;
     let { x, y } = to;
     if (x === undefined || y === undefined) {
       const occ = occupancy(target, to.area, tab);
@@ -830,7 +874,7 @@ export class Store {
       } else if (to.area === 'belt') {
         (td as D2Character).items.push(withPlacement(moving, beltPlacement(chk.x!)));
       } else {
-        placeItem(td as D2Character | D2SharedStash, to.area, to.area === 'shared' ? to.tab : 0, moving, chk.x!, chk.y!);
+        placeItem(td as D2Character | D2SharedStash, to.area, to.area === 'shared' ? to.tab : to.area === 'stashpage' ? to.page : 0, moving, chk.x!, chk.y!);
       }
     } catch (e) {
       // put everything back the way it was
@@ -1387,6 +1431,8 @@ export class Store {
     if (d.kind === 'character') {
       const belt = items.find((i) => !canUnequip(d, i).ok);
       if (belt) return (this.toast('error', canUnequip(d, belt).reason ?? "Can't delete that"), 0);
+      if (d.stashPages?.pending && items.some((i) => d.stashPages!.pages.some((p) => p.includes(i))))
+        return (this.toast('error', 'The game has an unfinished page turn for this character; items in its extra pages are read-only until the game settles it.'), 0);
     }
     this.snapshot(`delete ${items.length} item${items.length === 1 ? '' : 's'}`, [docId]);
     let n = 0;
@@ -1469,7 +1515,7 @@ export class Store {
     };
     const name = desc(item).name;
     this.snapshot(`move ${count} × ${name}`, [fromDocId, to.docId]);
-    const gridArea = to.area === 'inventory' || to.area === 'stash' || to.area === 'cube' || to.area === 'shared';
+    const gridArea = to.area === 'inventory' || to.area === 'stash' || to.area === 'cube' || to.area === 'shared' || to.area === 'stashpage';
     const moved: D2Item[] = [];
     let cur: D2Item | undefined = item;
     while (cur && moved.length < count) {
@@ -1517,7 +1563,7 @@ export class Store {
     this.snapshot(`move ${items.length} items`, [fromDocId, to.docId]);
     let moved = 0;
     const reasons = new Set<string>();
-    const gridArea = to.area === 'inventory' || to.area === 'stash' || to.area === 'cube' || to.area === 'shared';
+    const gridArea = to.area === 'inventory' || to.area === 'stash' || to.area === 'cube' || to.area === 'shared' || to.area === 'stashpage';
     for (const it of items) {
       const tries: Loc[] = [];
       const at = to as { x?: number; y?: number };
@@ -1728,20 +1774,49 @@ export class Store {
       }
       // 1) serialize + verify everything first; abort before touching disk if anything is off.
       // Step 1 is synchronous, so the version captured here is exactly the state that was serialized.
-      const outputs: { doc: LoadedDoc; version: number; bytes?: Uint8Array; text?: string }[] = [];
+      const outputs: { doc: LoadedDoc; version: number; bytes?: Uint8Array; text?: string; bytes2?: Uint8Array; path2?: string }[] = [];
       for (const d of dirty) {
         if (d.doc!.kind === 'vault') outputs.push({ doc: d, version: d.version ?? 0, text: serializeVault(d.doc as Vault) });
-        else outputs.push({ doc: d, version: d.version ?? 0, bytes: serializeVerified(d.doc as D2Character | D2SharedStash) });
+        else {
+          const out: (typeof outputs)[number] = { doc: d, version: d.version ?? 0, bytes: serializeVerified(d.doc as D2Character | D2SharedStash) };
+          // a character's .swpage sidecar is part of the same save unit (SPEC §5.2.2): written
+          // when it existed on disk or anything is parked in the extra pages; a pending state
+          // (the game's unfinished page turn) is never written.
+          if (d.doc!.kind === 'character') {
+            const sp = (d.doc as D2Character).stashPages;
+            const path2 = swpagePathFor(d.path);
+            if (sp && !sp.pending && path2 && (sp.existed || sp.pages.some((p) => p.length))) {
+              out.bytes2 = serializeSwpage(sp);
+              out.path2 = path2;
+            }
+          }
+          outputs.push(out);
+        }
       }
       // 2) back up originals (once per session)
       const toBackup = outputs.filter((o) => o.bytes && !o.doc.backedUp).map((o) => o.doc.path);
-      if (toBackup.length) {
-        this.lastBackup = await this.platform.backupFiles(toBackup);
+      const toBackup2 = outputs
+        .filter((o) => o.bytes2 && o.path2 && !o.doc.swpageBackedUp && (o.doc.doc as D2Character).stashPages?.existed)
+        .map((o) => o.path2!);
+      if (toBackup.length || toBackup2.length) {
+        this.lastBackup = await this.platform.backupFiles([...toBackup, ...toBackup2]);
         outputs.forEach((o) => (o.doc.backedUp = true));
       }
+      outputs.forEach((o) => {
+        if (o.bytes2) o.doc.swpageBackedUp = true;
+      });
       // 3) write
       for (const o of outputs) {
-        if (o.bytes) await this.platform.writeFileAtomic(o.doc.path, o.bytes);
+        if (o.bytes) {
+          // the sidecar lands first: if the .d2s write then fails, items moved into an extra
+          // page exist in both files for a while (a duplicate the game tolerates and logs)
+          // rather than in neither; the doc stays dirty and a retry rewrites the pair.
+          if (o.bytes2 && o.path2) {
+            await this.platform.writeFileAtomic(o.path2, o.bytes2);
+            (o.doc.doc as D2Character).stashPages!.existed = true;
+          }
+          await this.platform.writeFileAtomic(o.doc.path, o.bytes);
+        }
         else {
           const v = o.doc.doc as Vault;
           const path = await this.platform.writeVault(this.folder ?? '', v.name, o.text!, o.doc.path || undefined);
@@ -1782,7 +1857,7 @@ export class Store {
     docId: string,
     item: D2Item,
     quantity: number,
-    target: { area: 'vault' } | { area: GridKind; tab?: number },
+    target: { area: 'vault' } | { area: GridRef; tab?: number },
   ): { imported: number; discarded: number } {
     const entry = this.entryOf(docId);
     if (!entry?.doc) {

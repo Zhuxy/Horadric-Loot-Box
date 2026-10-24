@@ -1,9 +1,15 @@
 import type { D2Character } from './d2s';
 import { StashTabType, type D2SharedStash } from './d2i';
+import { emptyStashPages } from './swpage';
 import { GD } from './gamedata';
 import { ItemMode, Quality, StorePage, itemSize, withPlacement, type D2Item } from './item';
 
 export type GridKind = 'inventory' | 'stash' | 'cube' | 'shared';
+
+/** A grid the layout functions can address: the classic kinds plus 'stashpage' — one of a
+ * character's D2R Mobile extra personal-stash pages, where `tab` is the absolute page (0–4)
+ * and the item list is `ch.stashPages.pages[tab]` instead of the .d2s item list. */
+export type GridRef = GridKind | 'stashpage';
 
 export const GRID_SIZE: Record<GridKind, { w: number; h: number }> = {
   inventory: { w: 10, h: 4 },
@@ -70,11 +76,13 @@ export class Occupancy {
   }
 }
 
-export function gridItems(doc: D2Character | D2SharedStash, grid: GridKind, tab = 0): D2Item[] {
+export function gridItems(doc: D2Character | D2SharedStash, grid: GridRef, tab = 0): D2Item[] {
   if (doc.kind === 'character') {
     if (grid === 'shared') throw new Error('Characters have no shared tabs');
+    if (grid === 'stashpage') return doc.stashPages?.pages[tab] ?? [];
     return characterGridItems(doc, grid);
   }
+  if (grid === 'stashpage') throw new Error('Stashes have no personal pages');
   return doc.tabs[tab]?.items ?? [];
 }
 
@@ -82,8 +90,10 @@ export function gridItems(doc: D2Character | D2SharedStash, grid: GridKind, tab 
  * Grid dimensions: the vanilla size, grown to fit any items that sit outside it (e.g. saves from stash-expanding mods),
  * so nothing is ever hidden or overlapped.
  */
-export function gridDims(doc: D2Character | D2SharedStash, grid: GridKind, tab = 0): { w: number; h: number } {
-  let { w, h } = GRID_SIZE[grid];
+export function gridDims(doc: D2Character | D2SharedStash, grid: GridRef, tab = 0): { w: number; h: number } {
+  // a stash page is the same physical grid as the character's own stash page, only parked
+  // in the sidecar — same base size, then grown to fit whatever sits outside it
+  let { w, h } = grid === 'stashpage' ? GRID_SIZE.stash : GRID_SIZE[grid];
   for (const it of gridItems(doc, grid, tab)) {
     const s = itemSize(it);
     w = Math.max(w, it.x + s.w);
@@ -92,7 +102,7 @@ export function gridDims(doc: D2Character | D2SharedStash, grid: GridKind, tab =
   return { w: Math.min(w, 16), h: Math.min(h, 16) };
 }
 
-export function occupancy(doc: D2Character | D2SharedStash, grid: GridKind, tab = 0): Occupancy {
+export function occupancy(doc: D2Character | D2SharedStash, grid: GridRef, tab = 0): Occupancy {
   const { w, h } = gridDims(doc, grid, tab);
   return new Occupancy(w, h, gridItems(doc, grid, tab));
 }
@@ -120,7 +130,9 @@ export function commonChecks(doc: D2Character | D2SharedStash, item: D2Item, ign
   if (doc.kind === 'character') {
     const group = carryOneGroup(item);
     if (group !== undefined) {
-      const clash = [...doc.items, ...doc.mercItems].find((i) => i !== ignore && i !== item && carryOneGroup(i) === group);
+      // sidecar pages count too: they are the character's stash, just parked in another file
+      const parked = doc.stashPages?.pages.flat() ?? [];
+      const clash = [...doc.items, ...doc.mercItems, ...parked].find((i) => i !== ignore && i !== item && carryOneGroup(i) === group);
       if (clash) return { ok: false, reason: `${doc.name} already has one of these (the game only allows carrying one).` };
     }
     if (doc.expansion === false && item.def && GD.types[item.def.type]?.all.some((t) => ['jewl', 'char'].includes(t)))
@@ -133,13 +145,19 @@ export function commonChecks(doc: D2Character | D2SharedStash, item: D2Item, ign
 /** Validates that `item` can be dropped into a container at (x, y). */
 export function canDrop(
   doc: D2Character | D2SharedStash,
-  grid: GridKind,
+  grid: GridRef,
   tab: number,
   item: D2Item,
   x: number,
   y: number,
   ignore?: D2Item,
 ): DropCheck {
+  if (grid === 'stashpage') {
+    if (doc.kind !== 'character') return { ok: false, reason: 'Only characters have personal stash pages.' };
+    if (doc.stashPages?.pending)
+      return { ok: false, reason: 'The game has an unfinished page turn for this character; its extra pages are read-only until the game settles it.' };
+    if (tab === (doc.stashPages?.current ?? 0)) return { ok: false, reason: 'That page is the current page — it is the personal stash itself.' };
+  }
   if (doc.kind === 'stash' && !tabIsEditable(doc, tab)) return { ok: false, reason: 'Drop runes, gems and materials onto the Stackables tab.' };
   const common = commonChecks(doc, item, ignore, tab);
   if (!common.ok) return common;
@@ -161,19 +179,26 @@ export const ROTW_CODES = new Set(
 );
 
 /** Places a (detached) item into a container, returning the stored copy. Mutates the document. */
-export function placeItem(doc: D2Character | D2SharedStash, grid: GridKind, tab: number, item: D2Item, x: number, y: number): D2Item {
+export function placeItem(doc: D2Character | D2SharedStash, grid: GridRef, tab: number, item: D2Item, x: number, y: number): D2Item {
   const check = canDrop(doc, grid, tab, item, x, y);
   if (!check.ok) throw new Error(check.reason);
-  const page = grid === 'shared' ? StorePage.Stash : PAGE_FOR[grid];
+  const page = grid === 'shared' || grid === 'stashpage' ? StorePage.Stash : PAGE_FOR[grid];
   const placed = withPlacement(item, { mode: ItemMode.Stored, page, x, y, bodyLoc: 0 });
-  if (doc.kind === 'character') doc.items.push(placed);
+  if (grid === 'stashpage') {
+    if (doc.kind !== 'character') throw new Error('Stashes have no personal pages');
+    // first use creates the state (the file itself appears at the next save): the .d2s page
+    // is page 1 by definition when the game has never written a sidecar
+    doc.stashPages ??= emptyStashPages(0, false);
+    doc.stashPages.pages[tab].push(placed);
+  } else if (doc.kind === 'character') doc.items.push(placed);
   else doc.tabs[tab].items.push(placed);
   return placed;
 }
 
 /** Removes an item (by identity) from a document. Returns true if found. */
 export function removeItem(doc: D2Character | D2SharedStash, item: D2Item): boolean {
-  const lists = doc.kind === 'character' ? [doc.items, doc.mercItems] : doc.tabs.map((t) => t.items);
+  const lists =
+    doc.kind === 'character' ? [doc.items, doc.mercItems, ...(doc.stashPages?.pages ?? [])] : doc.tabs.map((t) => t.items);
   for (const list of lists) {
     const i = list.indexOf(item);
     if (i >= 0) {

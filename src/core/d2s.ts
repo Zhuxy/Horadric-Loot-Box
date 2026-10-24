@@ -1,6 +1,7 @@
 import { BitReader, concatBytes, setU16, setU32, u16, u32 } from './bits';
 import { CLASS_NAMES, statDef } from './gamedata';
 import { itemBytes, readItem, readItemList, type D2Item } from './item';
+import type { StashPagesState } from './swpage';
 
 export const SAVE_MAGIC = 0xaa55aa55;
 
@@ -25,6 +26,9 @@ export interface D2Character {
   statsAt: { start: number; end: number };
   /** Player items (inventory, stash, cube, belt, equipped). Editable. */
   items: D2Item[];
+  /** D2R Mobile's extra personal-stash pages, from the `<name>.swpage` sidecar (core/swpage.ts).
+   * Not part of the .d2s: the serializer never sees it; the store loads and saves it alongside. */
+  stashPages?: StashPagesState;
   /** Read-only sections parsed from the tail for display. */
   corpseItems: D2Item[];
   mercItems: D2Item[];

@@ -9,6 +9,7 @@ export * from './verify';
 export * from './describe';
 export * from './import';
 export * from './stackables';
+export * from './swpage';
 export * from './equip';
 export * from './gold';
 export * from './collection';

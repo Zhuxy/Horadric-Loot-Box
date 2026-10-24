@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
-import { StashTabType, canStack, itemBytes, itemName, slotCodes, stackCount, type D2Item } from '../../src/core';
+import { STASH_PAGE_COUNT, StashTabType, canStack, itemBytes, itemName, slotCodes, stackCount, type D2Item } from '../../src/core';
 import { desc, docLabel } from '../../src/state/store';
 import { useStore } from '../../src/ui/context';
 import { isTauri } from '../../src/platform/tauri';
@@ -74,6 +74,12 @@ export function ItemSheet({
       add(`${ch.name} · 背包`, { docId: charId!, kind: 'grid', area: 'inventory', tab: 0 });
       add(`${ch.name} · 方块`, { docId: charId!, kind: 'grid', area: 'cube', tab: 0 });
       add(`${ch.name} · 个人仓库`, { docId: charId!, kind: 'grid', area: 'stash', tab: 0 });
+      // the character's other D2R Mobile pages (the current page is the plain 个人仓库 target above)
+      const curPage = ch.stashPages?.current ?? 0;
+      for (let p = 0; p < STASH_PAGE_COUNT; p++) {
+        if (p === curPage) continue;
+        add(`${ch.name} · 个人仓库第 ${p + 1} 页`, { docId: charId!, kind: 'grid', area: 'stashpage', tab: p });
+      }
     }
     for (const { id, stash } of stashDocs(store)) {
       stash.tabs.forEach((t, i) => {

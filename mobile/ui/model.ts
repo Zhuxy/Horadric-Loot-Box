@@ -24,7 +24,7 @@ export const TRAY_NAME = 'MobileTray';
 /** Slot coordinates in cells, copied from the desktop paper doll (`src/ui/Equipment.tsx`). */
 export const px = (v: number) => Math.round(v * (CELL + 1.5));
 
-export type GridArea = 'inventory' | 'stash' | 'cube' | 'shared';
+export type GridArea = 'inventory' | 'stash' | 'cube' | 'shared' | 'stashpage';
 
 export type ItemLoc =
   | { docId: string; kind: 'equip'; bodyLoc: number }
@@ -60,7 +60,9 @@ export function toStoreLoc(loc: ItemLoc): Loc {
     case 'grid':
       return loc.area === 'shared'
         ? { docId: loc.docId, area: 'shared', tab: loc.tab }
-        : { docId: loc.docId, area: loc.area };
+        : loc.area === 'stashpage'
+          ? { docId: loc.docId, area: 'stashpage', page: loc.tab }
+          : { docId: loc.docId, area: loc.area };
   }
 }
 
@@ -124,12 +126,18 @@ export function activeGridLoc(
   charId: string | undefined,
   sharedId: string | undefined,
   sharedTabIsStack = false,
+  personalPage = 0,
+  personalCurrent = 0,
 ): ItemLoc | undefined {
   if (tab === 0 && charId && (sub === 'equip' || sub === 'merc')) {
     return { docId: charId, kind: 'grid', area: sub === 'merc' ? 'inventory' : gridView === 'cube' ? 'cube' : 'inventory', tab: 0 };
   }
   if (tab === 1) {
-    if (stashSeg === 'personal' && charId) return { docId: charId, kind: 'grid', area: 'stash', tab: 0 };
+    // the tray's current area is the personal page being looked at (same rule as the materials board)
+    if (stashSeg === 'personal' && charId)
+      return personalPage === personalCurrent
+        ? { docId: charId, kind: 'grid', area: 'stash', tab: 0 }
+        : { docId: charId, kind: 'grid', area: 'stashpage', tab: personalPage };
     if (stashSeg === 'shared' && sharedId)
       return sharedTabIsStack
         ? { docId: sharedId, kind: 'stack', tab: sharedTab }
@@ -154,6 +162,7 @@ export function areaLabel(store: Store, loc: ItemLoc): string {
     if (loc.area === 'inventory') return '背包';
     if (loc.area === 'cube') return '赫拉迪克方块';
     if (loc.area === 'stash') return '个人仓库';
+    if (loc.area === 'stashpage') return `个人仓库第 ${loc.tab + 1} 页`;
     return '共享仓库';
   }
   return '';

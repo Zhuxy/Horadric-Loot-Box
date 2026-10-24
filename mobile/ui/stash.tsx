@@ -1,4 +1,4 @@
-import { StashTabType, type D2Character, type D2SharedStash } from '../../src/core';
+import { STASH_PAGE_COUNT, StashTabType, gridItems, type D2Character, type D2SharedStash } from '../../src/core';
 import { docLabel, type GoldRef } from '../../src/state/store';
 import { useStore } from '../../src/ui/context';
 import { Grid } from './items';
@@ -12,6 +12,8 @@ export function StashScreen({
   onChar,
   segment,
   onSegment,
+  personalPage,
+  onPersonalPage,
   sharedId,
   onShared,
   sharedTab,
@@ -22,6 +24,8 @@ export function StashScreen({
   onChar: (id: string) => void;
   segment: 'personal' | 'shared';
   onSegment: (s: 'personal' | 'shared') => void;
+  personalPage: number;
+  onPersonalPage: (page: number) => void;
   sharedId?: string;
   onShared: (id: string) => void;
   sharedTab: number;
@@ -68,9 +72,35 @@ export function StashScreen({
               onClick={() => onGold({ docId: charId!, kind: 'stash' })}
             />
             <div className="m-spacer" />
-            <Grid docId={charId!} doc={current} area="stash" maxHeight={300} />
+            {(() => {
+              const cur = current.stashPages?.current ?? 0;
+              const onCurrent = personalPage === cur;
+              return (
+                <>
+                  <div className="m-tabchips">
+                    {Array.from({ length: STASH_PAGE_COUNT }, (_, i) => {
+                      const count = i === cur ? gridItems(current, 'stash').length : (current.stashPages?.pages[i]?.length ?? 0);
+                      return (
+                        <button key={i} className={i === personalPage ? 'on' : ''} onClick={() => onPersonalPage(i)}>
+                          第 {i + 1} 页{count > 0 ? ` · ${count}` : ''}
+                          {i === cur ? '（当前）' : ''}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {current.stashPages?.pending && (
+                    <div className="m-hintline">游戏里有一次翻页还没落定，这个角色的额外页暂时只读——进一次游戏再退出即可恢复。</div>
+                  )}
+                  {onCurrent ? (
+                    <Grid docId={charId!} doc={current} area="stash" maxHeight={300} />
+                  ) : (
+                    <Grid docId={charId!} doc={current} area="stashpage" tab={personalPage} maxHeight={300} />
+                  )}
+                </>
+              );
+            })()}
             <div className="m-spacer" />
-            <div className="m-hintline">个人仓库跟角色走 · 金币点上方金币行取出</div>
+            <div className="m-hintline">个人仓库跟角色走 · 共 5 页（D2R Mobile）· 金币点上方金币行取出</div>
           </>
         ) : (
           <div className="m-empty">还没有角色存档。</div>
