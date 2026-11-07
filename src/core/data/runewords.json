@@ -1,0 +1,4185 @@
+[
+  {
+    "id": 1,
+    "name": "天底",
+    "name_en": "Nadir",
+    "required_level": 13,
+    "base_types": [
+      "头盔"
+    ],
+    "runes": [
+      {
+        "code": "Nef",
+        "name": "那夫",
+        "number": 4
+      },
+      {
+        "code": "Tir",
+        "name": "特尔",
+        "number": 3
+      }
+    ],
+    "rune_codes": "Nef+Tir",
+    "properties": [
+      "+50% 防御强化",
+      "+10 防御",
+      "+30 对远程防御",
+      "等级 13 魔影斗篷（9 次）",
+      "+2 击杀法力恢复",
+      "+5 力量",
+      "怪物金币掉落量提高 -33%",
+      "照亮范围 -3"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 2,
+    "name": "钢铁",
+    "name_en": "Steel",
+    "required_level": 13,
+    "base_types": [
+      "刀剑",
+      "斧",
+      "钉锤"
+    ],
+    "runes": [
+      {
+        "code": "Tir",
+        "name": "特尔",
+        "number": 3
+      },
+      {
+        "code": "El",
+        "name": "艾尔",
+        "number": 1
+      }
+    ],
+    "rune_codes": "Tir+El",
+    "properties": [
+      "+25% 伤害强化",
+      "+3 最小伤害",
+      "+3 最大伤害",
+      "+50 准确率",
+      "25% 几率造成开放伤口",
+      "攻击速度 +25%",
+      "+2 击杀法力恢复",
+      "照亮范围 +1"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 3,
+    "name": "怨恨",
+    "name_en": "Malice",
+    "required_level": 15,
+    "base_types": [
+      "近战武器"
+    ],
+    "runes": [
+      {
+        "code": "Ith",
+        "name": "伊司",
+        "number": 6
+      },
+      {
+        "code": "El",
+        "name": "艾尔",
+        "number": 1
+      },
+      {
+        "code": "Eth",
+        "name": "爱斯",
+        "number": 5
+      }
+    ],
+    "rune_codes": "Ith+El+Eth",
+    "properties": [
+      "+33% 伤害强化",
+      "+9 最大伤害",
+      "100% 几率造成开放伤口",
+      "-25% 目标防御",
+      "击中使怪物防御 -100",
+      "防止怪物自疗",
+      "+50 准确率",
+      "吸取生命 -5"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 4,
+    "name": "隐密",
+    "name_en": "Stealth",
+    "required_level": 17,
+    "base_types": [
+      "护甲"
+    ],
+    "runes": [
+      {
+        "code": "Tal",
+        "name": "塔尔",
+        "number": 7
+      },
+      {
+        "code": "Eth",
+        "name": "爱斯",
+        "number": 5
+      }
+    ],
+    "rune_codes": "Tal+Eth",
+    "properties": [
+      "魔法伤害降低 3",
+      "+6 敏捷",
+      "+15 精力上限",
+      "毒素抗性 +30%",
+      "法力恢复 15%",
+      "+25% 跑步 / 行走速度",
+      "+25% 施法速度",
+      "+25% 打击恢复"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 5,
+    "name": "叶子",
+    "name_en": "Leaf",
+    "required_level": 19,
+    "base_types": [
+      "法杖"
+    ],
+    "runes": [
+      {
+        "code": "Tir",
+        "name": "特尔",
+        "number": 3
+      },
+      {
+        "code": "Ral",
+        "name": "拉尔",
+        "number": 8
+      }
+    ],
+    "rune_codes": "Tir+Ral",
+    "properties": [
+      "附加 5 - 30 火焰伤害",
+      "+3 火焰技能",
+      "+3 至火焰弹（只限法师）",
+      "+3 至炼狱之火（只限法师）",
+      "+3 至暖流（只限法师）",
+      "+2 击杀法力恢复",
+      "+(2-198) 防御 （依角色等级而定）",
+      "冰冷抗性 +33%"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 6,
+    "name": "先祖之契",
+    "name_en": "Ancients' Pledge",
+    "required_level": 21,
+    "base_types": [
+      "盾牌"
+    ],
+    "runes": [
+      {
+        "code": "Ral",
+        "name": "拉尔",
+        "number": 8
+      },
+      {
+        "code": "Ort",
+        "name": "欧特",
+        "number": 9
+      },
+      {
+        "code": "Tal",
+        "name": "塔尔",
+        "number": 7
+      }
+    ],
+    "rune_codes": "Ral+Ort+Tal",
+    "properties": [
+      "+50% 防御强化",
+      "冰冷抗性 +50%",
+      "火焰抗性 +50%",
+      "闪电抗性 +50%",
+      "毒素抗性 +50%",
+      "+10% 受到的伤害转为法力"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 7,
+    "name": "神圣雷击",
+    "name_en": "Holy Thunder",
+    "required_level": 21,
+    "base_types": [
+      "权杖"
+    ],
+    "runes": [
+      {
+        "code": "Eth",
+        "name": "爱斯",
+        "number": 5
+      },
+      {
+        "code": "Ral",
+        "name": "拉尔",
+        "number": 8
+      },
+      {
+        "code": "Ort",
+        "name": "欧特",
+        "number": 9
+      },
+      {
+        "code": "Tal",
+        "name": "塔尔",
+        "number": 7
+      }
+    ],
+    "rune_codes": "Eth+Ral+Ort+Tal",
+    "properties": [
+      "+60% 伤害强化",
+      "-25% 目标防御",
+      "附加 5 - 30 火焰伤害",
+      "附加 21 - 110 闪电伤害",
+      "+75 毒素伤害，时效 5 秒",
+      "+10 最大伤害",
+      "闪电抗性 +60%",
+      "闪电抗性上限 +5%",
+      "+3 至神圣闪电（只限圣骑士）",
+      "等级 7 连锁闪电（60 次）"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 8,
+    "name": "和风",
+    "name_en": "Zephyr",
+    "required_level": 21,
+    "base_types": [
+      "弓或弩"
+    ],
+    "runes": [
+      {
+        "code": "Ort",
+        "name": "欧特",
+        "number": 9
+      },
+      {
+        "code": "Eth",
+        "name": "爱斯",
+        "number": 5
+      }
+    ],
+    "rune_codes": "Ort+Eth",
+    "properties": [
+      "+33% 伤害强化",
+      "+66 准确率",
+      "附加 1 - 50 闪电伤害",
+      "-25% 目标防御",
+      "+25 防御",
+      "+25% 跑步 / 行走速度",
+      "攻击速度 +25%",
+      "被击中时有 7% 几率施展等级 1 旋风术"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 9,
+    "name": "图纹",
+    "name_en": "Pattern",
+    "required_level": 23,
+    "base_types": [
+      "爪或拳刃"
+    ],
+    "runes": [
+      {
+        "code": "Tal",
+        "name": "塔尔",
+        "number": 7
+      },
+      {
+        "code": "Ort",
+        "name": "欧特",
+        "number": 9
+      },
+      {
+        "code": "Thul",
+        "name": "书尔",
+        "number": 10
+      }
+    ],
+    "rune_codes": "Tal+Ort+Thul",
+    "properties": [
+      "+30% 格挡速度",
+      "+40-75% 伤害强化",
+      "10% 准确率加成",
+      "附加 12 - 36 火焰伤害",
+      "附加 1 - 50 闪电伤害",
+      "附加 3 - 14 冰冷伤害",
+      "+75 毒素伤害，时效 5 秒",
+      "+6 力量",
+      "+6 敏捷",
+      "所有抗性 +15"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 10,
+    "name": "边缘",
+    "name_en": "Edge",
+    "required_level": 25,
+    "base_types": [
+      "弓或弩"
+    ],
+    "runes": [
+      {
+        "code": "Tir",
+        "name": "特尔",
+        "number": 3
+      },
+      {
+        "code": "Tal",
+        "name": "塔尔",
+        "number": 7
+      },
+      {
+        "code": "Amn",
+        "name": "安姆",
+        "number": 11
+      }
+    ],
+    "rune_codes": "Tir+Tal+Amn",
+    "properties": [
+      "装备时赋予等级 15 荆棘灵气",
+      "攻击速度 +35%",
+      "+200-250% 对恶魔的伤害",
+      "+280% 对不死怪物的伤害",
+      "+75 毒素伤害，时效 5 秒",
+      "击中窃取 7% 生命",
+      "防止怪物自疗",
+      "+5-10 所有属性",
+      "+2 击杀法力恢复",
+      "所有商人的价格降低 15%"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 11,
+    "name": "王者的慈悲",
+    "name_en": "King's Grace",
+    "required_level": 25,
+    "base_types": [
+      "刀剑",
+      "权杖"
+    ],
+    "runes": [
+      {
+        "code": "Amn",
+        "name": "安姆",
+        "number": 11
+      },
+      {
+        "code": "Ral",
+        "name": "拉尔",
+        "number": 8
+      },
+      {
+        "code": "Thul",
+        "name": "书尔",
+        "number": 10
+      }
+    ],
+    "rune_codes": "Amn+Ral+Thul",
+    "properties": [
+      "+100% 伤害强化",
+      "+100% 对恶魔的伤害",
+      "+50% 对不死怪物的伤害",
+      "附加 5 - 30 火焰伤害",
+      "附加 3 - 14 冰冷伤害",
+      "+150 准确率",
+      "+100 对恶魔的准确率",
+      "+100 对不死怪物的准确率",
+      "击中窃取 7% 生命"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 12,
+    "name": "神话",
+    "name_en": "Myth",
+    "required_level": 25,
+    "base_types": [
+      "护甲"
+    ],
+    "runes": [
+      {
+        "code": "Hel",
+        "name": "海尔",
+        "number": 15
+      },
+      {
+        "code": "Amn",
+        "name": "安姆",
+        "number": 11
+      },
+      {
+        "code": "Nef",
+        "name": "那夫",
+        "number": 4
+      }
+    ],
+    "rune_codes": "Hel+Amn+Nef",
+    "properties": [
+      "被击中时有 3% 几率施展等级 1 狂嗥",
+      "击中时有 10% 几率施展等级 1 嘲讽",
+      "+2 野蛮人技能等级",
+      "+30 对远程防御",
+      "生命回复 +10",
+      "攻击者反伤：14",
+      "需求 -15%"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 13,
+    "name": "精神",
+    "name_en": "Spirit",
+    "required_level": 25,
+    "base_types": [
+      "刀剑",
+      "盾牌"
+    ],
+    "runes": [
+      {
+        "code": "Tal",
+        "name": "塔尔",
+        "number": 7
+      },
+      {
+        "code": "Thul",
+        "name": "书尔",
+        "number": 10
+      },
+      {
+        "code": "Ort",
+        "name": "欧特",
+        "number": 9
+      },
+      {
+        "code": "Amn",
+        "name": "安姆",
+        "number": 11
+      }
+    ],
+    "rune_codes": "Tal+Thul+Ort+Amn",
+    "properties": [
+      "盾牌：",
+      "闪电抗性 +35%",
+      "攻击者反伤：14",
+      "冰冷抗性 +35%",
+      "毒素抗性 +35%",
+      "武器：",
+      "附加 1 - 50 闪电伤害",
+      "附加 3 - 14 冰冷伤害",
+      "+75 毒素伤害，时效 5 秒",
+      "击中窃取 7% 生命",
+      "共通：",
+      "+3-8 魔法吸收",
+      "+25-35% 施法速度",
+      "+2 所有技能",
+      "+55% 打击恢复",
+      "+22 体能",
+      "+250 对远程防御",
+      "+89-112 法力"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 14,
+    "name": "力量",
+    "name_en": "Strength",
+    "required_level": 25,
+    "base_types": [
+      "近战武器"
+    ],
+    "runes": [
+      {
+        "code": "Amn",
+        "name": "安姆",
+        "number": 11
+      },
+      {
+        "code": "Tir",
+        "name": "特尔",
+        "number": 3
+      }
+    ],
+    "rune_codes": "Amn+Tir",
+    "properties": [
+      "+35% 伤害强化",
+      "+25% 几率造成粉碎打击",
+      "击中窃取 7% 生命",
+      "+2 击杀法力恢复",
+      "+20 力量",
+      "+10 体能"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 15,
+    "name": "荣耀",
+    "name_en": "Honor",
+    "required_level": 27,
+    "base_types": [
+      "近战武器"
+    ],
+    "runes": [
+      {
+        "code": "Amn",
+        "name": "安姆",
+        "number": 11
+      },
+      {
+        "code": "El",
+        "name": "艾尔",
+        "number": 1
+      },
+      {
+        "code": "Ith",
+        "name": "伊司",
+        "number": 6
+      },
+      {
+        "code": "Tir",
+        "name": "特尔",
+        "number": 3
+      },
+      {
+        "code": "Sol",
+        "name": "索尔",
+        "number": 12
+      }
+    ],
+    "rune_codes": "Amn+El+Ith+Tir+Sol",
+    "properties": [
+      "+160% 伤害强化",
+      "+9 最小伤害",
+      "+9 最大伤害",
+      "+25% 致命打击",
+      "+250 准确率",
+      "+1 所有技能",
+      "击中窃取 7% 生命",
+      "生命回复 +10",
+      "+10 力量",
+      "照亮范围 +1",
+      "+2 击杀法力恢复"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 16,
+    "name": "灵光",
+    "name_en": "Insight",
+    "required_level": 27,
+    "base_types": [
+      "长柄武器",
+      "法杖",
+      "弓或弩"
+    ],
+    "runes": [
+      {
+        "code": "Ral",
+        "name": "拉尔",
+        "number": 8
+      },
+      {
+        "code": "Tir",
+        "name": "特尔",
+        "number": 3
+      },
+      {
+        "code": "Tal",
+        "name": "塔尔",
+        "number": 7
+      },
+      {
+        "code": "Sol",
+        "name": "索尔",
+        "number": 12
+      }
+    ],
+    "rune_codes": "Ral+Tir+Tal+Sol",
+    "properties": [
+      "装备时赋予等级12-17 冥想灵气",
+      "+35% 施法速度",
+      "+200-260% 伤害强化",
+      "+9 最小伤害",
+      "180-250% 准确率加成",
+      "附加 5 - 30 火焰伤害",
+      "+75 毒素伤害，时效 5 秒",
+      "+1-6 至致命攻势",
+      "+5 所有属性",
+      "+2 击杀法力恢复",
+      "寻获魔法物品几率提高 23%"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 17,
+    "name": "知识",
+    "name_en": "Lore",
+    "required_level": 27,
+    "base_types": [
+      "头盔"
+    ],
+    "runes": [
+      {
+        "code": "Ort",
+        "name": "欧特",
+        "number": 9
+      },
+      {
+        "code": "Sol",
+        "name": "索尔",
+        "number": 12
+      }
+    ],
+    "rune_codes": "Ort+Sol",
+    "properties": [
+      "+1 所有技能等级",
+      "+10 能量",
+      "+2 击杀法力恢复",
+      "闪电抗性 +30%",
+      "伤害降低 7",
+      "照亮范围 +2"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 18,
+    "name": "光辉",
+    "name_en": "Radiance",
+    "required_level": 27,
+    "base_types": [
+      "头盔"
+    ],
+    "runes": [
+      {
+        "code": "Nef",
+        "name": "那夫",
+        "number": 4
+      },
+      {
+        "code": "Sol",
+        "name": "索尔",
+        "number": 12
+      },
+      {
+        "code": "Ith",
+        "name": "伊司",
+        "number": 6
+      }
+    ],
+    "rune_codes": "Nef+Sol+Ith",
+    "properties": [
+      "+75% 防御强化",
+      "+30 对远程防御",
+      "+10 能量",
+      "+10 体能",
+      "+15% 受到的伤害转为法力",
+      "魔法伤害降低 3",
+      "+33 法力",
+      "伤害降低 7",
+      "照亮范围 +5"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 19,
+    "name": "权威",
+    "name_en": "Authority",
+    "required_level": 29,
+    "base_types": [
+      "护甲"
+    ],
+    "runes": [
+      {
+        "code": "Hel",
+        "name": "海尔",
+        "number": 15
+      },
+      {
+        "code": "Shael",
+        "name": "夏尔",
+        "number": 13
+      },
+      {
+        "code": "Ral",
+        "name": "拉尔",
+        "number": 8
+      }
+    ],
+    "rune_codes": "Hel+Shael+Ral",
+    "properties": [
+      "击中时有 10% 几率施展等级 15 瘴气锁链",
+      "被击中时有 2% 几率施展等级 10 灵能护盾",
+      "+2 术士技能",
+      "+20% 打击恢复",
+      "+40-60% 伤害强化",
+      "火焰抗性 +30%",
+      "需求 -15%"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 20,
+    "name": "和平",
+    "name_en": "Peace",
+    "required_level": 29,
+    "base_types": [
+      "护甲"
+    ],
+    "runes": [
+      {
+        "code": "Shael",
+        "name": "夏尔",
+        "number": 13
+      },
+      {
+        "code": "Thul",
+        "name": "书尔",
+        "number": 10
+      },
+      {
+        "code": "Amn",
+        "name": "安姆",
+        "number": 11
+      }
+    ],
+    "rune_codes": "Shael+Thul+Amn",
+    "properties": [
+      "被击中时有 4% 几率施展等级 5 缓箭术",
+      "击中时有 2% 几率施展等级 15 女武神",
+      "+2 亚马逊技能等级",
+      "+20% 打击恢复",
+      "+2 至致命攻势",
+      "冰冷抗性 +30%",
+      "攻击者反伤：14"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 21,
+    "name": "声韵",
+    "name_en": "Rhyme",
+    "required_level": 29,
+    "base_types": [
+      "盾牌"
+    ],
+    "runes": [
+      {
+        "code": "Shael",
+        "name": "夏尔",
+        "number": 13
+      },
+      {
+        "code": "Eth",
+        "name": "爱斯",
+        "number": 5
+      }
+    ],
+    "rune_codes": "Shael+Eth",
+    "properties": [
+      "格挡几率提高 20%",
+      "+40% 格挡速度",
+      "所有抗性 +25",
+      "法力恢复 15%",
+      "无法冻结",
+      "怪物金币掉落量提高 50%",
+      "寻获魔法物品几率提高 25%"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 22,
+    "name": "黑锤",
+    "name_en": "Black",
+    "required_level": 35,
+    "base_types": [
+      "短棒",
+      "重槌",
+      "钉锤"
+    ],
+    "runes": [
+      {
+        "code": "Thul",
+        "name": "书尔",
+        "number": 10
+      },
+      {
+        "code": "Io",
+        "name": "破",
+        "number": 16
+      },
+      {
+        "code": "Nef",
+        "name": "那夫",
+        "number": 4
+      }
+    ],
+    "rune_codes": "Thul+Io+Nef",
+    "properties": [
+      "+120% 伤害强化",
+      "+40% 几率造成粉碎打击",
+      "+200 准确率",
+      "附加 3 - 14 冰冷伤害",
+      "+10 体能",
+      "攻击速度 +15%",
+      "击退",
+      "魔法伤害降低 2",
+      "等级 12 尸爆（60 次）"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 23,
+    "name": "壁垒",
+    "name_en": "Bulwark",
+    "required_level": 35,
+    "base_types": [
+      "头盔"
+    ],
+    "runes": [
+      {
+        "code": "Shael",
+        "name": "夏尔",
+        "number": 13
+      },
+      {
+        "code": "Io",
+        "name": "破",
+        "number": 16
+      },
+      {
+        "code": "Sol",
+        "name": "索尔",
+        "number": 12
+      }
+    ],
+    "rune_codes": "Shael+Io+Sol",
+    "properties": [
+      "+20% 打击恢复",
+      "击中窃取4-6% 生命",
+      "+75-100% 防御强化",
+      "+10 体能",
+      "生命上限提高 5%",
+      "生命回复 +30",
+      "伤害降低 7",
+      "受到的物理伤害降低10-15%",
+      "天梯限定"
+    ],
+    "ladder_only": true
+  },
+  {
+    "id": 24,
+    "name": "治愈",
+    "name_en": "Cure",
+    "required_level": 35,
+    "base_types": [
+      "头盔"
+    ],
+    "runes": [
+      {
+        "code": "Shael",
+        "name": "夏尔",
+        "number": 13
+      },
+      {
+        "code": "Io",
+        "name": "破",
+        "number": 16
+      },
+      {
+        "code": "Tal",
+        "name": "塔尔",
+        "number": 7
+      }
+    ],
+    "rune_codes": "Shael+Io+Tal",
+    "properties": [
+      "装备时赋予等级 1 净化灵气",
+      "+20% 打击恢复",
+      "+75-100% 防御强化",
+      "+10 体能",
+      "生命上限提高 5%",
+      "毒素抗性+40-60%",
+      "中毒的时效缩短 50%",
+      "天梯限定"
+    ],
+    "ladder_only": true
+  },
+  {
+    "id": 25,
+    "name": "接地",
+    "name_en": "Ground",
+    "required_level": 35,
+    "base_types": [
+      "头盔"
+    ],
+    "runes": [
+      {
+        "code": "Shael",
+        "name": "夏尔",
+        "number": 13
+      },
+      {
+        "code": "Io",
+        "name": "破",
+        "number": 16
+      },
+      {
+        "code": "Ort",
+        "name": "欧特",
+        "number": 9
+      }
+    ],
+    "rune_codes": "Shael+Io+Ort",
+    "properties": [
+      "+20% 打击恢复",
+      "+75-100% 防御强化",
+      "+10 体能",
+      "生命上限提高 5%",
+      "闪电抗性+40-60%",
+      "闪电吸收+10-15%",
+      "天梯限定"
+    ],
+    "ladder_only": true
+  },
+  {
+    "id": 26,
+    "name": "火炉",
+    "name_en": "Hearth",
+    "required_level": 35,
+    "base_types": [
+      "头盔"
+    ],
+    "runes": [
+      {
+        "code": "Shael",
+        "name": "夏尔",
+        "number": 13
+      },
+      {
+        "code": "Io",
+        "name": "破",
+        "number": 16
+      },
+      {
+        "code": "Thul",
+        "name": "书尔",
+        "number": 10
+      }
+    ],
+    "rune_codes": "Shael+Io+Thul",
+    "properties": [
+      "+20% 打击恢复",
+      "+75-100% 防御强化",
+      "+10 体能",
+      "生命上限提高 5%",
+      "冰冷抗性+40-60%",
+      "冰冷吸收+10-15%",
+      "无法冻结",
+      "天梯限定"
+    ],
+    "ladder_only": true
+  },
+  {
+    "id": 27,
+    "name": "和缓",
+    "name_en": "Temper",
+    "required_level": 35,
+    "base_types": [
+      "头盔"
+    ],
+    "runes": [
+      {
+        "code": "Shael",
+        "name": "夏尔",
+        "number": 13
+      },
+      {
+        "code": "Io",
+        "name": "破",
+        "number": 16
+      },
+      {
+        "code": "Ral",
+        "name": "拉尔",
+        "number": 8
+      }
+    ],
+    "rune_codes": "Shael+Io+Ral",
+    "properties": [
+      "+20% 打击恢复",
+      "+75-100% 防御强化",
+      "+10 体能",
+      "生命上限提高 5%",
+      "火焰抗性+40-60%",
+      "火焰吸收+10-15%",
+      "天梯限定"
+    ],
+    "ladder_only": true
+  },
+  {
+    "id": 28,
+    "name": "苍白",
+    "name_en": "White",
+    "required_level": 35,
+    "base_types": [
+      "魔杖"
+    ],
+    "runes": [
+      {
+        "code": "Dol",
+        "name": "多尔",
+        "number": 14
+      },
+      {
+        "code": "Io",
+        "name": "破",
+        "number": 16
+      }
+    ],
+    "rune_codes": "Dol+Io",
+    "properties": [
+      "+25% 几率击中使怪物逃跑",
+      "+10 体能",
+      "+3 毒素与骸骨技能 （只限死灵法师）",
+      "+3 至骸骨护甲（只限死灵法师）",
+      "+2 至骨矛（只限死灵法师）",
+      "+4 至骷髅专精（只限死灵法师）",
+      "魔法伤害降低 4",
+      "+20% 施法速度",
+      "+13 法力"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 29,
+    "name": "记忆",
+    "name_en": "Memory",
+    "required_level": 37,
+    "base_types": [
+      "法杖"
+    ],
+    "runes": [
+      {
+        "code": "Lum",
+        "name": "卢姆",
+        "number": 17
+      },
+      {
+        "code": "Io",
+        "name": "破",
+        "number": 16
+      },
+      {
+        "code": "Sol",
+        "name": "索尔",
+        "number": 12
+      },
+      {
+        "code": "Eth",
+        "name": "爱斯",
+        "number": 5
+      }
+    ],
+    "rune_codes": "Lum+Io+Sol+Eth",
+    "properties": [
+      "+3 法师技能等级",
+      "+33% 施法速度",
+      "法力上限提高 20%",
+      "+3 至能量护盾（只限法师）",
+      "+2 至静电力场（只限法师）",
+      "+10 能量",
+      "+10 体能",
+      "+9 最小伤害",
+      "-25% 目标防御",
+      "魔法伤害降低 7",
+      "+50% 防御强化"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 30,
+    "name": "烟雾",
+    "name_en": "Smoke",
+    "required_level": 37,
+    "base_types": [
+      "护甲"
+    ],
+    "runes": [
+      {
+        "code": "Nef",
+        "name": "那夫",
+        "number": 4
+      },
+      {
+        "code": "Lum",
+        "name": "卢姆",
+        "number": 17
+      }
+    ],
+    "rune_codes": "Nef+Lum",
+    "properties": [
+      "+75% 防御强化",
+      "+280 对远程防御",
+      "所有抗性 +50",
+      "+20% 打击恢复",
+      "等级 6 削弱（18 次）",
+      "+10 能量",
+      "照亮范围 -1"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 31,
+    "name": "灿烂",
+    "name_en": "Splendor",
+    "required_level": 37,
+    "base_types": [
+      "盾牌"
+    ],
+    "runes": [
+      {
+        "code": "Eth",
+        "name": "爱斯",
+        "number": 5
+      },
+      {
+        "code": "Lum",
+        "name": "卢姆",
+        "number": 17
+      }
+    ],
+    "rune_codes": "Eth+Lum",
+    "properties": [
+      "+1 所有技能",
+      "+10% 施法速度",
+      "+20% 格挡速度",
+      "+60-100% 防御强化",
+      "+10 能量",
+      "法力恢复 15%",
+      "怪物金币掉落量提高 50%",
+      "寻获魔法物品几率提高 20%",
+      "照亮范围 +3"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 32,
+    "name": "和谐",
+    "name_en": "Harmony",
+    "required_level": 39,
+    "base_types": [
+      "弓或弩"
+    ],
+    "runes": [
+      {
+        "code": "Tir",
+        "name": "特尔",
+        "number": 3
+      },
+      {
+        "code": "Ith",
+        "name": "伊司",
+        "number": 6
+      },
+      {
+        "code": "Sol",
+        "name": "索尔",
+        "number": 12
+      },
+      {
+        "code": "Ko",
+        "name": "科",
+        "number": 18
+      }
+    ],
+    "rune_codes": "Tir+Ith+Sol+Ko",
+    "properties": [
+      "装备时赋予等级 10 活力灵气",
+      "+200-275% 伤害强化",
+      "+9 最小伤害",
+      "+9 最大伤害",
+      "附加 55 - 160 闪电伤害",
+      "附加 55 - 160 火焰伤害",
+      "附加 55 - 160 冰冷伤害",
+      "+2-6 至女武神",
+      "+10 敏捷",
+      "法力恢复 20%",
+      "+2 击杀法力恢复",
+      "照亮范围 +2",
+      "等级 20 重生（25 次）"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 33,
+    "name": "歇斯底里",
+    "name_en": "Hysteria",
+    "required_level": 39,
+    "base_types": [
+      "武器",
+      "护甲"
+    ],
+    "runes": [
+      {
+        "code": "Shael",
+        "name": "夏尔",
+        "number": 13
+      },
+      {
+        "code": "Ko",
+        "name": "科",
+        "number": 18
+      },
+      {
+        "code": "Eld",
+        "name": "艾德",
+        "number": 2
+      }
+    ],
+    "rune_codes": "Shael+Ko+Eld",
+    "properties": [
+      "护甲：",
+      "+65% 跑步 / 行走速度",
+      "攻击速度 +40%",
+      "+20% 打击恢复",
+      "+6 至闪避",
+      "精力消耗减缓 50%",
+      "所有抗性 +10",
+      "武器：",
+      "击中时有 5% 几率施展等级 1 速度爆发",
+      "装备时赋予等级 1 狂热灵气",
+      "攻击速度 +30%",
+      "+180-200% 伤害强化",
+      "+75% 对不死怪物的伤害",
+      "+50 对不死怪物的准确率",
+      "共通：",
+      "+10 敏捷",
+      "天梯限定"
+    ],
+    "ladder_only": true
+  },
+  {
+    "id": 34,
+    "name": "旋律",
+    "name_en": "Melody",
+    "required_level": 39,
+    "base_types": [
+      "弓或弩"
+    ],
+    "runes": [
+      {
+        "code": "Shael",
+        "name": "夏尔",
+        "number": 13
+      },
+      {
+        "code": "Ko",
+        "name": "科",
+        "number": 18
+      },
+      {
+        "code": "Nef",
+        "name": "那夫",
+        "number": 4
+      }
+    ],
+    "rune_codes": "Shael+Ko+Nef",
+    "properties": [
+      "+50% 伤害强化",
+      "+300% 对不死怪物的伤害",
+      "+3 弓与弩技能 （只限亚马逊）",
+      "+3 至致命攻势（只限亚马逊）",
+      "+3 至闪躲（只限亚马逊）",
+      "+3 至缓箭术（只限亚马逊）",
+      "攻击速度 +20%",
+      "+10 敏捷",
+      "击退"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 35,
+    "name": "狮子心",
+    "name_en": "Lionheart",
+    "required_level": 41,
+    "base_types": [
+      "护甲"
+    ],
+    "runes": [
+      {
+        "code": "Hel",
+        "name": "海尔",
+        "number": 15
+      },
+      {
+        "code": "Lum",
+        "name": "卢姆",
+        "number": 17
+      },
+      {
+        "code": "Fal",
+        "name": "法尔",
+        "number": 19
+      }
+    ],
+    "rune_codes": "Hel+Lum+Fal",
+    "properties": [
+      "+20% 伤害强化",
+      "需求 -15%",
+      "+25 力量",
+      "+10 能量",
+      "+20 体能",
+      "+15 敏捷",
+      "+50 生命",
+      "所有抗性 +30"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 36,
+    "name": "遵从",
+    "name_en": "Obedience",
+    "required_level": 41,
+    "base_types": [
+      "长柄武器",
+      "长矛"
+    ],
+    "runes": [
+      {
+        "code": "Hel",
+        "name": "海尔",
+        "number": 15
+      },
+      {
+        "code": "Ko",
+        "name": "科",
+        "number": 18
+      },
+      {
+        "code": "Thul",
+        "name": "书尔",
+        "number": 10
+      },
+      {
+        "code": "Eth",
+        "name": "爱斯",
+        "number": 5
+      },
+      {
+        "code": "Fal",
+        "name": "法尔",
+        "number": 19
+      }
+    ],
+    "rune_codes": "Hel+Ko+Thul+Eth+Fal",
+    "properties": [
+      "当你杀敌时有 30% 几率施展等级 21 附魔",
+      "+40% 打击恢复",
+      "+210% 伤害强化",
+      "-25% 目标防御",
+      "附加 3 - 14 冰冷伤害",
+      "敌人火焰抗性 -25%",
+      "+40% 几率造成粉碎打击",
+      "+200-300 防御",
+      "+10 力量",
+      "+10 敏捷",
+      "所有抗性+20-30",
+      "需求 -20%"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 37,
+    "name": "不屈意志",
+    "name_en": "Unbending Will",
+    "required_level": 41,
+    "base_types": [
+      "刀剑"
+    ],
+    "runes": [
+      {
+        "code": "Fal",
+        "name": "法尔",
+        "number": 19
+      },
+      {
+        "code": "Io",
+        "name": "破",
+        "number": 16
+      },
+      {
+        "code": "Ith",
+        "name": "伊司",
+        "number": 6
+      },
+      {
+        "code": "Eld",
+        "name": "艾德",
+        "number": 2
+      },
+      {
+        "code": "El",
+        "name": "艾尔",
+        "number": 1
+      },
+      {
+        "code": "Hel",
+        "name": "海尔",
+        "number": 15
+      }
+    ],
+    "rune_codes": "Fal+Io+Ith+Eld+El+Hel",
+    "properties": [
+      "击中时有 18% 几率施展等级 18 嘲讽",
+      "+3 战斗技能 （只限野蛮人）",
+      "攻击速度+20-30%",
+      "+300-350% 伤害强化",
+      "+9 最大伤害",
+      "+50 准确率",
+      "+75% 对不死怪物的伤害",
+      "+50 对不死怪物的准确率",
+      "击中窃取8-10% 生命",
+      "防止怪物自疗",
+      "+10 力量",
+      "+10 体能",
+      "伤害降低 8",
+      "照亮范围 +1",
+      "需求 -20%"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 38,
+    "name": "执法者",
+    "name_en": "Lawbringer",
+    "required_level": 43,
+    "base_types": [
+      "刀剑",
+      "重槌",
+      "权杖"
+    ],
+    "runes": [
+      {
+        "code": "Amn",
+        "name": "安姆",
+        "number": 11
+      },
+      {
+        "code": "Lem",
+        "name": "蓝姆",
+        "number": 20
+      },
+      {
+        "code": "Ko",
+        "name": "科",
+        "number": 18
+      }
+    ],
+    "rune_codes": "Amn+Lem+Ko",
+    "properties": [
+      "击中时有 20% 几率施展等级 15 衰老",
+      "装备时赋予等级16-18 庇护灵气",
+      "-50% 目标防御",
+      "附加 150 - 220 火焰伤害",
+      "附加 130 - 180 冰冷伤害",
+      "击中窃取 7% 生命",
+      "杀死的怪物就此安息",
+      "+200-250 对远程防御",
+      "+10 敏捷",
+      "怪物金币掉落量提高 75%"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 39,
+    "name": "热情",
+    "name_en": "Passion",
+    "required_level": 43,
+    "base_types": [
+      "武器"
+    ],
+    "runes": [
+      {
+        "code": "Dol",
+        "name": "多尔",
+        "number": 14
+      },
+      {
+        "code": "Ort",
+        "name": "欧特",
+        "number": 9
+      },
+      {
+        "code": "Eld",
+        "name": "艾德",
+        "number": 2
+      },
+      {
+        "code": "Lem",
+        "name": "蓝姆",
+        "number": 20
+      }
+    ],
+    "rune_codes": "Dol+Ort+Eld+Lem",
+    "properties": [
+      "攻击速度 +25%",
+      "+160-220% 伤害强化",
+      "50-75% 准确率加成",
+      "+75% 对不死怪物的伤害",
+      "+50 对不死怪物的准确率",
+      "附加 1 - 50 闪电伤害",
+      "+1 至狂暴之击",
+      "+1 至热忱打击",
+      "击中使目标目盲 +10",
+      "+25% 几率击中使怪物逃跑",
+      "怪物金币掉落量提高 75%",
+      "等级 3 狼獾之心（12 次）"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 40,
+    "name": "背信",
+    "name_en": "Treachery",
+    "required_level": 43,
+    "base_types": [
+      "护甲"
+    ],
+    "runes": [
+      {
+        "code": "Shael",
+        "name": "夏尔",
+        "number": 13
+      },
+      {
+        "code": "Thul",
+        "name": "书尔",
+        "number": 10
+      },
+      {
+        "code": "Lem",
+        "name": "蓝姆",
+        "number": 20
+      }
+    ],
+    "rune_codes": "Shael+Thul+Lem",
+    "properties": [
+      "被击中时有 5% 几率施展等级 15 影散",
+      "击中时有 25% 几率施展等级 15 淬毒",
+      "+2 刺客技能等级",
+      "攻击速度 +45%",
+      "+20% 打击恢复",
+      "冰冷抗性 +30%",
+      "怪物金币掉落量提高 50%"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 41,
+    "name": "理性之声",
+    "name_en": "Voice of Reason",
+    "required_level": 43,
+    "base_types": [
+      "刀剑",
+      "钉锤"
+    ],
+    "runes": [
+      {
+        "code": "Lem",
+        "name": "蓝姆",
+        "number": 20
+      },
+      {
+        "code": "Ko",
+        "name": "科",
+        "number": 18
+      },
+      {
+        "code": "El",
+        "name": "艾尔",
+        "number": 1
+      },
+      {
+        "code": "Eld",
+        "name": "艾德",
+        "number": 2
+      }
+    ],
+    "rune_codes": "Lem+Ko+El+Eld",
+    "properties": [
+      "击中时有 15% 几率施展等级 13 冰封球",
+      "击中时有 18% 几率施展等级 20 寒冰球",
+      "+50 准确率",
+      "+220-350% 对恶魔的伤害",
+      "+200-300% 对不死怪物的伤害",
+      "+50 对不死怪物的准确率",
+      "附加 100 - 220 冰冷伤害",
+      "敌人冰冷抗性 -24%",
+      "+10 敏捷",
+      "无法冻结",
+      "怪物金币掉落量提高 75%",
+      "照亮范围 +1"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 42,
+    "name": "财富",
+    "name_en": "Wealth",
+    "required_level": 43,
+    "base_types": [
+      "护甲"
+    ],
+    "runes": [
+      {
+        "code": "Lem",
+        "name": "蓝姆",
+        "number": 20
+      },
+      {
+        "code": "Ko",
+        "name": "科",
+        "number": 18
+      },
+      {
+        "code": "Tir",
+        "name": "特尔",
+        "number": 3
+      }
+    ],
+    "rune_codes": "Lem+Ko+Tir",
+    "properties": [
+      "怪物金币掉落量提高 300%",
+      "寻获魔法物品几率提高 100%",
+      "+2 击杀法力恢复",
+      "+10 敏捷"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 43,
+    "name": "教化",
+    "name_en": "Enlightenment",
+    "required_level": 45,
+    "base_types": [
+      "护甲"
+    ],
+    "runes": [
+      {
+        "code": "Pul",
+        "name": "普尔",
+        "number": 21
+      },
+      {
+        "code": "Ral",
+        "name": "拉尔",
+        "number": 8
+      },
+      {
+        "code": "Sol",
+        "name": "索尔",
+        "number": 12
+      }
+    ],
+    "rune_codes": "Pul+Ral+Sol",
+    "properties": [
+      "被击中时有 5% 几率施展等级 15 炽烈之径",
+      "击中时有 5% 几率施展等级 15 火球术",
+      "+2 法师技能等级",
+      "+1 至暖流",
+      "+30% 防御强化",
+      "火焰抗性 +30%",
+      "伤害降低 7"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 44,
+    "name": "智慧",
+    "name_en": "Wisdom",
+    "required_level": 45,
+    "base_types": [
+      "头盔"
+    ],
+    "runes": [
+      {
+        "code": "Pul",
+        "name": "普尔",
+        "number": 21
+      },
+      {
+        "code": "Ith",
+        "name": "伊司",
+        "number": 6
+      },
+      {
+        "code": "Eld",
+        "name": "艾德",
+        "number": 2
+      }
+    ],
+    "rune_codes": "Pul+Ith+Eld",
+    "properties": [
+      "+33% 穿透攻击",
+      "15-25% 准确率加成",
+      "击中窃取4-8% 法力",
+      "+30% 防御强化",
+      "+10 能量",
+      "精力消耗减缓 15%",
+      "无法冻结",
+      "+5 击杀法力恢复",
+      "+15% 受到的伤害转为法力"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 45,
+    "name": "骸骨",
+    "name_en": "Bone",
+    "required_level": 47,
+    "base_types": [
+      "护甲"
+    ],
+    "runes": [
+      {
+        "code": "Sol",
+        "name": "索尔",
+        "number": 12
+      },
+      {
+        "code": "Um",
+        "name": "乌姆",
+        "number": 22
+      },
+      {
+        "code": "Um",
+        "name": "乌姆",
+        "number": 22
+      }
+    ],
+    "rune_codes": "Sol+Um+Um",
+    "properties": [
+      "被击中时有 15% 几率施展等级 10 骸骨护甲",
+      "击中时有 15% 几率施展等级 10 骨矛",
+      "+2 死灵法师技能等级",
+      "+100-150 法力",
+      "所有抗性 +30",
+      "伤害降低 7"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 46,
+    "name": "新月",
+    "name_en": "Crescent Moon",
+    "required_level": 47,
+    "base_types": [
+      "斧",
+      "刀剑",
+      "长柄武器"
+    ],
+    "runes": [
+      {
+        "code": "Shael",
+        "name": "夏尔",
+        "number": 13
+      },
+      {
+        "code": "Um",
+        "name": "乌姆",
+        "number": 22
+      },
+      {
+        "code": "Tir",
+        "name": "特尔",
+        "number": 3
+      }
+    ],
+    "rune_codes": "Shael+Um+Tir",
+    "properties": [
+      "击中时有 10% 几率施展等级 17 连锁闪电",
+      "击中时有 7% 几率施展等级 13 静电力场",
+      "攻击速度 +20%",
+      "+180-220% 伤害强化",
+      "无视目标防御",
+      "敌人闪电抗性 -35%",
+      "+25% 几率造成开放伤口",
+      "+9-11 魔法吸收",
+      "+2 击杀法力恢复",
+      "等级 18 召唤幽灵狼（30 次）"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 47,
+    "name": "强制",
+    "name_en": "Duress",
+    "required_level": 47,
+    "base_types": [
+      "护甲"
+    ],
+    "runes": [
+      {
+        "code": "Shael",
+        "name": "夏尔",
+        "number": 13
+      },
+      {
+        "code": "Um",
+        "name": "乌姆",
+        "number": 22
+      },
+      {
+        "code": "Thul",
+        "name": "书尔",
+        "number": 10
+      }
+    ],
+    "rune_codes": "Shael+Um+Thul",
+    "properties": [
+      "+40% 打击恢复",
+      "+10-20% 伤害强化",
+      "附加 37 - 133 冰冷伤害",
+      "+15% 几率造成粉碎打击",
+      "+33% 几率造成开放伤口",
+      "+150-200% 防御强化",
+      "精力消耗减缓 -20%",
+      "冰冷抗性 +45%",
+      "闪电抗性 +15%",
+      "火焰抗性 +15%",
+      "毒素抗性 +15%"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 48,
+    "name": "幽暗",
+    "name_en": "Gloom",
+    "required_level": 47,
+    "base_types": [
+      "护甲"
+    ],
+    "runes": [
+      {
+        "code": "Fal",
+        "name": "法尔",
+        "number": 19
+      },
+      {
+        "code": "Um",
+        "name": "乌姆",
+        "number": 22
+      },
+      {
+        "code": "Pul",
+        "name": "普尔",
+        "number": 21
+      }
+    ],
+    "rune_codes": "Fal+Um+Pul",
+    "properties": [
+      "被击中时有 15% 几率施展等级 3 昏暗视野",
+      "+10% 打击恢复",
+      "+200-260% 防御强化",
+      "+10 力量",
+      "所有抗性 +45",
+      "被冻结的时效减半",
+      "+5% 受到的伤害转为法力",
+      "照亮范围 -3"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 49,
+    "name": "石块",
+    "name_en": "Stone",
+    "required_level": 47,
+    "base_types": [
+      "护甲"
+    ],
+    "runes": [
+      {
+        "code": "Shael",
+        "name": "夏尔",
+        "number": 13
+      },
+      {
+        "code": "Um",
+        "name": "乌姆",
+        "number": 22
+      },
+      {
+        "code": "Pul",
+        "name": "普尔",
+        "number": 21
+      },
+      {
+        "code": "Lum",
+        "name": "卢姆",
+        "number": 17
+      }
+    ],
+    "rune_codes": "Shael+Um+Pul+Lum",
+    "properties": [
+      "+60% 打击恢复",
+      "+250-290% 防御强化",
+      "+300 对远程防御",
+      "+16 力量",
+      "+16 体能",
+      "+10 能量",
+      "所有抗性 +15",
+      "等级 16 熔火巨石（75 次）",
+      "等级 16 黏土魔像（16 次）"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 50,
+    "name": "誓约",
+    "name_en": "Oath",
+    "required_level": 49,
+    "base_types": [
+      "刀剑",
+      "斧",
+      "钉锤"
+    ],
+    "runes": [
+      {
+        "code": "Shael",
+        "name": "夏尔",
+        "number": 13
+      },
+      {
+        "code": "Pul",
+        "name": "普尔",
+        "number": 21
+      },
+      {
+        "code": "Mal",
+        "name": "马尔",
+        "number": 23
+      },
+      {
+        "code": "Lum",
+        "name": "卢姆",
+        "number": 17
+      }
+    ],
+    "rune_codes": "Shael+Pul+Mal+Lum",
+    "properties": [
+      "击中时有 30% 几率施展等级 20 骸骨之魂",
+      "永不毁损",
+      "攻击速度 +50%",
+      "+220-340% 伤害强化",
+      "+75% 对恶魔的伤害",
+      "+100 对恶魔的准确率",
+      "防止怪物自疗",
+      "+10 能量",
+      "+10-15 魔法吸收",
+      "等级 16 狼獾之心（20 次）",
+      "等级 17 钢铁魔像（14 次）"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 51,
+    "name": "谨慎",
+    "name_en": "Prudence",
+    "required_level": 49,
+    "base_types": [
+      "护甲"
+    ],
+    "runes": [
+      {
+        "code": "Mal",
+        "name": "马尔",
+        "number": 23
+      },
+      {
+        "code": "Tir",
+        "name": "特尔",
+        "number": 3
+      }
+    ],
+    "rune_codes": "Mal+Tir",
+    "properties": [
+      "+25% 打击恢复",
+      "+140-170% 防御强化",
+      "所有抗性+25-35",
+      "伤害降低 3",
+      "魔法伤害降低 17",
+      "+2 击杀法力恢复",
+      "照亮范围 +1",
+      "每 4 秒修复 1 点耐久度"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 52,
+    "name": "降雨",
+    "name_en": "Rain",
+    "required_level": 49,
+    "base_types": [
+      "护甲"
+    ],
+    "runes": [
+      {
+        "code": "Ort",
+        "name": "欧特",
+        "number": 9
+      },
+      {
+        "code": "Mal",
+        "name": "马尔",
+        "number": 23
+      },
+      {
+        "code": "Ith",
+        "name": "伊司",
+        "number": 6
+      }
+    ],
+    "rune_codes": "Ort+Mal+Ith",
+    "properties": [
+      "被击中时有 5% 几率施展等级 15 气旋护甲",
+      "击中时有 5% 几率施展等级 15 旋风术",
+      "+2 德鲁伊技能等级",
+      "+100-150 法力",
+      "闪电抗性 +30%",
+      "魔法伤害降低 7",
+      "+15% 受到的伤害转为法力"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 53,
+    "name": "圣堂",
+    "name_en": "Sanctuary",
+    "required_level": 49,
+    "base_types": [
+      "盾牌"
+    ],
+    "runes": [
+      {
+        "code": "Ko",
+        "name": "科",
+        "number": 18
+      },
+      {
+        "code": "Ko",
+        "name": "科",
+        "number": 18
+      },
+      {
+        "code": "Mal",
+        "name": "马尔",
+        "number": 23
+      }
+    ],
+    "rune_codes": "Ko+Ko+Mal",
+    "properties": [
+      "+20% 打击恢复",
+      "+20% 格挡速度",
+      "格挡几率提高 20%",
+      "+130-160% 防御强化",
+      "+250 对远程防御",
+      "+20 敏捷",
+      "所有抗性+50-70",
+      "魔法伤害降低 7",
+      "等级 12 缓箭术（60 次）"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 54,
+    "name": "剧毒",
+    "name_en": "Venom",
+    "required_level": 49,
+    "base_types": [
+      "武器"
+    ],
+    "runes": [
+      {
+        "code": "Tal",
+        "name": "塔尔",
+        "number": 7
+      },
+      {
+        "code": "Dol",
+        "name": "多尔",
+        "number": 14
+      },
+      {
+        "code": "Mal",
+        "name": "马尔",
+        "number": 23
+      }
+    ],
+    "rune_codes": "Tal+Dol+Mal",
+    "properties": [
+      "+25% 几率击中使怪物逃跑",
+      "防止怪物自疗",
+      "无视目标防御",
+      "击中窃取 7% 法力",
+      "等级 15 毒爆（27 次）",
+      "等级 13 剧毒新星（11 次）",
+      "+273 毒素伤害，时效 6 秒"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 55,
+    "name": "巫师会",
+    "name_en": "Coven",
+    "required_level": 51,
+    "base_types": [
+      "头盔"
+    ],
+    "runes": [
+      {
+        "code": "Ist",
+        "name": "伊斯特",
+        "number": 24
+      },
+      {
+        "code": "Ral",
+        "name": "拉尔",
+        "number": 8
+      },
+      {
+        "code": "Io",
+        "name": "破",
+        "number": 16
+      }
+    ],
+    "rune_codes": "Ist+Ral+Io",
+    "properties": [
+      "被击中时有 5% 几率施展等级 10 咒印：昏沉",
+      "+1 所有技能",
+      "+20% 施法速度",
+      "+30-50% 防御强化",
+      "+1-5 击杀生命恢复",
+      "寻获魔法物品几率提高25-40%",
+      "火焰抗性 +30%",
+      "+10 体能"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 56,
+    "name": "精神错乱",
+    "name_en": "Delirium",
+    "required_level": 51,
+    "base_types": [
+      "头盔"
+    ],
+    "runes": [
+      {
+        "code": "Lem",
+        "name": "蓝姆",
+        "number": 20
+      },
+      {
+        "code": "Ist",
+        "name": "伊斯特",
+        "number": 24
+      },
+      {
+        "code": "Io",
+        "name": "破",
+        "number": 16
+      }
+    ],
+    "rune_codes": "Lem+Ist+Io",
+    "properties": [
+      "被击中时有 1% 几率施展等级 50 精神错乱",
+      "被击中时有 6% 几率施展等级 14 心灵震爆",
+      "被击中时有 14% 几率施展等级 13 恐惧",
+      "击中时有 11% 几率施展等级 18 混乱",
+      "+2 所有技能",
+      "+261 防御",
+      "+10 体能",
+      "怪物金币掉落量提高 50%",
+      "寻获魔法物品几率提高 25%",
+      "等级 17 致命吸引（60 次）"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 57,
+    "name": "弑王者",
+    "name_en": "Kingslayer",
+    "required_level": 53,
+    "base_types": [
+      "刀剑",
+      "斧"
+    ],
+    "runes": [
+      {
+        "code": "Mal",
+        "name": "马尔",
+        "number": 23
+      },
+      {
+        "code": "Um",
+        "name": "乌姆",
+        "number": 22
+      },
+      {
+        "code": "Gul",
+        "name": "古尔",
+        "number": 25
+      },
+      {
+        "code": "Fal",
+        "name": "法尔",
+        "number": 19
+      }
+    ],
+    "rune_codes": "Mal+Um+Gul+Fal",
+    "properties": [
+      "攻击速度 +30%",
+      "+230-270% 伤害强化",
+      "-25% 目标防御",
+      "20% 准确率加成",
+      "+33% 几率造成粉碎打击",
+      "+50% 几率造成开放伤口",
+      "+1 至复仇打击",
+      "防止怪物自疗",
+      "+10 力量",
+      "怪物金币掉落量提高 40%"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 58,
+    "name": "嵌饰",
+    "name_en": "Mosaic",
+    "required_level": 53,
+    "base_types": [
+      "爪或拳刃"
+    ],
+    "runes": [
+      {
+        "code": "Mal",
+        "name": "马尔",
+        "number": 23
+      },
+      {
+        "code": "Gul",
+        "name": "古尔",
+        "number": 25
+      },
+      {
+        "code": "Amn",
+        "name": "安姆",
+        "number": 11
+      }
+    ],
+    "rune_codes": "Mal+Gul+Amn",
+    "properties": [
+      "+50% 几率使终结技不消耗集气的力量",
+      "+2 武学技艺 （只限刺客）",
+      "攻击速度 +20%",
+      "+200-250% 伤害强化",
+      "20% 准确率加成",
+      "击中窃取 7% 生命",
+      "+8-15% 冰冷技能伤害",
+      "+8-15% 闪电技能伤害",
+      "+8-15% 火焰技能伤害",
+      "防止怪物自疗",
+      "\"非\"天梯限定"
+    ],
+    "ladder_only": true
+  },
+  {
+    "id": 59,
+    "name": "原则",
+    "name_en": "Principle",
+    "required_level": 53,
+    "base_types": [
+      "护甲"
+    ],
+    "runes": [
+      {
+        "code": "Ral",
+        "name": "拉尔",
+        "number": 8
+      },
+      {
+        "code": "Gul",
+        "name": "古尔",
+        "number": 25
+      },
+      {
+        "code": "Eld",
+        "name": "艾德",
+        "number": 2
+      }
+    ],
+    "rune_codes": "Ral+Gul+Eld",
+    "properties": [
+      "击中时有 100% 几率施展等级 5 圣光弹",
+      "+2 圣骑士技能等级",
+      "+50% 对不死怪物的伤害",
+      "+100-150 生命",
+      "精力消耗减缓 15%",
+      "毒素抗性上限 +5%",
+      "火焰抗性 +30%"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 60,
+    "name": "裂隙",
+    "name_en": "Rift",
+    "required_level": 53,
+    "base_types": [
+      "长柄武器",
+      "权杖"
+    ],
+    "runes": [
+      {
+        "code": "Hel",
+        "name": "海尔",
+        "number": 15
+      },
+      {
+        "code": "Ko",
+        "name": "科",
+        "number": 18
+      },
+      {
+        "code": "Lem",
+        "name": "蓝姆",
+        "number": 20
+      },
+      {
+        "code": "Gul",
+        "name": "古尔",
+        "number": 25
+      }
+    ],
+    "rune_codes": "Hel+Ko+Lem+Gul",
+    "properties": [
+      "击中时有 20% 几率施展等级 16 龙卷风",
+      "攻击时有 16% 几率施展等级 21 冰封球",
+      "20% 准确率加成",
+      "附加 160 - 250 魔法伤害",
+      "附加 60 - 180 火焰伤害",
+      "+5-10 所有属性",
+      "+10 敏捷",
+      "+21% 受到的伤害转为法力",
+      "怪物金币掉落量提高 75%",
+      "等级 15 攻击反噬（40 次）",
+      "需求 -20%"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 61,
+    "name": "戒慎",
+    "name_en": "Vigilance",
+    "required_level": 53,
+    "base_types": [
+      "盾牌"
+    ],
+    "runes": [
+      {
+        "code": "Dol",
+        "name": "多尔",
+        "number": 14
+      },
+      {
+        "code": "Gul",
+        "name": "古尔",
+        "number": 25
+      }
+    ],
+    "rune_codes": "Dol+Gul",
+    "properties": [
+      "被击中时有 5% 几率施展等级 10 火焰之环",
+      "+10% 跑步 / 行走速度",
+      "+30% 格挡速度",
+      "+75-100% 防御强化",
+      "+20-40 生命",
+      "+20-40 法力",
+      "所有抗性+25-35",
+      "生命回复 +7",
+      "毒素抗性上限 +5%"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 62,
+    "name": "死神",
+    "name_en": "Death",
+    "required_level": 55,
+    "base_types": [
+      "刀剑",
+      "斧"
+    ],
+    "runes": [
+      {
+        "code": "Hel",
+        "name": "海尔",
+        "number": 15
+      },
+      {
+        "code": "El",
+        "name": "艾尔",
+        "number": 1
+      },
+      {
+        "code": "Vex",
+        "name": "伐克斯",
+        "number": 26
+      },
+      {
+        "code": "Ort",
+        "name": "欧特",
+        "number": 9
+      },
+      {
+        "code": "Gul",
+        "name": "古尔",
+        "number": 25
+      }
+    ],
+    "rune_codes": "Hel+El+Vex+Ort+Gul",
+    "properties": [
+      "当你死亡时有 100% 几率施展等级 44 连锁闪电",
+      "攻击时有 25% 几率施展等级 18 冰川之枪",
+      "永不毁损",
+      "+300-385% 伤害强化",
+      "20% 准确率加成",
+      "+50 准确率",
+      "附加 1 - 50 闪电伤害",
+      "击中窃取 7% 法力",
+      "+50% 几率造成粉碎打击",
+      "+(0.5-49.5)% 致命打击 （依角色等级而定）",
+      "照亮范围 +1",
+      "等级 22 鲜血魔像（15 次）",
+      "需求 -20%"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 63,
+    "name": "闪烁火焰",
+    "name_en": "Flickering Flame",
+    "required_level": 55,
+    "base_types": [
+      "头盔"
+    ],
+    "runes": [
+      {
+        "code": "Nef",
+        "name": "那夫",
+        "number": 4
+      },
+      {
+        "code": "Pul",
+        "name": "普尔",
+        "number": 21
+      },
+      {
+        "code": "Vex",
+        "name": "伐克斯",
+        "number": 26
+      }
+    ],
+    "rune_codes": "Nef+Pul+Vex",
+    "properties": [
+      "装备时赋予等级4-8 抗火灵气",
+      "+3 火焰技能",
+      "敌人火焰抗性 -10-15%",
+      "+30% 防御强化",
+      "+30 对远程防御",
+      "+50-75 法力",
+      "被冻结的时效减半",
+      "火焰抗性上限 +5%",
+      "中毒的时效缩短 50%"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 64,
+    "name": "橡树之心",
+    "name_en": "Heart of the Oak",
+    "required_level": 55,
+    "base_types": [
+      "法杖",
+      "钉锤"
+    ],
+    "runes": [
+      {
+        "code": "Ko",
+        "name": "科",
+        "number": 18
+      },
+      {
+        "code": "Vex",
+        "name": "伐克斯",
+        "number": 26
+      },
+      {
+        "code": "Pul",
+        "name": "普尔",
+        "number": 21
+      },
+      {
+        "code": "Thul",
+        "name": "书尔",
+        "number": 10
+      }
+    ],
+    "rune_codes": "Ko+Vex+Pul+Thul",
+    "properties": [
+      "+3 所有技能",
+      "+40% 施法速度",
+      "+75% 对恶魔的伤害",
+      "+100 对恶魔的准确率",
+      "附加 3 - 14 冰冷伤害",
+      "击中窃取 7% 法力",
+      "+10 敏捷",
+      "生命回复 +20",
+      "法力上限提高 15%",
+      "所有抗性+30-40",
+      "等级 4 橡木智者（25 次）",
+      "等级 14 掠鸦（60 次）"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 65,
+    "name": "寂静",
+    "name_en": "Silence",
+    "required_level": 55,
+    "base_types": [
+      "武器"
+    ],
+    "runes": [
+      {
+        "code": "Dol",
+        "name": "多尔",
+        "number": 14
+      },
+      {
+        "code": "Eld",
+        "name": "艾德",
+        "number": 2
+      },
+      {
+        "code": "Hel",
+        "name": "海尔",
+        "number": 15
+      },
+      {
+        "code": "Ist",
+        "name": "伊斯特",
+        "number": 24
+      },
+      {
+        "code": "Tir",
+        "name": "特尔",
+        "number": 3
+      },
+      {
+        "code": "Vex",
+        "name": "伐克斯",
+        "number": 26
+      }
+    ],
+    "rune_codes": "Dol+Eld+Hel+Ist+Tir+Vex",
+    "properties": [
+      "+200% 伤害强化",
+      "+75% 对不死怪物的伤害",
+      "需求 -20%",
+      "攻击速度 +20%",
+      "+50 对不死怪物的准确率",
+      "+2 所有技能",
+      "所有抗性 +75",
+      "+20% 打击恢复",
+      "击中窃取 11% 法力",
+      "+25% 几率击中使怪物逃跑",
+      "击中使目标目盲 +33",
+      "+2 击杀法力恢复",
+      "寻获魔法物品几率提高 30%"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 66,
+    "name": "战争召唤",
+    "name_en": "Call to Arms",
+    "required_level": 57,
+    "base_types": [
+      "武器"
+    ],
+    "runes": [
+      {
+        "code": "Amn",
+        "name": "安姆",
+        "number": 11
+      },
+      {
+        "code": "Ral",
+        "name": "拉尔",
+        "number": 8
+      },
+      {
+        "code": "Mal",
+        "name": "马尔",
+        "number": 23
+      },
+      {
+        "code": "Ist",
+        "name": "伊斯特",
+        "number": 24
+      },
+      {
+        "code": "Ohm",
+        "name": "欧姆",
+        "number": 27
+      }
+    ],
+    "rune_codes": "Amn+Ral+Mal+Ist+Ohm",
+    "properties": [
+      "+1 所有技能",
+      "攻击速度 +40%",
+      "+250-290% 伤害强化",
+      "附加 5 - 30 火焰伤害",
+      "击中窃取 7% 生命",
+      "+2-6 至战斗指挥",
+      "+1-6 至战斗命令",
+      "+1-4 至战斗怒吼",
+      "防止怪物自疗",
+      "生命回复 +12",
+      "寻获魔法物品几率提高 30%"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 67,
+    "name": "混沌",
+    "name_en": "Chaos",
+    "required_level": 57,
+    "base_types": [
+      "爪或拳刃"
+    ],
+    "runes": [
+      {
+        "code": "Fal",
+        "name": "法尔",
+        "number": 19
+      },
+      {
+        "code": "Ohm",
+        "name": "欧姆",
+        "number": 27
+      },
+      {
+        "code": "Um",
+        "name": "乌姆",
+        "number": 22
+      }
+    ],
+    "rune_codes": "Fal+Ohm+Um",
+    "properties": [
+      "击中时有 9% 几率施展等级 11 冰封球",
+      "击中时有 11% 几率施展等级 9 电能弹",
+      "攻击速度 +35%",
+      "+290-340% 伤害强化",
+      "附加 216 - 471 魔法伤害",
+      "+25% 几率造成开放伤口",
+      "+1 至旋风斩",
+      "+10 力量",
+      "+15 击杀恶魔生命恢复"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 68,
+    "name": "流亡",
+    "name_en": "Exile",
+    "required_level": 57,
+    "base_types": [
+      "圣骑士盾牌"
+    ],
+    "runes": [
+      {
+        "code": "Vex",
+        "name": "伐克斯",
+        "number": 26
+      },
+      {
+        "code": "Ohm",
+        "name": "欧姆",
+        "number": 27
+      },
+      {
+        "code": "Ist",
+        "name": "伊斯特",
+        "number": 24
+      },
+      {
+        "code": "Dol",
+        "name": "多尔",
+        "number": 14
+      }
+    ],
+    "rune_codes": "Vex+Ohm+Ist+Dol",
+    "properties": [
+      "击中时有 15% 几率施展等级 5 偷取生命",
+      "装备时赋予等级13-16 反抗灵气",
+      "+2 攻击灵气 （只限圣骑士）",
+      "+30% 格挡速度",
+      "冻结目标",
+      "+220-260% 防御强化",
+      "生命回复 +7",
+      "冰冷抗性上限 +5%",
+      "火焰抗性上限 +5%",
+      "寻获魔法物品几率提高 25%",
+      "每 4 秒修复 1 点耐久度"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 69,
+    "name": "仪式",
+    "name_en": "Ritual",
+    "required_level": 57,
+    "base_types": [
+      "匕首"
+    ],
+    "runes": [
+      {
+        "code": "Amn",
+        "name": "安姆",
+        "number": 11
+      },
+      {
+        "code": "Shael",
+        "name": "夏尔",
+        "number": 13
+      },
+      {
+        "code": "Ohm",
+        "name": "欧姆",
+        "number": 27
+      }
+    ],
+    "rune_codes": "Amn+Shael+Ohm",
+    "properties": [
+      "被击中时有 13% 几率施展等级 1 咒印：死亡",
+      "攻击速度 +40%",
+      "+250-300% 伤害强化",
+      "200-260% 准确率加成",
+      "+150-250% 对恶魔的伤害",
+      "+3-5 击杀生命恢复",
+      "杀死的怪物就此安息",
+      "击中窃取 7% 生命"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 70,
+    "name": "刚毅",
+    "name_en": "Fortitude",
+    "required_level": 59,
+    "base_types": [
+      "武器",
+      "护甲"
+    ],
+    "runes": [
+      {
+        "code": "El",
+        "name": "艾尔",
+        "number": 1
+      },
+      {
+        "code": "Sol",
+        "name": "索尔",
+        "number": 12
+      },
+      {
+        "code": "Dol",
+        "name": "多尔",
+        "number": 14
+      },
+      {
+        "code": "Lo",
+        "name": "罗",
+        "number": 28
+      }
+    ],
+    "rune_codes": "El+Sol+Dol+Lo",
+    "properties": [
+      "护甲：",
+      "伤害降低 7",
+      "+15 防御",
+      "生命回复 +7",
+      "闪电抗性上限 +5%",
+      "武器：",
+      "+9 最小伤害",
+      "+50 准确率",
+      "+25% 几率击中使怪物逃跑",
+      "+20% 致命打击",
+      "共通：",
+      "+200% 防御强化",
+      "所有抗性+25-30",
+      "+300% 伤害强化",
+      "+(1-1.5)生命 （依角色等级而定）",
+      "被击中时有 20% 几率施展等级 15 寒冰甲",
+      "+25% 施法速度",
+      "照亮范围 +1",
+      "+12% 受到的伤害转为法力"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 71,
+    "name": "悔恨",
+    "name_en": "Grief",
+    "required_level": 59,
+    "base_types": [
+      "刀剑",
+      "斧"
+    ],
+    "runes": [
+      {
+        "code": "Eth",
+        "name": "爱斯",
+        "number": 5
+      },
+      {
+        "code": "Tir",
+        "name": "特尔",
+        "number": 3
+      },
+      {
+        "code": "Lo",
+        "name": "罗",
+        "number": 28
+      },
+      {
+        "code": "Mal",
+        "name": "马尔",
+        "number": 23
+      },
+      {
+        "code": "Ral",
+        "name": "拉尔",
+        "number": 8
+      }
+    ],
+    "rune_codes": "Eth+Tir+Lo+Mal+Ral",
+    "properties": [
+      "击中时有 35% 几率施展等级 15 淬毒",
+      "攻击速度+30-40%",
+      "伤害+340-400",
+      "无视目标防御",
+      "-25% 目标防御",
+      "+(1.875-185.625)% 对恶魔的伤害 （依角色等级而定）",
+      "附加 5 - 30 火焰伤害",
+      "敌人毒素抗性 -20-25%",
+      "+20% 致命打击",
+      "防止怪物自疗",
+      "+2 击杀法力恢复",
+      "+10-15 击杀生命恢复"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 72,
+    "name": "刺藤",
+    "name_en": "Bramble",
+    "required_level": 61,
+    "base_types": [
+      "护甲"
+    ],
+    "runes": [
+      {
+        "code": "Ral",
+        "name": "拉尔",
+        "number": 8
+      },
+      {
+        "code": "Ohm",
+        "name": "欧姆",
+        "number": 27
+      },
+      {
+        "code": "Sur",
+        "name": "苏尔",
+        "number": 29
+      },
+      {
+        "code": "Eth",
+        "name": "爱斯",
+        "number": 5
+      }
+    ],
+    "rune_codes": "Ral+Ohm+Sur+Eth",
+    "properties": [
+      "装备时赋予等级15-21 荆棘灵气",
+      "+50% 打击恢复",
+      "+25-50% 毒素技能伤害",
+      "+300 防御",
+      "法力上限提高 5%",
+      "法力恢复 15%",
+      "冰冷抗性上限 +5%",
+      "火焰抗性 +30%",
+      "毒素抗性 +100%",
+      "+13 击杀生命恢复",
+      "等级 13 荆棘之灵（33 次）"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 73,
+    "name": "飞龙",
+    "name_en": "Dragon",
+    "required_level": 61,
+    "base_types": [
+      "护甲",
+      "盾牌"
+    ],
+    "runes": [
+      {
+        "code": "Sur",
+        "name": "苏尔",
+        "number": 29
+      },
+      {
+        "code": "Lo",
+        "name": "罗",
+        "number": 28
+      },
+      {
+        "code": "Sol",
+        "name": "索尔",
+        "number": 12
+      }
+    ],
+    "rune_codes": "Sur+Lo+Sol",
+    "properties": [
+      "被击中时有 20% 几率施展等级 18 淬毒",
+      "击中时有 12% 几率施展等级 15 多头蛇",
+      "装备时赋予等级 14 神圣火焰灵气",
+      "+360 防御",
+      "+230 对远程防御",
+      "+3-5 所有属性",
+      "+(0.375-37.125) 力量 （依角色等级而定）",
+      "法力上限提高 5% （只限护甲）",
+      "+50 法力 （只限盾牌）",
+      "闪电抗性上限 +5%",
+      "伤害降低 7"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 74,
+    "name": "轻风",
+    "name_en": "Wind",
+    "required_level": 61,
+    "base_types": [
+      "近战武器"
+    ],
+    "runes": [
+      {
+        "code": "Sur",
+        "name": "苏尔",
+        "number": 29
+      },
+      {
+        "code": "El",
+        "name": "艾尔",
+        "number": 1
+      }
+    ],
+    "rune_codes": "Sur+El",
+    "properties": [
+      "击中时有 10% 几率施展等级 9 龙卷风",
+      "+20% 跑步 / 行走速度",
+      "攻击速度 +40%",
+      "+15% 打击恢复",
+      "+120-160% 伤害强化",
+      "-50% 目标防御",
+      "+50 准确率",
+      "击中使目标目盲",
+      "照亮范围 +1",
+      "等级 13 旋风术（47 次）"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 75,
+    "name": "野兽",
+    "name_en": "Beast",
+    "required_level": 63,
+    "base_types": [
+      "斧",
+      "权杖",
+      "重槌"
+    ],
+    "runes": [
+      {
+        "code": "Ber",
+        "name": "贝",
+        "number": 30
+      },
+      {
+        "code": "Tir",
+        "name": "特尔",
+        "number": 3
+      },
+      {
+        "code": "Um",
+        "name": "乌姆",
+        "number": 22
+      },
+      {
+        "code": "Mal",
+        "name": "马尔",
+        "number": 23
+      },
+      {
+        "code": "Lum",
+        "name": "卢姆",
+        "number": 17
+      }
+    ],
+    "rune_codes": "Ber+Tir+Um+Mal+Lum",
+    "properties": [
+      "装备时赋予等级 9 狂热灵气",
+      "攻击速度 +40%",
+      "+240-270% 伤害强化",
+      "+20% 几率造成粉碎打击",
+      "+25% 几率造成开放伤口",
+      "+3 至熊人变化",
+      "+3 至变形术",
+      "防止怪物自疗",
+      "+25-40 力量",
+      "+10 能量",
+      "+2 击杀法力恢复",
+      "等级 13 召唤灰熊（5 次）"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 76,
+    "name": "荣耀之炼",
+    "name_en": "Chains of Honor",
+    "required_level": 63,
+    "base_types": [
+      "护甲"
+    ],
+    "runes": [
+      {
+        "code": "Dol",
+        "name": "多尔",
+        "number": 14
+      },
+      {
+        "code": "Um",
+        "name": "乌姆",
+        "number": 22
+      },
+      {
+        "code": "Ber",
+        "name": "贝",
+        "number": 30
+      },
+      {
+        "code": "Ist",
+        "name": "伊斯特",
+        "number": 24
+      }
+    ],
+    "rune_codes": "Dol+Um+Ber+Ist",
+    "properties": [
+      "+2 所有技能",
+      "+200% 对恶魔的伤害",
+      "+100% 对不死怪物的伤害",
+      "击中窃取 8% 生命",
+      "+70% 防御强化",
+      "+20 力量",
+      "生命回复 +7",
+      "所有抗性 +65",
+      "受到的物理伤害降低 8%",
+      "寻获魔法物品几率提高 25%"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 77,
+    "name": "永恒",
+    "name_en": "Eternity",
+    "required_level": 63,
+    "base_types": [
+      "近战武器"
+    ],
+    "runes": [
+      {
+        "code": "Amn",
+        "name": "安姆",
+        "number": 11
+      },
+      {
+        "code": "Ber",
+        "name": "贝",
+        "number": 30
+      },
+      {
+        "code": "Ist",
+        "name": "伊斯特",
+        "number": 24
+      },
+      {
+        "code": "Sol",
+        "name": "索尔",
+        "number": 12
+      },
+      {
+        "code": "Sur",
+        "name": "苏尔",
+        "number": 29
+      }
+    ],
+    "rune_codes": "Amn+Ber+Ist+Sol+Sur",
+    "properties": [
+      "永不毁损",
+      "+260-310% 伤害强化",
+      "+9 最小伤害",
+      "击中窃取 7% 生命",
+      "+20% 几率造成粉碎打击",
+      "击中使目标目盲",
+      "使目标减慢 33%",
+      "法力恢复 16%",
+      "生命回复 +16",
+      "无法冻结",
+      "寻获魔法物品几率提高 30%",
+      "等级 8 重生（88 次）"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 78,
+    "name": "无限",
+    "name_en": "Infinity",
+    "required_level": 63,
+    "base_types": [
+      "长柄武器",
+      "长矛"
+    ],
+    "runes": [
+      {
+        "code": "Ber",
+        "name": "贝",
+        "number": 30
+      },
+      {
+        "code": "Mal",
+        "name": "马尔",
+        "number": 23
+      },
+      {
+        "code": "Ber",
+        "name": "贝",
+        "number": 30
+      },
+      {
+        "code": "Ist",
+        "name": "伊斯特",
+        "number": 24
+      }
+    ],
+    "rune_codes": "Ber+Mal+Ber+Ist",
+    "properties": [
+      "当你杀敌时有 50% 几率施展等级 20 连锁闪电",
+      "装备时赋予等级 12 信念灵气",
+      "+35% 跑步 / 行走速度",
+      "+255-325% 伤害强化",
+      "敌人闪电抗性 -45-55%",
+      "+40% 几率造成粉碎打击",
+      "防止怪物自疗",
+      "+(0.5-49.5) 体能 （依角色等级而定）",
+      "寻获魔法物品几率提高 30%",
+      "等级 21 气旋护甲（30 次）"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 79,
+    "name": "愤怒",
+    "name_en": "Wrath",
+    "required_level": 63,
+    "base_types": [
+      "弓或弩"
+    ],
+    "runes": [
+      {
+        "code": "Pul",
+        "name": "普尔",
+        "number": 21
+      },
+      {
+        "code": "Lum",
+        "name": "卢姆",
+        "number": 17
+      },
+      {
+        "code": "Ber",
+        "name": "贝",
+        "number": 30
+      },
+      {
+        "code": "Mal",
+        "name": "马尔",
+        "number": 23
+      }
+    ],
+    "rune_codes": "Pul+Lum+Ber+Mal",
+    "properties": [
+      "击中时有 30% 几率施展等级 1 衰老",
+      "击中时有 5% 几率施展等级 10 偷取生命",
+      "+125% 对恶魔的伤害",
+      "+100 对恶魔的准确率",
+      "+250-300% 对不死怪物的伤害",
+      "附加 25 - 50 魔法伤害",
+      "附加 75 - 100 闪电伤害",
+      "+20% 几率造成粉碎打击",
+      "防止怪物自疗",
+      "+10 能量",
+      "无法冻结"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 80,
+    "name": "烙印",
+    "name_en": "Brand",
+    "required_level": 65,
+    "base_types": [
+      "弓或弩"
+    ],
+    "runes": [
+      {
+        "code": "Jah",
+        "name": "乔",
+        "number": 31
+      },
+      {
+        "code": "Lo",
+        "name": "罗",
+        "number": 28
+      },
+      {
+        "code": "Mal",
+        "name": "马尔",
+        "number": 23
+      },
+      {
+        "code": "Gul",
+        "name": "古尔",
+        "number": 25
+      }
+    ],
+    "rune_codes": "Jah+Lo+Mal+Gul",
+    "properties": [
+      "被击中时有 35% 几率施展等级 14 伤害加深",
+      "击中时有 100% 几率施展等级 18 骨矛",
+      "+260-340% 伤害强化",
+      "无视目标防御",
+      "20% 准确率加成",
+      "+280-330% 对恶魔的伤害",
+      "+20% 致命打击",
+      "防止怪物自疗",
+      "击退",
+      "射出爆炸的弓矢或弩箭 15"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 81,
+    "name": "毁灭",
+    "name_en": "Destruction",
+    "required_level": 65,
+    "base_types": [
+      "长柄武器",
+      "刀剑"
+    ],
+    "runes": [
+      {
+        "code": "Vex",
+        "name": "伐克斯",
+        "number": 26
+      },
+      {
+        "code": "Lo",
+        "name": "罗",
+        "number": 28
+      },
+      {
+        "code": "Ber",
+        "name": "贝",
+        "number": 30
+      },
+      {
+        "code": "Jah",
+        "name": "乔",
+        "number": 31
+      },
+      {
+        "code": "Ko",
+        "name": "科",
+        "number": 18
+      }
+    ],
+    "rune_codes": "Vex+Lo+Ber+Jah+Ko",
+    "properties": [
+      "击中时有 5% 几率施展等级 22 火山喷发",
+      "击中时有 5% 几率施展等级 23 熔火巨石",
+      "当你死亡时有 100% 几率施展等级 45 陨石术",
+      "攻击时有 15% 几率施展等级 22 闪电新星",
+      "+350% 伤害强化",
+      "无视目标防御",
+      "附加 100 - 180 魔法伤害",
+      "击中窃取 7% 法力",
+      "+20% 几率造成粉碎打击",
+      "+20% 致命打击",
+      "防止怪物自疗",
+      "+10 敏捷"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 82,
+    "name": "梦境",
+    "name_en": "Dream",
+    "required_level": 65,
+    "base_types": [
+      "头盔",
+      "盾牌"
+    ],
+    "runes": [
+      {
+        "code": "Io",
+        "name": "破",
+        "number": 16
+      },
+      {
+        "code": "Jah",
+        "name": "乔",
+        "number": 31
+      },
+      {
+        "code": "Pul",
+        "name": "普尔",
+        "number": 21
+      }
+    ],
+    "rune_codes": "Io+Jah+Pul",
+    "properties": [
+      "被击中时有 10% 几率施展等级 15 混乱",
+      "装备时赋予等级 15 神圣闪电灵气",
+      "+20-30% 打击恢复",
+      "+30% 防御强化",
+      "+150-220 防御",
+      "+10 体能",
+      "生命上限提高 5% （只限头盔）",
+      "+50 生命 （只限盾牌）",
+      "+(0.375-37.125) 法力 （依角色等级而定）",
+      "所有抗性+5-20",
+      "寻获魔法物品几率提高12-25%"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 83,
+    "name": "谜团",
+    "name_en": "Enigma",
+    "required_level": 65,
+    "base_types": [
+      "护甲"
+    ],
+    "runes": [
+      {
+        "code": "Jah",
+        "name": "乔",
+        "number": 31
+      },
+      {
+        "code": "Ith",
+        "name": "伊司",
+        "number": 6
+      },
+      {
+        "code": "Ber",
+        "name": "贝",
+        "number": 30
+      }
+    ],
+    "rune_codes": "Jah+Ith+Ber",
+    "properties": [
+      "+2 所有技能",
+      "+45% 跑步 / 行走速度",
+      "+1 至传送术",
+      "+775-785 防御",
+      "+(0.75-74.25) 力量 （依角色等级而定）",
+      "生命上限提高 5%",
+      "受到的物理伤害降低 8%",
+      "+14 击杀生命恢复",
+      "+15% 受到的伤害转为法力",
+      "寻获魔法物品几率提高 (1-99)% （依角色等级而定）"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 84,
+    "name": "信心",
+    "name_en": "Faith",
+    "required_level": 65,
+    "base_types": [
+      "弓或弩"
+    ],
+    "runes": [
+      {
+        "code": "Ohm",
+        "name": "欧姆",
+        "number": 27
+      },
+      {
+        "code": "Jah",
+        "name": "乔",
+        "number": 31
+      },
+      {
+        "code": "Lem",
+        "name": "蓝姆",
+        "number": 20
+      },
+      {
+        "code": "Eld",
+        "name": "艾德",
+        "number": 2
+      }
+    ],
+    "rune_codes": "Ohm+Jah+Lem+Eld",
+    "properties": [
+      "装备时赋予等级12-15 狂热灵气",
+      "+1-2 所有技能",
+      "+330% 伤害强化",
+      "无视目标防御",
+      "300% 准确率加成",
+      "+75% 对不死怪物的伤害",
+      "+50 对不死怪物的准确率",
+      "+120 火焰伤害",
+      "所有抗性 +15",
+      "10% 几率将目标复生为：返世亡灵",
+      "怪物金币掉落量提高 75%"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 85,
+    "name": "饥荒",
+    "name_en": "Famine",
+    "required_level": 65,
+    "base_types": [
+      "斧",
+      "重槌"
+    ],
+    "runes": [
+      {
+        "code": "Fal",
+        "name": "法尔",
+        "number": 19
+      },
+      {
+        "code": "Ohm",
+        "name": "欧姆",
+        "number": 27
+      },
+      {
+        "code": "Ort",
+        "name": "欧特",
+        "number": 9
+      },
+      {
+        "code": "Jah",
+        "name": "乔",
+        "number": 31
+      }
+    ],
+    "rune_codes": "Fal+Ohm+Ort+Jah",
+    "properties": [
+      "攻击速度 +30%",
+      "+300-320% 伤害强化",
+      "无视目标防御",
+      "附加 180 - 200 魔法伤害",
+      "附加 50 - 200 火焰伤害",
+      "附加 51 - 250 闪电伤害",
+      "附加 50 - 200 冰冷伤害",
+      "击中窃取 12% 生命",
+      "防止怪物自疗",
+      "+10 力量"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 86,
+    "name": "狂怒",
+    "name_en": "Fury",
+    "required_level": 65,
+    "base_types": [
+      "近战武器"
+    ],
+    "runes": [
+      {
+        "code": "Jah",
+        "name": "乔",
+        "number": 31
+      },
+      {
+        "code": "Gul",
+        "name": "古尔",
+        "number": 25
+      },
+      {
+        "code": "Eth",
+        "name": "爱斯",
+        "number": 5
+      }
+    ],
+    "rune_codes": "Jah+Gul+Eth",
+    "properties": [
+      "+209% 伤害强化",
+      "攻击速度 +40%",
+      "防止怪物自疗",
+      "+66% 几率造成开放伤口",
+      "+33% 致命打击",
+      "无视目标防御",
+      "-25% 目标防御",
+      "20% 准确率加成",
+      "击中窃取 6% 生命",
+      "+5 至狂乱连击（只限野蛮人）"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 87,
+    "name": "寒冰",
+    "name_en": "Ice",
+    "required_level": 65,
+    "base_types": [
+      "弓或弩"
+    ],
+    "runes": [
+      {
+        "code": "Amn",
+        "name": "安姆",
+        "number": 11
+      },
+      {
+        "code": "Shael",
+        "name": "夏尔",
+        "number": 13
+      },
+      {
+        "code": "Jah",
+        "name": "乔",
+        "number": 31
+      },
+      {
+        "code": "Lo",
+        "name": "罗",
+        "number": 28
+      }
+    ],
+    "rune_codes": "Amn+Shael+Jah+Lo",
+    "properties": [
+      "当你升级时有 100% 几率施展等级 40 暴风雪",
+      "击中时有 25% 几率施展等级 22 冰霜新星",
+      "装备时赋予等级 18 神圣冰冻灵气",
+      "攻击速度 +20%",
+      "+140-210% 伤害强化",
+      "无视目标防御",
+      "+25-30% 冰冷技能伤害",
+      "敌人冰冷抗性 -20%",
+      "击中窃取 7% 生命",
+      "+20% 致命打击",
+      "怪物金币掉落量提高 (3.125-309.375)% （依角色等级而定）"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 88,
+    "name": "最后遗愿",
+    "name_en": "Last Wish",
+    "required_level": 65,
+    "base_types": [
+      "刀剑",
+      "重槌",
+      "斧"
+    ],
+    "runes": [
+      {
+        "code": "Jah",
+        "name": "乔",
+        "number": 31
+      },
+      {
+        "code": "Mal",
+        "name": "马尔",
+        "number": 23
+      },
+      {
+        "code": "Jah",
+        "name": "乔",
+        "number": 31
+      },
+      {
+        "code": "Sur",
+        "name": "苏尔",
+        "number": 29
+      },
+      {
+        "code": "Jah",
+        "name": "乔",
+        "number": 31
+      },
+      {
+        "code": "Ber",
+        "name": "贝",
+        "number": 30
+      }
+    ],
+    "rune_codes": "Jah+Mal+Jah+Sur+Jah+Ber",
+    "properties": [
+      "被击中时有 6% 几率施展等级 11 影散",
+      "击中时有 10% 几率施展等级 18 偷取生命",
+      "攻击时有 20% 几率施展等级 20 电能弹",
+      "装备时赋予等级 17 力量灵气",
+      "+330-375% 伤害强化",
+      "无视目标防御",
+      "+60-70% 几率造成粉碎打击",
+      "防止怪物自疗",
+      "击中使目标目盲",
+      "寻获魔法物品几率提高 (0.5-49.5)% （依角色等级而定）"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 89,
+    "name": "凤凰",
+    "name_en": "Phoenix",
+    "required_level": 65,
+    "base_types": [
+      "武器",
+      "盾牌"
+    ],
+    "runes": [
+      {
+        "code": "Vex",
+        "name": "伐克斯",
+        "number": 26
+      },
+      {
+        "code": "Vex",
+        "name": "伐克斯",
+        "number": 26
+      },
+      {
+        "code": "Lo",
+        "name": "罗",
+        "number": 28
+      },
+      {
+        "code": "Jah",
+        "name": "乔",
+        "number": 31
+      }
+    ],
+    "rune_codes": "Vex+Vex+Lo+Jah",
+    "properties": [
+      "盾牌：",
+      "+50 生命",
+      "闪电抗性上限 +5%",
+      "火焰抗性上限 +10%",
+      "武器：",
+      "无视目标防御",
+      "击中窃取 14% 法力",
+      "+20% 致命打击",
+      "共通：",
+      "+350-400% 伤害强化",
+      "当你升级时有 100% 几率施展等级 40 炽烈之径",
+      "击中时有 40% 几率施展等级 22 火焰风暴",
+      "+15-21 火焰吸收",
+      "装备时赋予等级10-15 救赎灵气",
+      "+350-400 对远程防御",
+      "敌人火焰抗性 -28%"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 90,
+    "name": "末日",
+    "name_en": "Doom",
+    "required_level": 67,
+    "base_types": [
+      "斧",
+      "长柄武器",
+      "重槌"
+    ],
+    "runes": [
+      {
+        "code": "Hel",
+        "name": "海尔",
+        "number": 15
+      },
+      {
+        "code": "Ohm",
+        "name": "欧姆",
+        "number": 27
+      },
+      {
+        "code": "Um",
+        "name": "乌姆",
+        "number": 22
+      },
+      {
+        "code": "Lo",
+        "name": "罗",
+        "number": 28
+      },
+      {
+        "code": "Cham",
+        "name": "查姆",
+        "number": 32
+      }
+    ],
+    "rune_codes": "Hel+Ohm+Um+Lo+Cham",
+    "properties": [
+      "击中时有 5% 几率施展等级 18 火山喷发",
+      "装备时赋予等级 12 神圣冰冻灵气",
+      "+2 所有技能",
+      "攻击速度 +45%",
+      "+330-370% 伤害强化",
+      "敌人冰冷抗性 -40-60%",
+      "+20% 致命打击",
+      "+25% 几率造成开放伤口",
+      "防止怪物自疗",
+      "冻结目标 +3",
+      "需求 -20%"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 91,
+    "name": "正义之手",
+    "name_en": "Hand of Justice",
+    "required_level": 67,
+    "base_types": [
+      "武器"
+    ],
+    "runes": [
+      {
+        "code": "Sur",
+        "name": "苏尔",
+        "number": 29
+      },
+      {
+        "code": "Cham",
+        "name": "查姆",
+        "number": 32
+      },
+      {
+        "code": "Amn",
+        "name": "安姆",
+        "number": 11
+      },
+      {
+        "code": "Lo",
+        "name": "罗",
+        "number": 28
+      }
+    ],
+    "rune_codes": "Sur+Cham+Amn+Lo",
+    "properties": [
+      "当你升级时有 100% 几率施展等级 36 炽烈之径",
+      "当你死亡时有 100% 几率施展等级 48 陨石术",
+      "装备时赋予等级 16 神圣火焰灵气",
+      "攻击速度 +33%",
+      "+280-330% 伤害强化",
+      "无视目标防御",
+      "击中窃取 7% 生命",
+      "敌人火焰抗性 -20%",
+      "+20% 致命打击",
+      "击中使目标目盲",
+      "冻结目标 +3"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 92,
+    "name": "变化",
+    "name_en": "Metamorphosis",
+    "required_level": 67,
+    "base_types": [
+      "头盔"
+    ],
+    "runes": [
+      {
+        "code": "Io",
+        "name": "破",
+        "number": 16
+      },
+      {
+        "code": "Cham",
+        "name": "查姆",
+        "number": 32
+      },
+      {
+        "code": "Fal",
+        "name": "法尔",
+        "number": 19
+      }
+    ],
+    "rune_codes": "Io+Cham+Fal",
+    "properties": [
+      "共通：",
+      "狼人变化的攻击会赋予印记，持续 180",
+      "熊人变化的攻击会赋予印记，持续 180",
+      "+5 变形技能 （只限德鲁伊）",
+      "+25% 几率造成粉碎打击",
+      "+50-75% 防御强化",
+      "+10 力量",
+      "+10 体能",
+      "所有抗性 +10",
+      "无法冻结",
+      "狼之印记：",
+      "30% 准确率加成",
+      "生命上限提高 40%",
+      "熊之印记：",
+      "攻击速度 +25%",
+      "受到的物理伤害降低 20%",
+      "天梯限定"
+    ],
+    "ladder_only": true
+  },
+  {
+    "id": 93,
+    "name": "迷雾",
+    "name_en": "Mist",
+    "required_level": 67,
+    "base_types": [
+      "弓或弩"
+    ],
+    "runes": [
+      {
+        "code": "Cham",
+        "name": "查姆",
+        "number": 32
+      },
+      {
+        "code": "Shael",
+        "name": "夏尔",
+        "number": 13
+      },
+      {
+        "code": "Gul",
+        "name": "古尔",
+        "number": 25
+      },
+      {
+        "code": "Thul",
+        "name": "书尔",
+        "number": 10
+      },
+      {
+        "code": "Ith",
+        "name": "伊司",
+        "number": 6
+      }
+    ],
+    "rune_codes": "Cham+Shael+Gul+Thul+Ith",
+    "properties": [
+      "装备时赋予等级8-12 专注灵气",
+      "+3 所有技能",
+      "攻击速度 +20%",
+      "+100% 穿透攻击",
+      "+325-375% 伤害强化",
+      "+9 最大伤害",
+      "20% 准确率加成",
+      "附加 3 - 14 冰冷伤害",
+      "冻结目标 +3",
+      "+24 体能",
+      "所有抗性 +40"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 94,
+    "name": "瘟疫",
+    "name_en": "Plague",
+    "required_level": 67,
+    "base_types": [
+      "刀剑",
+      "爪或拳刃",
+      "匕首"
+    ],
+    "runes": [
+      {
+        "code": "Cham",
+        "name": "查姆",
+        "number": 32
+      },
+      {
+        "code": "Shael",
+        "name": "夏尔",
+        "number": 13
+      },
+      {
+        "code": "Um",
+        "name": "乌姆",
+        "number": 22
+      }
+    ],
+    "rune_codes": "Cham+Shael+Um",
+    "properties": [
+      "被击中时有 20% 几率施展等级 12 降低抗性",
+      "击中时有 25% 几率施展等级 15 剧毒新星",
+      "装备时赋予等级13-17 净化灵气",
+      "+1-2 所有技能",
+      "攻击速度 +20%",
+      "+220-320% 伤害强化",
+      "敌人毒素抗性 -23%",
+      "+(0.5-49.5)% 致命打击 （依角色等级而定）",
+      "+25% 几率造成开放伤口",
+      "冻结目标 +3"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 95,
+    "name": "骄傲",
+    "name_en": "Pride",
+    "required_level": 67,
+    "base_types": [
+      "长柄武器",
+      "长矛"
+    ],
+    "runes": [
+      {
+        "code": "Cham",
+        "name": "查姆",
+        "number": 32
+      },
+      {
+        "code": "Sur",
+        "name": "苏尔",
+        "number": 29
+      },
+      {
+        "code": "Io",
+        "name": "破",
+        "number": 16
+      },
+      {
+        "code": "Lo",
+        "name": "罗",
+        "number": 28
+      }
+    ],
+    "rune_codes": "Cham+Sur+Io+Lo",
+    "properties": [
+      "被击中时有 25% 几率施展等级 17 火墙术",
+      "装备时赋予等级16-20 专注灵气",
+      "260-300% 准确率加成",
+      "+(1-99)% 对恶魔的伤害 （依角色等级而定）",
+      "附加 50 - 280 闪电伤害",
+      "+20% 致命打击",
+      "击中使目标目盲",
+      "冻结目标 +3",
+      "+10 体能",
+      "生命回复 +8",
+      "怪物金币掉落量提高 (1.875-185.625)% （依角色等级而定）"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 96,
+    "name": "死亡呼吸",
+    "name_en": "Breath of the Dying",
+    "required_level": 69,
+    "base_types": [
+      "武器"
+    ],
+    "runes": [
+      {
+        "code": "Vex",
+        "name": "伐克斯",
+        "number": 26
+      },
+      {
+        "code": "Hel",
+        "name": "海尔",
+        "number": 15
+      },
+      {
+        "code": "El",
+        "name": "艾尔",
+        "number": 1
+      },
+      {
+        "code": "Eld",
+        "name": "艾德",
+        "number": 2
+      },
+      {
+        "code": "Zod",
+        "name": "萨德",
+        "number": 33
+      },
+      {
+        "code": "Eth",
+        "name": "爱斯",
+        "number": 5
+      }
+    ],
+    "rune_codes": "Vex+Hel+El+Eld+Zod+Eth",
+    "properties": [
+      "当你杀敌时有 50% 几率施展等级 20 剧毒新星",
+      "永不毁损",
+      "攻击速度 +60%",
+      "+350-400% 伤害强化",
+      "+200% 对不死怪物的伤害",
+      "-25% 目标防御",
+      "+50 准确率",
+      "+50 对不死怪物的准确率",
+      "击中窃取 7% 法力",
+      "击中窃取12-15% 生命",
+      "防止怪物自疗",
+      "+30 所有属性",
+      "照亮范围 +1",
+      "需求 -20%"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 97,
+    "name": "执念",
+    "name_en": "Obsession",
+    "required_level": 69,
+    "base_types": [
+      "法杖"
+    ],
+    "runes": [
+      {
+        "code": "Zod",
+        "name": "萨德",
+        "number": 33
+      },
+      {
+        "code": "Ist",
+        "name": "伊斯特",
+        "number": 24
+      },
+      {
+        "code": "Lem",
+        "name": "蓝姆",
+        "number": 20
+      },
+      {
+        "code": "Lum",
+        "name": "卢姆",
+        "number": 17
+      },
+      {
+        "code": "Io",
+        "name": "破",
+        "number": 16
+      },
+      {
+        "code": "Nef",
+        "name": "那夫",
+        "number": 4
+      }
+    ],
+    "rune_codes": "Zod+Ist+Lem+Lum+Io+Nef",
+    "properties": [
+      "永不毁损",
+      "被击中时有 24% 几率施展等级 10 削弱",
+      "+4 所有技能",
+      "+65% 施法速度",
+      "+60% 打击恢复",
+      "击退",
+      "+10 体能",
+      "+10 能量",
+      "生命上限提高15-25%",
+      "法力恢复15-30%",
+      "所有抗性+60-70",
+      "怪物金币掉落量提高 75%",
+      "寻获魔法物品几率提高 30%"
+    ],
+    "ladder_only": false
+  },
+  {
+    "id": 98,
+    "name": "虚无",
+    "name_en": "Void",
+    "required_level": 69,
+    "base_types": [
+      "匕首"
+    ],
+    "runes": [
+      {
+        "code": "Thul",
+        "name": "书尔",
+        "number": 10
+      },
+      {
+        "code": "Zod",
+        "name": "萨德",
+        "number": 33
+      },
+      {
+        "code": "Ist",
+        "name": "伊斯特",
+        "number": 24
+      }
+    ],
+    "rune_codes": "Thul+Zod+Ist",
+    "properties": [
+      "+2 所有技能",
+      "+40% 施法速度",
+      "+10-15% 魔法技能伤害",
+      "+1-3 至深渊裂口",
+      "+8-12 所有属性",
+      "等级 4 衰老（35 次）",
+      "附加 3 - 14 冰冷伤害",
+      "永不毁损",
+      "寻获魔法物品几率提高 30%"
+    ],
+    "ladder_only": false
+  }
+]
